@@ -1,0 +1,19 @@
+{
+  "name": "7more-email-backend",
+  "version": "1.0.0",
+  "description": "Secure email sending backend for 7more app",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.19.2",
+    "nodemailer": "^6.9.13"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}

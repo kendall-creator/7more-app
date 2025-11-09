@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: 7more-email-backend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: BRIDGE_TEAM_EMAIL
+        sync: false
+      - key: BRIDGE_TEAM_EMAIL_PASSWORD
+        sync: false
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_SECURE
+        value: false
+      - key: EMAIL_API_KEY
+        sync: false
+      - key: NODE_ENV
+        value: production
