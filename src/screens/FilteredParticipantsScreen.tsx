@@ -35,6 +35,8 @@ export default function FilteredParticipantsScreen() {
       case "pending_mentor": return "bg-yellow-100 text-gray-700";
       case "assigned_mentor": return "bg-yellow-100 text-gray-700";
       case "initial_contact_pending": return "bg-orange-100 text-orange-700";
+      case "mentor_attempted": return "bg-amber-100 text-amber-700";
+      case "mentor_unable": return "bg-gray-100 text-gray-700";
       case "active_mentorship": return "bg-yellow-100 text-gray-900";
       case "graduated": return "bg-yellow-100 text-gray-700";
       case "ceased_contact": return "bg-gray-200 text-gray-900";

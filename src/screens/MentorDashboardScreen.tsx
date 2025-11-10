@@ -28,7 +28,7 @@ export default function MentorDashboardScreen() {
     return Math.floor(diffMs / (1000 * 60 * 60 * 24));
   };
 
-  const needsInitialContact = participants.filter((p) => p.status === "initial_contact_pending");
+  const needsInitialContact = participants.filter((p) => p.status === "initial_contact_pending" || p.status === "mentor_attempted" || p.status === "mentor_unable");
   const activeParticipants = participants.filter((p) => p.status === "active_mentorship");
 
   // Check for participants with monthly reports due or overdue

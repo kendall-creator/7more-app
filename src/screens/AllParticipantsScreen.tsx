@@ -18,8 +18,13 @@ export default function AllParticipantsScreen() {
   const statusOptions: { value: ParticipantStatus | "all"; label: string; color: string }[] = [
     { value: "all", label: "All", color: "bg-gray-100 text-gray-700" },
     { value: "pending_bridge", label: "Pending Bridge", color: "bg-gray-200 text-gray-900" },
+    { value: "bridge_attempted", label: "Bridge Attempted", color: "bg-amber-100 text-amber-700" },
     { value: "bridge_contacted", label: "Contacted", color: "bg-yellow-100 text-gray-900" },
+    { value: "bridge_unable", label: "Bridge Unable", color: "bg-gray-100 text-gray-700" },
     { value: "pending_mentor", label: "Awaiting Mentor", color: "bg-yellow-100 text-gray-700" },
+    { value: "initial_contact_pending", label: "Initial Contact Pending", color: "bg-orange-100 text-orange-700" },
+    { value: "mentor_attempted", label: "Mentor Attempted", color: "bg-amber-100 text-amber-700" },
+    { value: "mentor_unable", label: "Mentor Unable", color: "bg-gray-100 text-gray-700" },
     { value: "active_mentorship", label: "Active", color: "bg-yellow-100 text-gray-900" },
     { value: "graduated", label: "Graduated", color: "bg-yellow-100 text-gray-700" },
   ];
