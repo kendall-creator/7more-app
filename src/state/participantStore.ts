@@ -398,9 +398,10 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
 
     // Handle different contact outcomes
     if (formData.contactOutcome === "attempted") {
-      // Contact was attempted but not successful
+      // Contact was attempted but not successful - update status to bridge_attempted
       const updatedParticipant = {
         ...participant,
+        status: "bridge_attempted" as ParticipantStatus,
         history: [
           ...participant.history,
           {
@@ -426,9 +427,10 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
     }
 
     if (formData.contactOutcome === "unable") {
-      // Unable to contact participant
+      // Unable to contact participant - update status to bridge_unable
       const updatedParticipant = {
         ...participant,
+        status: "bridge_unable" as ParticipantStatus,
         history: [
           ...participant.history,
           {
