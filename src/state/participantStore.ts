@@ -392,12 +392,18 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
     }
 
     const participant = get().participants.find((p) => p.id === formData.participantId);
-    if (!participant) return;
+    if (!participant) {
+      console.log("❌ Participant not found:", formData.participantId);
+      return;
+    }
 
     const now = new Date();
 
     // Handle different contact outcomes
     if (formData.contactOutcome === "attempted") {
+      console.log("📝 Recording attempted contact for participant:", participant.firstName, participant.lastName);
+      console.log("Current status:", participant.status);
+
       // Contact was attempted but not successful - update status to bridge_attempted
       const updatedParticipant = {
         ...participant,
@@ -421,8 +427,13 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
         ],
       };
 
+      console.log("✅ Updating participant status to:", updatedParticipant.status);
+      console.log("Notes:", formData.attemptNotes);
+
       const participantRef = ref(database, `participants/${formData.participantId}`);
       await firebaseSet(participantRef, updatedParticipant);
+
+      console.log("✅ Firebase update complete for participant:", formData.participantId);
       return;
     }
 

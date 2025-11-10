@@ -75,14 +75,22 @@ export default function AddUserScreen({ navigation }: any) {
   ];
 
   const handleSubmit = async () => {
+    console.log("📝 AddUser form submitted");
+    console.log("Name:", name);
+    console.log("Email:", email);
+    console.log("Nickname:", nickname);
+    console.log("Phone:", phone);
+
     // Validation
     if (!name.trim() || !email.trim()) {
+      console.log("❌ Validation failed: Missing name or email");
       setErrorMessage("Please fill in all required fields.");
       setShowErrorModal(true);
       return;
     }
 
     if (!email.includes("@")) {
+      console.log("❌ Validation failed: Invalid email");
       setErrorMessage("Please enter a valid email address.");
       setShowErrorModal(true);
       return;
@@ -91,16 +99,24 @@ export default function AddUserScreen({ navigation }: any) {
     // Check if user already exists
     const existingUser = getUserByEmail(email);
     if (existingUser) {
+      console.log("❌ User already exists:", email);
       setErrorMessage("A user with this email already exists.");
       setShowErrorModal(true);
       return;
     }
 
+    console.log("✅ Validation passed, creating user...");
     setIsLoading(true);
 
     try {
       // Generate password from name (first initial + last name)
       const generatedPassword = generatePasswordFromName(name.trim());
+
+      const nicknameValue = nickname.trim() || undefined;
+      const phoneValue = phone.trim() || undefined;
+
+      console.log("Calling addUser with nickname:", nicknameValue);
+      console.log("Calling addUser with phone:", phoneValue);
 
       // Add the user
       const result = await addUser(
@@ -109,8 +125,8 @@ export default function AddUserScreen({ navigation }: any) {
         selectedRole,
         generatedPassword,
         currentUser?.id || "system",
-        phone.trim() || undefined,
-        nickname.trim() || undefined
+        phoneValue,
+        nicknameValue
       );
 
       if (result.success) {
