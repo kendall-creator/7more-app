@@ -542,7 +542,7 @@ export default function InitialContactFormScreen({ route, navigation }: any) {
               {/* Mentorship Offered */}
               <View className="mb-5">
                 <Text className="text-sm font-semibold text-gray-700 mb-2">
-                  Mentorship Offered <Text className="text-red-500">*</Text>
+                  Are you alright with me continuing to reach out and check up on you? <Text className="text-red-500">*</Text>
                 </Text>
                 <Pressable
                   onPress={() => setShowMentorshipModal(true)}
@@ -925,8 +925,8 @@ export default function InitialContactFormScreen({ route, navigation }: any) {
           onPress={() => setShowMentorshipModal(false)}
         >
           <View className="bg-white rounded-2xl p-6 mx-6 w-80">
-            <Text className="text-lg font-bold text-gray-900 mb-4">Mentorship Offered</Text>
-            {["Interested", "Not Interested"].map((option) => (
+            <Text className="text-lg font-bold text-gray-900 mb-4">Continue Reaching Out?</Text>
+            {["Yes", "No"].map((option) => (
               <Pressable
                 key={option}
                 onPress={() => {
