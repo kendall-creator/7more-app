@@ -57,6 +57,8 @@ import ManageReportingScreen from "../screens/ManageReportingScreen";
 import ViewReportingScreen from "../screens/ViewReportingScreen";
 import EmbeddableFormScreen from "../screens/EmbeddableFormScreen";
 import FileManagementScreen from "../screens/FileManagementScreen";
+import ManageFormsScreen from "../screens/ManageFormsScreen";
+import EditFormQuestionsScreen from "../screens/EditFormQuestionsScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -399,6 +401,8 @@ export default function RootNavigator() {
           <Stack.Screen name="EmbeddableForm" component={EmbeddableFormScreen} />
           <Stack.Screen name="TestEmail" component={TestEmailScreen} />
           <Stack.Screen name="FileManagement" component={FileManagementScreen} />
+          <Stack.Screen name="ManageForms" component={ManageFormsScreen} />
+          <Stack.Screen name="EditFormQuestions" component={EditFormQuestionsScreen} />
         </>
       )}
     </Stack.Navigator>

@@ -301,7 +301,7 @@ The app features a role-based tab navigation system:
 
 The app supports seven distinct user roles:
 
-1. **Admin** - Complete overview of the program with metrics, analytics, and full access to all features including shift and mentorship management
+1. **Admin** - Complete overview of the program with metrics, analytics, and full access to all features including shift and mentorship management, form customization
 2. **Bridge Team** - Initial contact and participant intake management
 3. **Mentorship Leader** - Assigns participants to mentors (can assign to themselves) and manages shifts
 4. **Mentor** - Direct participant engagement, progress tracking, and shift volunteering
@@ -310,6 +310,25 @@ The app supports seven distinct user roles:
 7. **Support Volunteer** - Can only sign up for shifts specifically designated for support volunteers
 
 ### Key Functionality
+
+#### Form Management (Admin Only)
+- **Customizable Forms** - Admins can edit form questions without touching code
+- **Available Forms**:
+  - Initial Contact Form (used by mentors)
+  - Bridge Team Follow-Up Form
+  - Weekly Update Form
+  - Monthly Check-In Form
+- **Form Editor Features**:
+  - Edit question text and labels
+  - Change question types (text, textarea, radio, checkbox, dropdown)
+  - Add or remove answer options
+  - Mark questions as required or optional
+  - Reorder questions
+  - Add new custom questions
+  - Delete existing questions
+- **Access**: Navigate to Resources tab → "Form Management" card (admin only)
+- **Changes apply immediately** - All users see updated forms right away
+- **Persistent Storage** - Form configurations are saved locally and sync across devices
 
 #### Admin Homepage Dashboard
 - **Complete program overview** - All key metrics in one place

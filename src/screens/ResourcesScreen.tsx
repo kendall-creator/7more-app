@@ -275,6 +275,26 @@ export default function ResourcesScreen() {
           </View>
         )}
 
+        {/* Form Management Card - For Admins Only */}
+        {currentUser?.role === "admin" && (
+          <View className="bg-purple-50 border border-purple-200 rounded-xl p-5 mb-4">
+            <View className="flex-row items-center mb-3">
+              <Ionicons name="document-text" size={24} color="#9333EA" />
+              <Text className="text-lg font-bold text-purple-900 ml-2">Form Management</Text>
+            </View>
+            <Text className="text-sm text-gray-600 mb-4">
+              Customize form questions, options, and settings for Initial Contact, Bridge Team Follow-Up, and other forms.
+            </Text>
+            <Pressable
+              onPress={() => navigation.navigate("ManageForms")}
+              className="bg-purple-600 rounded-lg py-3 flex-row items-center justify-center active:opacity-80"
+            >
+              <Ionicons name="create-outline" size={18} color="white" />
+              <Text className="text-white text-sm font-semibold ml-2">Manage Forms</Text>
+            </Pressable>
+          </View>
+        )}
+
         {/* Demographics Report Card - For Admins Only */}
         {currentUser?.role === "admin" && (
           <View className="bg-teal-50 border border-teal-200 rounded-xl p-5 mb-4">
