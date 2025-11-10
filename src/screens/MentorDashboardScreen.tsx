@@ -31,27 +31,40 @@ export default function MentorDashboardScreen() {
   const needsInitialContact = participants.filter((p) => p.status === "initial_contact_pending" || p.status === "mentor_attempted" || p.status === "mentor_unable");
   const activeParticipants = participants.filter((p) => p.status === "active_mentorship");
 
-  // Check for participants with monthly reports due or overdue
-  const participantsWithReportsDue = participants.filter((p) => {
-    if (!p.nextMonthlyReportDue) return false;
-    const dueDate = new Date(p.nextMonthlyReportDue);
+  // Check for participants with updates due or overdue
+  const participantsWithUpdatesDue = participants.filter((p) => {
     const now = new Date();
-    return dueDate <= now;
+    const weeklyDue = p.nextWeeklyUpdateDue && new Date(p.nextWeeklyUpdateDue) <= now;
+    const monthlyCheckInDue = p.nextMonthlyCheckInDue && new Date(p.nextMonthlyCheckInDue) <= now;
+    const reportDue = p.nextMonthlyReportDue && new Date(p.nextMonthlyReportDue) <= now;
+    return weeklyDue || monthlyCheckInDue || reportDue;
   });
 
   const renderParticipantCard = (participant: Participant, needsAction: boolean) => {
     const daysSince = getDaysSinceAssignment(participant.assignedToMentorAt);
 
+    // Check if weekly update is due
+    const isWeeklyDue = participant.nextWeeklyUpdateDue &&
+      new Date(participant.nextWeeklyUpdateDue) <= new Date();
+
+    // Check if monthly check-in is due
+    const isMonthlyCheckInDue = participant.nextMonthlyCheckInDue &&
+      new Date(participant.nextMonthlyCheckInDue) <= new Date();
+
     // Check if monthly report is due
     const isReportDue = participant.nextMonthlyReportDue &&
       new Date(participant.nextMonthlyReportDue) <= new Date();
+
+    const isActive = participant.status === "active_mentorship";
+    const isAttempted = participant.status === "mentor_attempted";
+    const isUnable = participant.status === "mentor_unable";
 
     return (
       <Pressable
         key={participant.id}
         onPress={() => navigation.navigate("ParticipantProfile", { participantId: participant.id })}
         className={`bg-white rounded-2xl p-4 mb-3 border-2 active:opacity-70 ${
-          needsAction ? "border-amber-300" : isReportDue ? "border-red-300" : "border-gray-100"
+          needsAction ? "border-amber-300" : (isWeeklyDue || isMonthlyCheckInDue || isReportDue) ? "border-red-300" : "border-gray-100"
         }`}
       >
         {needsAction && (
@@ -62,10 +75,10 @@ export default function MentorDashboardScreen() {
           </View>
         )}
 
-        {!needsAction && isReportDue && (
+        {!needsAction && (isWeeklyDue || isMonthlyCheckInDue) && (
           <View className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-3">
             <Text className="text-red-800 text-xs font-semibold">
-              📋 Monthly Report Due
+              📋 {isWeeklyDue ? "Weekly Update" : "Monthly Check-In"} Due
             </Text>
           </View>
         )}
@@ -92,40 +105,89 @@ export default function MentorDashboardScreen() {
           </View>
         </View>
 
+        {/* Initial Contact Pending or Attempted/Unable Actions */}
         {needsAction && (
-          <Pressable
-            onPress={(e) => {
-              e.stopPropagation();
-              navigation.navigate("InitialContactForm", { participantId: participant.id });
-            }}
-            className="bg-gray-600 rounded-xl py-3 items-center active:opacity-80"
-          >
-            <Text className="text-white text-sm font-bold">Complete Initial Contact</Text>
-          </Pressable>
-        )}
-
-        {!needsAction && (
-          <View className="flex-row gap-2">
-            {isReportDue && (
-              <Pressable
-                onPress={(e) => {
-                  e.stopPropagation();
-                  navigation.navigate("MonthlyReportForm", { participantId: participant.id });
-                }}
-                className="flex-1 bg-red-600 rounded-xl py-3 items-center active:opacity-80"
-              >
-                <Text className="text-white text-sm font-bold">Submit Report</Text>
-              </Pressable>
-            )}
+          <View className="gap-2">
             <Pressable
               onPress={(e) => {
                 e.stopPropagation();
-                navigation.navigate("MonthlyUpdateForm", { participantId: participant.id });
+                navigation.navigate("InitialContactForm", { participantId: participant.id });
               }}
-              className={`${isReportDue ? "flex-1" : "flex-1"} bg-gray-50 border border-gray-200 rounded-xl py-3 items-center active:opacity-80`}
+              className="bg-gray-600 rounded-xl py-3 items-center active:opacity-80"
             >
-              <Text className="text-yellow-700 text-sm font-semibold">Add Update</Text>
+              <Text className="text-white text-sm font-bold">
+                {(isAttempted || isUnable) ? "Follow Up on Initial Contact" : "Complete Initial Contact"}
+              </Text>
             </Pressable>
+
+            {/* Show "View Profile" button for attempted/unable */}
+            {(isAttempted || isUnable) && (
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  navigation.navigate("ParticipantProfile", { participantId: participant.id });
+                }}
+                className="bg-blue-50 border border-blue-200 rounded-xl py-2 items-center active:opacity-80"
+              >
+                <Text className="text-blue-700 text-xs font-semibold">View Full Profile</Text>
+              </Pressable>
+            )}
+          </View>
+        )}
+
+        {/* Active Mentorship Actions */}
+        {isActive && (
+          <View className="gap-2">
+            {/* Weekly Update Button */}
+            <View className="flex-row gap-2">
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  navigation.navigate("WeeklyUpdateForm", { participantId: participant.id });
+                }}
+                className={`flex-1 rounded-xl py-3 items-center active:opacity-80 ${
+                  isWeeklyDue ? "bg-red-600" : "bg-yellow-600"
+                }`}
+              >
+                <Text className="text-white text-xs font-bold">Weekly Update</Text>
+              </Pressable>
+
+              {/* Monthly Check-In Button */}
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  navigation.navigate("MonthlyCheckInForm", { participantId: participant.id });
+                }}
+                className={`flex-1 rounded-xl py-3 items-center active:opacity-80 ${
+                  isMonthlyCheckInDue ? "bg-red-600" : "bg-gray-600"
+                }`}
+              >
+                <Text className="text-white text-xs font-bold">Monthly Check-In</Text>
+              </Pressable>
+            </View>
+
+            {/* Monthly Update (Legacy) and View Profile */}
+            <View className="flex-row gap-2">
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  navigation.navigate("MonthlyUpdateForm", { participantId: participant.id });
+                }}
+                className="flex-1 bg-gray-50 border border-gray-200 rounded-xl py-2 items-center active:opacity-80"
+              >
+                <Text className="text-gray-700 text-xs font-semibold">Monthly Update</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  navigation.navigate("ParticipantProfile", { participantId: participant.id });
+                }}
+                className="flex-1 bg-blue-50 border border-blue-200 rounded-xl py-2 items-center active:opacity-80"
+              >
+                <Text className="text-blue-700 text-xs font-semibold">View Profile</Text>
+              </Pressable>
+            </View>
           </View>
         )}
       </Pressable>
@@ -170,10 +232,10 @@ export default function MentorDashboardScreen() {
           <Text className="text-xs text-gray-600 mt-1">Active</Text>
         </View>
         <View className="flex-1 bg-white rounded-xl p-4 border border-gray-100">
-          <Text className={`text-2xl font-bold ${participantsWithReportsDue.length > 0 ? "text-red-600" : "text-gray-900"}`}>
-            {participantsWithReportsDue.length}
+          <Text className={`text-2xl font-bold ${participantsWithUpdatesDue.length > 0 ? "text-red-600" : "text-gray-900"}`}>
+            {participantsWithUpdatesDue.length}
           </Text>
-          <Text className="text-xs text-gray-600 mt-1">Reports Due</Text>
+          <Text className="text-xs text-gray-600 mt-1">Updates Due</Text>
         </View>
       </View>
 
