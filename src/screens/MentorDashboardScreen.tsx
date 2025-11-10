@@ -28,28 +28,19 @@ export default function MentorDashboardScreen() {
     return Math.floor(diffMs / (1000 * 60 * 60 * 24));
   };
 
-  // Include all participants that need initial contact, regardless of their status
-  // This handles edge cases where participants were assigned but status wasn't updated
-  const needsInitialContact = participants.filter((p) =>
+  // Separate participants by status (like Bridge Team)
+  const pendingInitialContact = participants.filter((p) =>
     p.status === "initial_contact_pending" ||
-    p.status === "mentor_attempted" ||
-    p.status === "mentor_unable" ||
     p.status === "bridge_attempted" ||  // Include bridge_attempted if assigned to mentor
     p.status === "bridge_unable" ||     // Include bridge_unable if assigned to mentor
-    (p.status === "assigned_mentor" && !p.initialContactCompletedAt)  // Include assigned_mentor without initial contact
+    (p.status === "assigned_mentor" && !p.initialContactCompletedAt)
   );
+
+  const attemptedContact = participants.filter((p) => p.status === "mentor_attempted");
+  const unableToContact = participants.filter((p) => p.status === "mentor_unable");
   const activeParticipants = participants.filter((p) => p.status === "active_mentorship");
 
-  // Check for participants with updates due or overdue
-  const participantsWithUpdatesDue = participants.filter((p) => {
-    const now = new Date();
-    const weeklyDue = p.nextWeeklyUpdateDue && new Date(p.nextWeeklyUpdateDue) <= now;
-    const monthlyCheckInDue = p.nextMonthlyCheckInDue && new Date(p.nextMonthlyCheckInDue) <= now;
-    const reportDue = p.nextMonthlyReportDue && new Date(p.nextMonthlyReportDue) <= now;
-    return weeklyDue || monthlyCheckInDue || reportDue;
-  });
-
-  const renderParticipantCard = (participant: Participant, needsAction: boolean) => {
+  const renderParticipantCard = (participant: Participant, section: "initial" | "attempted" | "unable" | "active") => {
     const daysSince = getDaysSinceAssignment(participant.assignedToMentorAt);
 
     // Check if weekly update is due
@@ -64,27 +55,28 @@ export default function MentorDashboardScreen() {
     const isReportDue = participant.nextMonthlyReportDue &&
       new Date(participant.nextMonthlyReportDue) <= new Date();
 
-    const isActive = participant.status === "active_mentorship";
-    const isAttempted = participant.status === "mentor_attempted" || participant.status === "bridge_attempted";
-    const isUnable = participant.status === "mentor_unable" || participant.status === "bridge_unable";
+    const isActive = section === "active";
+    const isInitial = section === "initial";
+    const isAttempted = section === "attempted";
+    const isUnable = section === "unable";
 
     return (
       <Pressable
         key={participant.id}
         onPress={() => navigation.navigate("ParticipantProfile", { participantId: participant.id })}
         className={`bg-white rounded-2xl p-4 mb-3 border-2 active:opacity-70 ${
-          needsAction ? "border-amber-300" : (isWeeklyDue || isMonthlyCheckInDue || isReportDue) ? "border-red-300" : "border-gray-100"
+          (isInitial || isAttempted || isUnable) ? "border-amber-300" : (isWeeklyDue || isMonthlyCheckInDue || isReportDue) ? "border-red-300" : "border-gray-100"
         }`}
       >
-        {needsAction && (
+        {(isInitial || isAttempted || isUnable) && (
           <View className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
             <Text className="text-amber-800 text-xs font-semibold">
-              ⚠️ Initial Contact Required
+              ⚠️ {isInitial ? "Initial Contact Required" : isAttempted ? "Follow-Up Needed" : "Unable to Contact"}
             </Text>
           </View>
         )}
 
-        {!needsAction && (isWeeklyDue || isMonthlyCheckInDue) && (
+        {isActive && (isWeeklyDue || isMonthlyCheckInDue) && (
           <View className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-3">
             <Text className="text-red-800 text-xs font-semibold">
               📋 {isWeeklyDue ? "Weekly Update" : "Monthly Check-In"} Due
@@ -114,10 +106,11 @@ export default function MentorDashboardScreen() {
           </View>
         </View>
 
-        {/* Initial Contact Pending or Attempted/Unable Actions */}
-        {needsAction && (
+        {/* Action Buttons - Different for each section */}
+
+        {/* Initial Contact Section: Contacted, Attempted, Unable */}
+        {isInitial && (
           <View>
-            {/* First row: Contacted button */}
             <View className="flex-row gap-2 mb-2">
               <Pressable
                 onPress={(e) => {
@@ -129,8 +122,6 @@ export default function MentorDashboardScreen() {
                 <Text className="text-gray-900 text-xs font-semibold">Contacted</Text>
               </Pressable>
             </View>
-
-            {/* Second row: Attempted and Unable buttons */}
             <View className="flex-row gap-2">
               <Pressable
                 onPress={(e) => {
@@ -141,7 +132,6 @@ export default function MentorDashboardScreen() {
               >
                 <Text className="text-amber-700 text-xs font-semibold">Attempted</Text>
               </Pressable>
-
               <Pressable
                 onPress={(e) => {
                   e.stopPropagation();
@@ -152,6 +142,45 @@ export default function MentorDashboardScreen() {
                 <Text className="text-gray-700 text-xs font-semibold">Unable</Text>
               </Pressable>
             </View>
+          </View>
+        )}
+
+        {/* Attempted Contact Section: Follow Up (Attempted 2nd Time), Unable */}
+        {isAttempted && (
+          <View className="flex-row gap-2">
+            <Pressable
+              onPress={(e) => {
+                e.stopPropagation();
+                navigation.navigate("InitialContactForm", { participantId: participant.id });
+              }}
+              className="flex-1 bg-amber-50 border border-amber-200 rounded-xl py-2 items-center active:opacity-70"
+            >
+              <Text className="text-amber-700 text-xs font-semibold">Attempted Contact (2nd)</Text>
+            </Pressable>
+            <Pressable
+              onPress={(e) => {
+                e.stopPropagation();
+                navigation.navigate("InitialContactForm", { participantId: participant.id });
+              }}
+              className="flex-1 bg-gray-50 border border-gray-200 rounded-xl py-2 items-center active:opacity-70"
+            >
+              <Text className="text-gray-700 text-xs font-semibold">Unable to Contact</Text>
+            </Pressable>
+          </View>
+        )}
+
+        {/* Unable to Contact Section: Move back to Initial or Attempted */}
+        {isUnable && (
+          <View className="flex-row gap-2">
+            <Pressable
+              onPress={(e) => {
+                e.stopPropagation();
+                navigation.navigate("InitialContactForm", { participantId: participant.id });
+              }}
+              className="flex-1 bg-blue-50 border border-blue-200 rounded-xl py-2 items-center active:opacity-70"
+            >
+              <Text className="text-blue-700 text-xs font-semibold">Try Again</Text>
+            </Pressable>
           </View>
         )}
 
@@ -241,30 +270,54 @@ export default function MentorDashboardScreen() {
         </Text>
       </View>
 
-      {/* Stats */}
+      {/* Stats Cards */}
       <View className="px-6 py-4 flex-row gap-3">
         <View className="flex-1 bg-white rounded-xl p-4 border border-gray-100">
-          <Text className="text-2xl font-bold text-gray-900">{needsInitialContact.length}</Text>
-          <Text className="text-xs text-gray-600 mt-1">Needs Initial Contact</Text>
+          <Text className="text-2xl font-bold text-gray-900">
+            {pendingInitialContact.length}
+          </Text>
+          <Text className="text-xs text-gray-600 mt-1">Initial Contact</Text>
+        </View>
+        <View className="flex-1 bg-white rounded-xl p-4 border border-gray-100">
+          <Text className="text-2xl font-bold text-gray-900">
+            {attemptedContact.length}
+          </Text>
+          <Text className="text-xs text-gray-600 mt-1">Attempted</Text>
+        </View>
+        <View className="flex-1 bg-white rounded-xl p-4 border border-gray-100">
+          <Text className="text-2xl font-bold text-gray-900">
+            {unableToContact.length}
+          </Text>
+          <Text className="text-xs text-gray-600 mt-1">Unable</Text>
         </View>
         <View className="flex-1 bg-white rounded-xl p-4 border border-gray-100">
           <Text className="text-2xl font-bold text-gray-900">{activeParticipants.length}</Text>
           <Text className="text-xs text-gray-600 mt-1">Active</Text>
         </View>
-        <View className="flex-1 bg-white rounded-xl p-4 border border-gray-100">
-          <Text className={`text-2xl font-bold ${participantsWithUpdatesDue.length > 0 ? "text-red-600" : "text-gray-900"}`}>
-            {participantsWithUpdatesDue.length}
-          </Text>
-          <Text className="text-xs text-gray-600 mt-1">Updates Due</Text>
-        </View>
       </View>
 
       <ScrollView className="flex-1 px-6" contentContainerStyle={contentContainerStyle}>
-        {/* Needs Action Section */}
-        {needsInitialContact.length > 0 && (
+        {/* Initial Contact Pending Section */}
+        {pendingInitialContact.length > 0 && (
           <View className="mb-6">
-            <Text className="text-sm font-bold text-gray-900 mb-3 uppercase">Needs Action</Text>
-            {needsInitialContact.map((p) => renderParticipantCard(p, true))}
+            <Text className="text-sm font-bold text-gray-900 mb-3 uppercase">Initial Contact Pending</Text>
+            {pendingInitialContact.map((p) => renderParticipantCard(p, "initial"))}
+          </View>
+        )}
+
+        {/* Attempted Contact Section */}
+        {attemptedContact.length > 0 && (
+          <View className="mb-6">
+            <Text className="text-sm font-bold text-gray-900 mb-3 uppercase">Attempted Contact</Text>
+            {attemptedContact.map((p) => renderParticipantCard(p, "attempted"))}
+          </View>
+        )}
+
+        {/* Unable to Contact Section */}
+        {unableToContact.length > 0 && (
+          <View className="mb-6">
+            <Text className="text-sm font-bold text-gray-900 mb-3 uppercase">Unable to Contact</Text>
+            {unableToContact.map((p) => renderParticipantCard(p, "unable"))}
           </View>
         )}
 
@@ -272,7 +325,7 @@ export default function MentorDashboardScreen() {
         {activeParticipants.length > 0 && (
           <View className="mb-4">
             <Text className="text-sm font-bold text-gray-900 mb-3 uppercase">Active</Text>
-            {activeParticipants.map((p) => renderParticipantCard(p, false))}
+            {activeParticipants.map((p) => renderParticipantCard(p, "active"))}
           </View>
         )}
 
