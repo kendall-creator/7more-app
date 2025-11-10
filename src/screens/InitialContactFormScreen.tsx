@@ -126,7 +126,7 @@ export default function InitialContactFormScreen({ route, navigation }: any) {
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // For unsuccessful contacts, only require date and details
     if (contactOutcome === "attempted") {
       if (!attemptNotes.trim()) {
@@ -153,14 +153,21 @@ export default function InitialContactFormScreen({ route, navigation }: any) {
         guidanceNotes: "",
       };
 
-      recordInitialContact(formData, currentUser.id, currentUser.name);
+      try {
+        console.log("📝 Submitting contact attempt form...");
+        await recordInitialContact(formData, currentUser.id, currentUser.name);
+        console.log("✅ Contact attempt recorded, showing success alert");
 
-      Alert.alert("Success", "Contact attempt recorded successfully!", [
-        {
-          text: "OK",
-          onPress: () => navigation.goBack(),
-        },
-      ]);
+        Alert.alert("Success", "Contact attempt recorded successfully!", [
+          {
+            text: "OK",
+            onPress: () => navigation.goBack(),
+          },
+        ]);
+      } catch (error) {
+        console.error("❌ Error recording contact attempt:", error);
+        Alert.alert("Error", "Failed to record contact attempt. Please try again.");
+      }
       return;
     }
 
@@ -190,14 +197,21 @@ export default function InitialContactFormScreen({ route, navigation }: any) {
         guidanceNotes: "",
       };
 
-      recordInitialContact(formData, currentUser.id, currentUser.name);
+      try {
+        console.log("📝 Submitting unable to contact form...");
+        await recordInitialContact(formData, currentUser.id, currentUser.name);
+        console.log("✅ Unable to contact recorded, showing success alert");
 
-      Alert.alert("Success", "Unable to contact information recorded successfully!", [
-        {
-          text: "OK",
-          onPress: () => navigation.goBack(),
-        },
-      ]);
+        Alert.alert("Success", "Unable to contact information recorded successfully!", [
+          {
+            text: "OK",
+            onPress: () => navigation.goBack(),
+          },
+        ]);
+      } catch (error) {
+        console.error("❌ Error recording unable to contact:", error);
+        Alert.alert("Error", "Failed to record information. Please try again.");
+      }
       return;
     }
 
@@ -257,14 +271,21 @@ export default function InitialContactFormScreen({ route, navigation }: any) {
       guidanceNotes: guidanceNeeded ? guidanceNotes : "",
     };
 
-    recordInitialContact(formData, currentUser.id, currentUser.name);
+    try {
+      console.log("📝 Submitting successful contact form...");
+      await recordInitialContact(formData, currentUser.id, currentUser.name);
+      console.log("✅ Initial contact recorded, showing success alert");
 
-    Alert.alert("Success", "Initial contact form completed successfully!", [
-      {
-        text: "OK",
-        onPress: () => navigation.goBack(),
-      },
-    ]);
+      Alert.alert("Success", "Initial contact form completed successfully!", [
+        {
+          text: "OK",
+          onPress: () => navigation.goBack(),
+        },
+      ]);
+    } catch (error) {
+      console.error("❌ Error recording initial contact:", error);
+      Alert.alert("Error", "Failed to record initial contact. Please try again.");
+    }
   };
 
   const getHeaderColor = () => {
