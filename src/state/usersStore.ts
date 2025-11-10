@@ -70,12 +70,10 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
       throw new Error("Firebase not configured. Please add Firebase credentials in ENV tab.");
     }
 
-    const newUser: InvitedUser = {
+    const newUser: any = {
       id: `user_${Date.now()}`,
       name,
-      nickname: nickname || undefined,
       email: email.toLowerCase().trim(),
-      phone: phone || undefined,
       role, // Primary role (required)
       roles: [role], // Initialize roles array with the primary role
       password,
@@ -83,6 +81,14 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
       invitedBy,
       requiresPasswordChange: false, // No longer forcing password changes
     };
+
+    // Only add optional fields if they have values (Firebase doesn't allow undefined)
+    if (nickname) {
+      newUser.nickname = nickname;
+    }
+    if (phone) {
+      newUser.phone = phone;
+    }
 
     const userRef = ref(database, `users/${newUser.id}`);
     await firebaseSet(userRef, newUser);
