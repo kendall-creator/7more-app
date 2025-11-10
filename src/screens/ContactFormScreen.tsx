@@ -32,7 +32,7 @@ export default function ContactFormScreen({ route, navigation }: any) {
     return null;
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!contactNotes.trim()) {
       Alert.alert("Missing Information", "Please add contact notes before submitting.");
       return;
@@ -43,26 +43,38 @@ export default function ContactFormScreen({ route, navigation }: any) {
       return;
     }
 
-    recordContact(
-      {
-        participantId,
-        contactDate: contactDate.toISOString(),
-        contactMethod,
-        contactNotes,
-        outcomeType,
-        attemptType: outcomeType === "attempted" ? attemptType : undefined,
-        unableReason: outcomeType === "unable" ? unableReason : undefined,
-      },
-      currentUser.id,
-      currentUser.name
-    );
+    try {
+      console.log("📝 Submitting contact form...");
+      console.log("Participant ID:", participantId);
+      console.log("Outcome type:", outcomeType);
+      console.log("Contact notes:", contactNotes);
 
-    Alert.alert("Success", "Contact information recorded successfully.", [
-      {
-        text: "OK",
-        onPress: () => navigation.goBack(),
-      },
-    ]);
+      await recordContact(
+        {
+          participantId,
+          contactDate: contactDate.toISOString(),
+          contactMethod,
+          contactNotes,
+          outcomeType,
+          attemptType: outcomeType === "attempted" ? attemptType : undefined,
+          unableReason: outcomeType === "unable" ? unableReason : undefined,
+        },
+        currentUser.id,
+        currentUser.name
+      );
+
+      console.log("✅ Contact recorded successfully");
+
+      Alert.alert("Success", "Contact information recorded successfully.", [
+        {
+          text: "OK",
+          onPress: () => navigation.goBack(),
+        },
+      ]);
+    } catch (error) {
+      console.error("❌ Error recording contact:", error);
+      Alert.alert("Error", "Failed to record contact. Please try again.");
+    }
   };
 
   const getHeaderTitle = () => {

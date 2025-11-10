@@ -130,6 +130,7 @@ export default function AddUserScreen({ navigation }: any) {
       );
 
       if (result.success) {
+        console.log("✅ User created successfully:", result);
         setGeneratedPassword(result.password);
 
         // Try to send welcome email
@@ -141,6 +142,7 @@ export default function AddUserScreen({ navigation }: any) {
           "https://7more.org/app"
         );
 
+        console.log("Email send result:", emailResult);
         setEmailSent(emailResult.success);
 
         // Try to send welcome SMS if phone number provided
@@ -151,12 +153,19 @@ export default function AddUserScreen({ navigation }: any) {
             result.password,
             "https://7more.org/app"
           );
+          console.log("SMS send result:", smsResult);
           setSmsSent(smsResult.success);
         }
 
+        console.log("✅ Showing success modal");
         setShowSuccessModal(true);
+      } else {
+        console.log("❌ User creation returned success: false");
+        setErrorMessage("Failed to create user. Please try again.");
+        setShowErrorModal(true);
       }
     } catch (error) {
+      console.error("❌ Error in handleSubmit:", error);
       setErrorMessage("Failed to create user. Please try again.");
       setShowErrorModal(true);
     } finally {

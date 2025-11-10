@@ -255,7 +255,14 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
     }
 
     const participant = get().participants.find((p) => p.id === formData.participantId);
-    if (!participant) return;
+    if (!participant) {
+      console.log("❌ Participant not found:", formData.participantId);
+      return;
+    }
+
+    console.log("📝 Recording contact for participant:", participant.firstName, participant.lastName);
+    console.log("Current status:", participant.status);
+    console.log("Outcome type:", formData.outcomeType);
 
     let newStatus: ParticipantStatus = participant.status;
     let additionalFields: Partial<Participant> = {};
@@ -268,6 +275,8 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
     } else if (formData.outcomeType === "unable") {
       newStatus = "bridge_unable";
     }
+
+    console.log("New status will be:", newStatus);
 
     const updatedParticipant = {
       ...participant,
@@ -297,8 +306,10 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
       ],
     };
 
+    console.log("✅ Saving to Firebase...");
     const participantRef = ref(database, `participants/${formData.participantId}`);
     await firebaseSet(participantRef, updatedParticipant);
+    console.log("✅ Firebase save complete");
   },
 
   recordBridgeFollowUp: async (formData, userId, userName) => {
