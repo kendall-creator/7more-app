@@ -89,6 +89,34 @@ export default function AdminHomepageScreen() {
     return { mentors, mentorLeaders, bridgeTeam, volunteers, total: invitedUsers.length };
   }, [invitedUsers]);
 
+  // Bridge Team stats
+  const bridgeTeamStats = useMemo(() => {
+    const users = invitedUsers.filter((u) => u.role === "bridge_team").length;
+    const totalParticipants = allParticipants.filter(
+      (p) => p.status === "pending_bridge" || p.status === "bridge_contacted" ||
+             p.status === "bridge_attempted" || p.status === "bridge_unable"
+    ).length;
+    const pendingBridge = allParticipants.filter((p) => p.status === "pending_bridge").length;
+    const contacted = allParticipants.filter((p) => p.status === "bridge_contacted").length;
+    const attempted = allParticipants.filter((p) => p.status === "bridge_attempted").length;
+    const unable = allParticipants.filter((p) => p.status === "bridge_unable").length;
+
+    return { users, totalParticipants, pendingBridge, contacted, attempted, unable };
+  }, [invitedUsers, allParticipants]);
+
+  // Mentor stats
+  const mentorStats = useMemo(() => {
+    const users = invitedUsers.filter((u) => u.role === "mentor" || u.role === "mentorship_leader").length;
+    const totalParticipants = allParticipants.filter(
+      (p) => p.status === "pending_mentor" || p.status === "active_mentorship" || p.status === "graduated"
+    ).length;
+    const pendingMentor = allParticipants.filter((p) => p.status === "pending_mentor").length;
+    const activeMentorship = allParticipants.filter((p) => p.status === "active_mentorship").length;
+    const graduated = allParticipants.filter((p) => p.status === "graduated").length;
+
+    return { users, totalParticipants, pendingMentor, activeMentorship, graduated };
+  }, [invitedUsers, allParticipants]);
+
   return (
     <View className="flex-1 bg-[#f8f8f8]">
       {/* Header */}
@@ -219,35 +247,112 @@ export default function AdminHomepageScreen() {
           </View>
         </View>
 
-        {/* Users Overview */}
+        {/* Bridge Team Overview */}
         <View className="bg-white rounded-2xl p-5 mb-4 border border-[#d7d7d6]">
           <View className="flex-row items-center justify-between mb-4">
             <View className="flex-row items-center">
-              <Ionicons name="person-circle" size={20} color="#99896c" />
-              <Text className="text-base font-bold text-[#3c3832] ml-2">Team</Text>
+              <Ionicons name="people-circle" size={20} color="#0891b2" />
+              <Text className="text-base font-bold text-[#3c3832] ml-2">Bridge Team</Text>
             </View>
             <Pressable onPress={() => navigation.navigate("Users")}>
-              <Text className="text-[#405b69] text-sm font-semibold">View All</Text>
+              <Text className="text-[#405b69] text-sm font-semibold">Manage</Text>
             </Pressable>
           </View>
 
+          {/* Summary Stats */}
+          <View className="flex-row gap-2 mb-4">
+            <View className="flex-1 bg-teal-50 rounded-xl p-3 border border-teal-200">
+              <Text className="text-2xl font-bold text-teal-600">{formatNumber(bridgeTeamStats.users)}</Text>
+              <Text className="text-xs text-[#99896c] mt-1">Team Members</Text>
+            </View>
+            <View className="flex-1 bg-teal-50 rounded-xl p-3 border border-teal-200">
+              <Text className="text-2xl font-bold text-teal-600">{formatNumber(bridgeTeamStats.totalParticipants)}</Text>
+              <Text className="text-xs text-[#99896c] mt-1">Total Participants</Text>
+            </View>
+          </View>
+
+          {/* Participant Categories */}
+          <Text className="text-xs font-semibold text-[#99896c] mb-2 uppercase">Participant Status</Text>
           <View className="flex-row flex-wrap gap-2">
-            <View className="flex-1 min-w-[45%] bg-[#405b69]/10 rounded-xl p-3">
-              <Text className="text-2xl font-bold text-[#405b69]">{formatNumber(userStats.mentors)}</Text>
-              <Text className="text-xs text-[#99896c] mt-1">Mentors</Text>
+            <Pressable
+              onPress={() => navigation.navigate("FilteredParticipants", { status: "pending_bridge" })}
+              className="flex-1 min-w-[45%] bg-orange-50 rounded-xl p-3 border border-orange-200"
+            >
+              <Text className="text-xl font-bold text-orange-600">{formatNumber(bridgeTeamStats.pendingBridge)}</Text>
+              <Text className="text-xs text-[#99896c] mt-1">Pending Bridge</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => navigation.navigate("FilteredParticipants", { status: "bridge_contacted" })}
+              className="flex-1 min-w-[45%] bg-green-50 rounded-xl p-3 border border-green-200"
+            >
+              <Text className="text-xl font-bold text-green-600">{formatNumber(bridgeTeamStats.contacted)}</Text>
+              <Text className="text-xs text-[#99896c] mt-1">Contacted</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => navigation.navigate("FilteredParticipants", { status: "bridge_attempted" })}
+              className="flex-1 min-w-[45%] bg-yellow-50 rounded-xl p-3 border border-yellow-200"
+            >
+              <Text className="text-xl font-bold text-yellow-600">{formatNumber(bridgeTeamStats.attempted)}</Text>
+              <Text className="text-xs text-[#99896c] mt-1">Attempted</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => navigation.navigate("FilteredParticipants", { status: "bridge_unable" })}
+              className="flex-1 min-w-[45%] bg-red-50 rounded-xl p-3 border border-red-200"
+            >
+              <Text className="text-xl font-bold text-red-600">{formatNumber(bridgeTeamStats.unable)}</Text>
+              <Text className="text-xs text-[#99896c] mt-1">Unable to Contact</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Mentors Overview */}
+        <View className="bg-white rounded-2xl p-5 mb-4 border border-[#d7d7d6]">
+          <View className="flex-row items-center justify-between mb-4">
+            <View className="flex-row items-center">
+              <Ionicons name="school" size={20} color="#7c3aed" />
+              <Text className="text-base font-bold text-[#3c3832] ml-2">Mentors</Text>
             </View>
-            <View className="flex-1 min-w-[45%] bg-purple-50 rounded-xl p-3">
-              <Text className="text-2xl font-bold text-purple-600">{formatNumber(userStats.mentorLeaders)}</Text>
-              <Text className="text-xs text-[#99896c] mt-1">Leaders</Text>
+            <Pressable onPress={() => navigation.navigate("Users")}>
+              <Text className="text-[#405b69] text-sm font-semibold">Manage</Text>
+            </Pressable>
+          </View>
+
+          {/* Summary Stats */}
+          <View className="flex-row gap-2 mb-4">
+            <View className="flex-1 bg-purple-50 rounded-xl p-3 border border-purple-200">
+              <Text className="text-2xl font-bold text-purple-600">{formatNumber(mentorStats.users)}</Text>
+              <Text className="text-xs text-[#99896c] mt-1">Mentors & Leaders</Text>
             </View>
-            <View className="flex-1 min-w-[45%] bg-teal-50 rounded-xl p-3">
-              <Text className="text-2xl font-bold text-teal-600">{formatNumber(userStats.bridgeTeam)}</Text>
-              <Text className="text-xs text-[#99896c] mt-1">Bridge Team</Text>
+            <View className="flex-1 bg-purple-50 rounded-xl p-3 border border-purple-200">
+              <Text className="text-2xl font-bold text-purple-600">{formatNumber(mentorStats.totalParticipants)}</Text>
+              <Text className="text-xs text-[#99896c] mt-1">Total Participants</Text>
             </View>
-            <View className="flex-1 min-w-[45%] bg-[#fcc85c]/20 rounded-xl p-3">
-              <Text className="text-2xl font-bold text-[#fcc85c]">{formatNumber(userStats.volunteers)}</Text>
-              <Text className="text-xs text-[#99896c] mt-1">Volunteers</Text>
-            </View>
+          </View>
+
+          {/* Participant Categories */}
+          <Text className="text-xs font-semibold text-[#99896c] mb-2 uppercase">Participant Status</Text>
+          <View className="flex-row flex-wrap gap-2">
+            <Pressable
+              onPress={() => navigation.navigate("FilteredParticipants", { status: "pending_mentor" })}
+              className="flex-1 min-w-[45%] bg-red-50 rounded-xl p-3 border border-red-200"
+            >
+              <Text className="text-xl font-bold text-red-600">{formatNumber(mentorStats.pendingMentor)}</Text>
+              <Text className="text-xs text-[#99896c] mt-1">Need Assignment</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => navigation.navigate("FilteredParticipants", { status: "active_mentorship" })}
+              className="flex-1 min-w-[45%] bg-green-50 rounded-xl p-3 border border-green-200"
+            >
+              <Text className="text-xl font-bold text-green-600">{formatNumber(mentorStats.activeMentorship)}</Text>
+              <Text className="text-xs text-[#99896c] mt-1">Active Mentorship</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => navigation.navigate("FilteredParticipants", { status: "graduated" })}
+              className="flex-1 min-w-[45%] bg-blue-50 rounded-xl p-3 border border-blue-200"
+            >
+              <Text className="text-xl font-bold text-blue-600">{formatNumber(mentorStats.graduated)}</Text>
+              <Text className="text-xs text-[#99896c] mt-1">Graduated</Text>
+            </Pressable>
           </View>
         </View>
 
