@@ -28,6 +28,20 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
     return null;
   }
 
+  // Debug logging to help troubleshoot Quick Actions visibility
+  console.log("=== ParticipantProfileScreen Debug ===");
+  console.log("Participant:", participant.firstName, participant.lastName);
+  console.log("Participant Status:", participant.status);
+  console.log("User Role:", userRole);
+  console.log("Current User:", currentUser.name, currentUser.role);
+  console.log("Assigned Mentor:", participant.assignedMentor);
+  console.log("Quick Actions Should Show:", (userRole === "admin" ||
+    (userRole === "bridge_team" && ["pending_bridge", "bridge_contacted", "bridge_attempted", "bridge_unable"].includes(participant.status)) ||
+    (userRole === "mentorship_leader" && ["pending_mentor", "assigned_mentor"].includes(participant.status)) ||
+    (userRole === "mentor" && ["initial_contact_pending", "mentor_attempted", "mentor_unable", "active_mentorship"].includes(participant.status))
+  ));
+  console.log("======================================");
+
   const handleAddNote = () => {
     if (noteText.trim()) {
       addNote(participantId, noteText.trim(), currentUser.id, currentUser.name);
