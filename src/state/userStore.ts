@@ -23,6 +23,7 @@ const defaultUsers: User[] = [
     name: "Admin",
     email: "admin@7more.org",
     role: "admin",
+    roles: ["admin"], // Initialize roles array
   },
 ];
 
@@ -43,6 +44,7 @@ export const useUserStore = create<UserStore>()(
           name,
           email,
           role,
+          roles: [role], // Initialize roles array with the primary role
         };
 
         set((state) => ({

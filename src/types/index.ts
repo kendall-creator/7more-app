@@ -13,9 +13,31 @@ export interface User {
   name: string;
   nickname?: string;
   email: string;
-  role: UserRole;
+  role: UserRole; // Primary role (for backward compatibility)
+  roles?: UserRole[]; // Optional: multiple roles
   requiresPasswordChange?: boolean;
 }
+
+// Helper to get all roles for a user
+export const getUserRoles = (user: User | undefined): UserRole[] => {
+  if (!user) return [];
+  if (user.roles && user.roles.length > 0) return user.roles;
+  return [user.role];
+};
+
+// Helper to check if user has a specific role
+export const userHasRole = (user: User | undefined, role: UserRole): boolean => {
+  if (!user) return false;
+  if (user.roles && user.roles.length > 0) return user.roles.includes(role);
+  return user.role === role;
+};
+
+// Helper to check if user has any of the specified roles
+export const userHasAnyRole = (user: User | undefined, roles: UserRole[]): boolean => {
+  if (!user) return false;
+  const userRoles = getUserRoles(user);
+  return roles.some(role => userRoles.includes(role));
+};
 
 // Participant status in the system
 export type ParticipantStatus =

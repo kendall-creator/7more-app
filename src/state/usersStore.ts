@@ -9,7 +9,8 @@ interface InvitedUser {
   nickname?: string; // Optional nickname
   email: string;
   phone?: string; // Phone number (optional)
-  role: UserRole;
+  role: UserRole; // Primary role (required for backward compatibility)
+  roles?: UserRole[]; // Optional: multiple roles
   password: string; // In production, this would be hashed
   invitedAt: string;
   invitedBy: string;
@@ -75,7 +76,8 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
       nickname: nickname || undefined,
       email: email.toLowerCase().trim(),
       phone: phone || undefined,
-      role,
+      role, // Primary role (required)
+      roles: [role], // Initialize roles array with the primary role
       password,
       invitedAt: new Date().toISOString(),
       invitedBy,
@@ -161,7 +163,8 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
       name: user.name,
       nickname: user.nickname,
       email: user.email,
-      role: user.role,
+      role: user.role, // Primary role (required)
+      roles: user.roles, // Optional roles array
       requiresPasswordChange: user.requiresPasswordChange,
     };
   },
@@ -182,7 +185,8 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
         id: "admin_default",
         name: "Kendall",
         email: adminEmail,
-        role: "admin",
+        role: "admin", // Primary role (required)
+        roles: ["admin"], // Initialize roles array
         password: "7moreHouston!",
         invitedAt: new Date().toISOString(),
         invitedBy: "system",
