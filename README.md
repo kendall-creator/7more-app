@@ -94,41 +94,66 @@ After testing that everything works, secure your database:
 
 ## 🌐 Embeddable Web Form for Wix
 
-**NEW:** You can now embed your participant intake form on your Wix website! Submissions automatically sync to your app's Firebase database.
+**✅ YOU ALREADY HAVE A WORKING FORM!**
 
-### Features
-- ✅ **Live mirror** of your in-app participant form
-- ✅ **Automatic synchronization** - Web submissions appear instantly in the app
-- ✅ **Same validation** - Identical field validation as in-app form
-- ✅ **Dynamic updates** - Form configuration changes reflect on the website
-- ✅ **Secure HTTPS** - Deployed on Vercel with SSL encryption
-- ✅ **Wix compatible** - Easy iframe embedding
+**Your form is live at: https://7more-embedded-form1.vercel.app**
 
-### Quick Start
+### 🎉 Ready to Use Right Now
 
-1. **Access the Embeddable Form Screen** in your app
-2. **Follow the Deployment Guide** (see `DEPLOYMENT_GUIDE.md`)
-3. **Deploy to Vercel** (free tier, ~15 minutes)
-4. **Embed on Wix** using the generated iframe code
+This form is already deployed, connected to Firebase, and ready to embed on your website!
 
-### Files Included
+**Copy this iframe code and paste it into your Wix website:**
 
-- `embedded-form.html` - Standalone web form with dynamic configuration
-- `serverless-templates/` - Vercel serverless functions for API endpoints
-  - `vercel-form-config.js` - Returns current form configuration
-  - `vercel-submit-participant.js` - Handles form submissions to Firebase
-- `DEPLOYMENT_GUIDE.md` - Complete step-by-step deployment instructions
-- `src/screens/EmbeddableFormScreen.tsx` - In-app management interface
+```html
+<iframe
+  src="https://7more-embedded-form1.vercel.app"
+  width="100%"
+  height="800"
+  frameborder="0"
+  scrolling="auto"
+  style="border: none;"
+></iframe>
+```
+
+### How to Embed in Wix (2 minutes)
+
+1. **Open Wix Editor** on your website
+2. **Add Element** → Click the `+` button
+3. **Go to "Embed Code"** → Select "HTML iframe"
+4. **Paste the iframe code** above
+5. **Adjust height** if needed (800px default)
+6. **Publish your site**
 
 ### How It Works
 
-1. **You configure the form** in your app (Edit Intake Form screen)
-2. **Serverless functions serve** the configuration to the web form
-3. **Users submit the form** on your Wix website
-4. **Data saves directly** to your Firebase database
-5. **Appears instantly** in your app dashboard
+1. **Participant fills out form** on your Wix website
+2. **Form submits directly** to your Firebase database
+3. **Appears instantly** in your app's Bridge Team queue
+4. **All data syncs automatically** across all devices
 
-See `DEPLOYMENT_GUIDE.md` for complete setup instructions.
+### What the Form Collects
+
+- Name (required)
+- Email (optional)
+- Phone (optional)
+- Notes (optional)
+
+All submissions appear immediately in your app dashboard under Bridge Team participants.
+
+### Troubleshooting
+
+If you see "Failed to load form" or "Loading..." that won't finish:
+- Check `QUICK_FIX_INSTRUCTIONS.md` for deployment steps
+- The `/embedded-form.html` version needs API endpoints deployed
+- The main URL (shown above) already works without any additional setup
+
+### Files Included
+
+- `embedded-form.html` - Advanced form with dynamic configuration
+- `serverless-templates/` - Vercel serverless functions for API endpoints
+- `vercel-project.zip` - Complete deployable project
+- `DEPLOYMENT_GUIDE.md` - Detailed setup instructions
+- `QUICK_FIX_INSTRUCTIONS.md` - ⭐ **START HERE for embedding**
 
 ## Communication Integration Setup
 
