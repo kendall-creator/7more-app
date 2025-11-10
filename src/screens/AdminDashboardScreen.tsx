@@ -22,6 +22,9 @@ export default function AdminDashboardScreen() {
     bridgeContacted: participants.filter((p) => p.status === "bridge_contacted").length,
     bridgeAttempted: participants.filter((p) => p.status === "bridge_attempted").length,
     bridgeUnable: participants.filter((p) => p.status === "bridge_unable").length,
+    mentorAttempted: participants.filter((p) => p.status === "mentor_attempted").length,
+    mentorUnable: participants.filter((p) => p.status === "mentor_unable").length,
+    unableToContact: participants.filter((p) => p.status === "bridge_unable" || p.status === "mentor_unable").length,
     pendingMentorAssignment: participants.filter((p) => p.status === "pending_mentor").length,
     assignedToMentor: participants.filter((p) => p.status === "assigned_mentor" || p.status === "initial_contact_pending").length,
     activeInMentorship: participants.filter((p) => p.status === "active_mentorship").length,
@@ -163,7 +166,7 @@ export default function AdminDashboardScreen() {
             status="bridge_attempted"
           />
           <StatCard
-            title="Unable to Contact"
+            title="Unable to Contact (Bridge)"
             value={metrics.bridgeUnable}
             color="bg-gray-500"
             icon="close-circle"
@@ -189,11 +192,37 @@ export default function AdminDashboardScreen() {
             statuses={["assigned_mentor", "initial_contact_pending"]}
           />
           <StatCard
+            title="Mentor Attempted Contact"
+            value={metrics.mentorAttempted}
+            color="bg-amber-500"
+            icon="time"
+            status="mentor_attempted"
+          />
+          <StatCard
+            title="Unable to Contact (Mentor)"
+            value={metrics.mentorUnable}
+            color="bg-gray-500"
+            icon="close-circle"
+            status="mentor_unable"
+          />
+          <StatCard
             title="Active in Mentorship"
             value={metrics.activeInMentorship}
             color="bg-yellow-500"
             icon="trending-up"
             status="active_mentorship"
+          />
+        </View>
+
+        {/* Combined Unable to Contact Section */}
+        <View className="mb-6">
+          <Text className="text-lg font-bold text-gray-900 mb-3">Unable to Contact (All)</Text>
+          <StatCard
+            title="All Unable to Contact"
+            value={metrics.unableToContact}
+            color="bg-red-500"
+            icon="alert-circle"
+            statuses={["bridge_unable", "mentor_unable"]}
           />
         </View>
 

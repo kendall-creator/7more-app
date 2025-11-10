@@ -272,6 +272,9 @@ export interface DashboardMetrics {
   bridgeContacted: number;
   bridgeAttempted: number;
   bridgeUnable: number;
+  mentorAttempted: number;
+  mentorUnable: number;
+  unableToContact: number;
   pendingMentorAssignment: number;
   assignedToMentor: number;
   activeInMentorship: number;

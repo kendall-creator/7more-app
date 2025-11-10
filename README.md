@@ -1009,10 +1009,23 @@ To enable automatic welcome and password reset emails:
 ```
 pending_bridge → bridge_contacted/bridge_attempted/bridge_unable
     ↓
-pending_mentor → assigned_mentor → initial_contact_pending
+pending_mentor → assigned_mentor → initial_contact_pending/mentor_attempted/mentor_unable
     ↓
 active_mentorship → graduated
 ```
+
+**Status Separation by Team:**
+- **Bridge Team statuses**: `pending_bridge`, `bridge_contacted`, `bridge_attempted`, `bridge_unable`
+  - Bridge Team members only see participants with these statuses
+  - When Bridge Team marks "Attempted Contact", it stays with Bridge Team as `bridge_attempted`
+  - When Bridge Team marks "Unable to Contact", it stays with Bridge Team as `bridge_unable`
+
+- **Mentor statuses**: `initial_contact_pending`, `mentor_attempted`, `mentor_unable`, `active_mentorship`
+  - Mentors only see participants assigned to them with these statuses
+  - When Mentor marks "Attempted Contact", it stays with the Mentor as `mentor_attempted`
+  - When Mentor marks "Unable to Contact", it stays with the Mentor as `mentor_unable`
+
+- **Admin view**: Admins can see all statuses and can view a combined "Unable to Contact" list that includes both `bridge_unable` and `mentor_unable` participants
 
 #### History Tracking
 Every action is recorded in the participant's history with:
