@@ -116,31 +116,42 @@ export default function MentorDashboardScreen() {
 
         {/* Initial Contact Pending or Attempted/Unable Actions */}
         {needsAction && (
-          <View className="gap-2">
-            <Pressable
-              onPress={(e) => {
-                e.stopPropagation();
-                navigation.navigate("InitialContactForm", { participantId: participant.id });
-              }}
-              className="bg-gray-600 rounded-xl py-3 items-center active:opacity-80"
-            >
-              <Text className="text-white text-sm font-bold">
-                {(isAttempted || isUnable) ? "Follow Up on Initial Contact" : "Complete Initial Contact"}
-              </Text>
-            </Pressable>
-
-            {/* Show "View Profile" button for attempted/unable */}
-            {(isAttempted || isUnable) && (
+          <View>
+            {/* First row: Contacted button */}
+            <View className="flex-row gap-2 mb-2">
               <Pressable
                 onPress={(e) => {
                   e.stopPropagation();
-                  navigation.navigate("ParticipantProfile", { participantId: participant.id });
+                  navigation.navigate("InitialContactForm", { participantId: participant.id });
                 }}
-                className="bg-blue-50 border border-blue-200 rounded-xl py-2 items-center active:opacity-80"
+                className="flex-1 bg-green-50 border border-green-200 rounded-xl py-2 items-center active:opacity-70"
               >
-                <Text className="text-blue-700 text-xs font-semibold">View Full Profile</Text>
+                <Text className="text-gray-900 text-xs font-semibold">Contacted</Text>
               </Pressable>
-            )}
+            </View>
+
+            {/* Second row: Attempted and Unable buttons */}
+            <View className="flex-row gap-2">
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  navigation.navigate("InitialContactForm", { participantId: participant.id });
+                }}
+                className="flex-1 bg-amber-50 border border-amber-200 rounded-xl py-2 items-center active:opacity-70"
+              >
+                <Text className="text-amber-700 text-xs font-semibold">Attempted</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  navigation.navigate("InitialContactForm", { participantId: participant.id });
+                }}
+                className="flex-1 bg-gray-50 border border-gray-200 rounded-xl py-2 items-center active:opacity-70"
+              >
+                <Text className="text-gray-700 text-xs font-semibold">Unable</Text>
+              </Pressable>
+            </View>
           </View>
         )}
 
