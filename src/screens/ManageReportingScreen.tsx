@@ -33,7 +33,7 @@ export default function ManageReportingScreen() {
   const [showMonthPicker, setShowMonthPicker] = useState(false);
 
   // For category view
-  const [selectedCategory, setSelectedCategory] = useState<"releasees" | "calls" | "donors" | "financials" | "social_media">("releasees");
+  const [selectedCategory, setSelectedCategory] = useState<"releasees" | "calls" | "donors" | "financials" | "social_media" | "wins_concerns">("releasees");
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
 
   // Current report (for month view)
@@ -76,6 +76,7 @@ export default function ManageReportingScreen() {
   const [viewsFromNonFollowers, setViewsFromNonFollowers] = useState("");
   const [followers, setFollowers] = useState("");
   const [followersGained, setFollowersGained] = useState("");
+  const [followersGainedSign, setFollowersGainedSign] = useState<"plus" | "minus">("plus");
 
   // Wins & Concerns - Array of up to 5 entries each
   const [wins, setWins] = useState<{ title: string; body: string }[]>([]);
@@ -135,7 +136,16 @@ export default function ManageReportingScreen() {
     setReelsPostViews(report.socialMediaMetrics?.reelsPostViews !== null && report.socialMediaMetrics?.reelsPostViews !== undefined ? report.socialMediaMetrics.reelsPostViews.toString() : "");
     setViewsFromNonFollowers(report.socialMediaMetrics?.viewsFromNonFollowers !== null && report.socialMediaMetrics?.viewsFromNonFollowers !== undefined ? report.socialMediaMetrics.viewsFromNonFollowers.toString() : "");
     setFollowers(report.socialMediaMetrics?.followers !== null && report.socialMediaMetrics?.followers !== undefined ? report.socialMediaMetrics.followers.toString() : "");
-    setFollowersGained(report.socialMediaMetrics?.followersGained !== null && report.socialMediaMetrics?.followersGained !== undefined ? report.socialMediaMetrics.followersGained.toString() : "");
+
+    // Handle followers gained with sign
+    const followersGainedValue = report.socialMediaMetrics?.followersGained;
+    if (followersGainedValue !== null && followersGainedValue !== undefined) {
+      setFollowersGainedSign(followersGainedValue >= 0 ? "plus" : "minus");
+      setFollowersGained(Math.abs(followersGainedValue).toString());
+    } else {
+      setFollowersGained("");
+      setFollowersGainedSign("plus");
+    }
 
     // Populate wins and concerns arrays
     setWins(report.wins || []);
@@ -183,6 +193,19 @@ export default function ManageReportingScreen() {
           const value = (report.financialData as any)?.[field];
           inputs[key] = value === null || value === undefined ? "N/A" : value.toString();
         });
+      } else if (selectedCategory === "social_media") {
+        ["reelsPostViews", "viewsFromNonFollowers", "followers", "followersGained"].forEach((field) => {
+          const key = `${month}-${field}`;
+          const value = (report.socialMediaMetrics as any)?.[field];
+          inputs[key] = value === null || value === undefined ? "N/A" : value.toString();
+        });
+      } else if (selectedCategory === "wins_concerns") {
+        // For wins and concerns, we'll display them differently (not as simple inputs)
+        // Store summary data for display
+        const key = `${month}-winsCount`;
+        inputs[key] = report.wins?.length?.toString() || "0";
+        const concernsKey = `${month}-concernsCount`;
+        inputs[concernsKey] = report.concerns?.length?.toString() || "0";
       }
     }
 
@@ -271,11 +294,16 @@ export default function ManageReportingScreen() {
   const handleSaveSocialMediaMetrics = async () => {
     if (!currentReport) return;
 
+    // Calculate the signed value for followers gained
+    const followersGainedValue = followersGained === ""
+      ? null
+      : (followersGainedSign === "minus" ? -1 : 1) * (parseInt(followersGained) || 0);
+
     await updateSocialMediaMetrics(currentReport.id, {
       reelsPostViews: reelsPostViews === "" ? null : parseInt(reelsPostViews) || null,
       viewsFromNonFollowers: viewsFromNonFollowers === "" ? null : parseFloat(viewsFromNonFollowers) || null,
       followers: followers === "" ? null : parseInt(followers) || null,
-      followersGained: followersGained === "" ? null : parseInt(followersGained) || null,
+      followersGained: followersGainedValue,
     });
 
     Alert.alert("Success", "Social media metrics saved");
@@ -341,6 +369,11 @@ export default function ManageReportingScreen() {
         field === "beginningBalance" ? numValue : report.financialData.beginningBalance,
         field === "endingBalance" ? numValue : report.financialData.endingBalance
       );
+    } else if (selectedCategory === "social_media") {
+      await updateSocialMediaMetrics(report.id, {
+        ...report.socialMediaMetrics,
+        [field]: numValue,
+      });
     }
 
     // Don't reload all reports - just update the local state
@@ -366,6 +399,8 @@ export default function ManageReportingScreen() {
           return (report.donorData as any)?.[field];
         } else if (selectedCategory === "financials") {
           return (report.financialData as any)?.[field];
+        } else if (selectedCategory === "social_media") {
+          return (report.socialMediaMetrics as any)?.[field];
         }
         return null;
       })
@@ -864,15 +899,51 @@ export default function ManageReportingScreen() {
 
                   <View>
                     <Text className="text-gray-700 mb-1">Followers Gained (+/-)</Text>
-                    <TextInput
-                      className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-300"
-                      value={followersGained}
-                      onChangeText={setFollowersGained}
-                      placeholder="Enter positive or negative number"
-                      keyboardType="numeric"
-                      editable={canEdit}
-                    />
-                    <Text className="text-xs text-gray-500 mt-1">Use positive numbers for gains, negative for losses (e.g., +50 or -20)</Text>
+                    <View className="flex-row items-center gap-2">
+                      {/* Plus/Minus Buttons */}
+                      <View className="flex-row border border-gray-300 rounded-lg overflow-hidden">
+                        <Pressable
+                          onPress={() => setFollowersGainedSign("plus")}
+                          disabled={!canEdit}
+                          className={`px-4 py-3 ${
+                            followersGainedSign === "plus" ? "bg-green-500" : "bg-gray-50"
+                          }`}
+                        >
+                          <Ionicons
+                            name="add"
+                            size={24}
+                            color={followersGainedSign === "plus" ? "white" : "#6B7280"}
+                          />
+                        </Pressable>
+                        <View className="w-px bg-gray-300" />
+                        <Pressable
+                          onPress={() => setFollowersGainedSign("minus")}
+                          disabled={!canEdit}
+                          className={`px-4 py-3 ${
+                            followersGainedSign === "minus" ? "bg-red-500" : "bg-gray-50"
+                          }`}
+                        >
+                          <Ionicons
+                            name="remove"
+                            size={24}
+                            color={followersGainedSign === "minus" ? "white" : "#6B7280"}
+                          />
+                        </Pressable>
+                      </View>
+
+                      {/* Number Input */}
+                      <TextInput
+                        className="flex-1 bg-gray-50 px-4 py-3 rounded-lg border border-gray-300"
+                        value={followersGained}
+                        onChangeText={setFollowersGained}
+                        placeholder="Enter number"
+                        keyboardType="number-pad"
+                        editable={canEdit}
+                      />
+                    </View>
+                    <Text className="text-xs text-gray-500 mt-1">
+                      {followersGainedSign === "plus" ? "Gained followers" : "Lost followers"}
+                    </Text>
                   </View>
 
                   {canEdit && (
@@ -1193,6 +1264,110 @@ export default function ManageReportingScreen() {
                     })}
                   </View>
                 )}
+
+                {selectedCategory === "social_media" && (
+                  <View className="space-y-4">
+                    {["reelsPostViews", "viewsFromNonFollowers", "followers", "followersGained"].map((field) => {
+                      const stats = calculateCategoryStats(field);
+                      const isPercentage = field === "viewsFromNonFollowers";
+                      return (
+                        <View key={field} className="border-b border-gray-100 pb-4">
+                          <Text className="text-base font-semibold text-gray-900 mb-3 capitalize">
+                            {field.replace(/([A-Z])/g, " $1").trim()}
+                            {isPercentage ? " (%)" : ""}
+                          </Text>
+                          <View className="flex-row flex-wrap">
+                            {yearReports.map((report) => {
+                              const key = `${report.month}-${field}`;
+                              const inputValue = categoryInputs[key] || "N/A";
+                              return (
+                                <View key={report.month} className="w-1/3 p-1">
+                                  <Text className="text-xs text-gray-600 mb-1">{months[report.month - 1].substring(0, 3)}</Text>
+                                  <TextInput
+                                    className="bg-gray-50 px-2 py-2 rounded border border-gray-300 text-sm"
+                                    value={inputValue === "N/A" ? "" : inputValue}
+                                    onChangeText={(value) => handleCategoryInputChange(report.month, field, value)}
+                                    onBlur={() => {
+                                      const currentValue = categoryInputs[key] || "";
+                                      handleSaveCategoryData(report.month, field, currentValue === "" ? "N/A" : currentValue);
+                                    }}
+                                    keyboardType={isPercentage ? "decimal-pad" : "number-pad"}
+                                    placeholder="N/A"
+                                    editable={canEdit}
+                                  />
+                                </View>
+                              );
+                            })}
+                          </View>
+                          {/* Stats Summary */}
+                          <View className="mt-3 bg-indigo-50 p-3 rounded-lg border border-indigo-200">
+                            <View className="flex-row justify-between mb-1">
+                              <Text className="text-sm text-gray-700">Total:</Text>
+                              <Text className="text-sm font-semibold text-indigo-900">
+                                {isPercentage ? formatPercentage(stats.total, 1) : formatNumber(stats.total)}
+                              </Text>
+                            </View>
+                            <View className="flex-row justify-between">
+                              <Text className="text-sm text-gray-700">Average ({stats.count} months):</Text>
+                              <Text className="text-sm font-semibold text-indigo-900">
+                                {isPercentage ? formatPercentage(stats.average, 1) : formatNumber(stats.average)}
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+                      );
+                    })}
+                  </View>
+                )}
+
+                {selectedCategory === "wins_concerns" && (
+                  <View className="space-y-4">
+                    <Text className="text-base text-gray-600 mb-4">
+                      Wins & Concerns are displayed below for each month. View details in Month View for full entries.
+                    </Text>
+                    {yearReports.map((report) => (
+                      <View key={report.month} className="border border-gray-200 rounded-lg p-4 mb-3">
+                        <Text className="text-base font-bold text-gray-900 mb-3">
+                          {months[report.month - 1]} {report.year}
+                        </Text>
+
+                        {/* Wins */}
+                        <View className="mb-3">
+                          <Text className="text-sm font-semibold text-green-700 mb-2">
+                            Wins ({report.wins?.length || 0})
+                          </Text>
+                          {report.wins && report.wins.length > 0 ? (
+                            report.wins.map((win: any, index: number) => (
+                              <View key={index} className="mb-2 pl-3 border-l-2 border-green-400">
+                                <Text className="text-sm font-semibold text-gray-900">{win.title}</Text>
+                                <Text className="text-xs text-gray-600">{win.body}</Text>
+                              </View>
+                            ))
+                          ) : (
+                            <Text className="text-xs text-gray-400 italic">No wins entered</Text>
+                          )}
+                        </View>
+
+                        {/* Concerns */}
+                        <View>
+                          <Text className="text-sm font-semibold text-red-700 mb-2">
+                            Concerns ({report.concerns?.length || 0})
+                          </Text>
+                          {report.concerns && report.concerns.length > 0 ? (
+                            report.concerns.map((concern: any, index: number) => (
+                              <View key={index} className="mb-2 pl-3 border-l-2 border-red-400">
+                                <Text className="text-sm font-semibold text-gray-900">{concern.title}</Text>
+                                <Text className="text-xs text-gray-600">{concern.body}</Text>
+                              </View>
+                            ))
+                          ) : (
+                            <Text className="text-xs text-gray-400 italic">No concerns entered</Text>
+                          )}
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
               </View>
             )
           )}
@@ -1277,6 +1452,8 @@ export default function ManageReportingScreen() {
                   { value: "calls", label: "Phone Calls", icon: "call" },
                   { value: "donors", label: "Donors", icon: "heart" },
                   { value: "financials", label: "Financials", icon: "cash" },
+                  { value: "social_media", label: "Social Media", icon: "logo-instagram" },
+                  { value: "wins_concerns", label: "Wins & Concerns", icon: "star" },
                 ].map((category) => (
                   <Pressable
                     key={category.value}
