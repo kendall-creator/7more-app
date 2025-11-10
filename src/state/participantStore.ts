@@ -278,6 +278,21 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
 
     console.log("New status will be:", newStatus);
 
+    // Build metadata object without undefined values
+    const metadata: any = {
+      contactDate: formData.contactDate,
+      contactMethod: formData.contactMethod,
+      outcomeType: formData.outcomeType,
+    };
+
+    // Only add optional fields if they have values
+    if (formData.attemptType) {
+      metadata.attemptType = formData.attemptType;
+    }
+    if (formData.unableReason) {
+      metadata.unableReason = formData.unableReason;
+    }
+
     const updatedParticipant = {
       ...participant,
       ...additionalFields,
@@ -295,13 +310,7 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
           createdBy: userId,
           createdByName: userName,
           createdAt: new Date().toISOString(),
-          metadata: {
-            contactDate: formData.contactDate,
-            contactMethod: formData.contactMethod,
-            outcomeType: formData.outcomeType,
-            attemptType: formData.attemptType,
-            unableReason: formData.unableReason,
-          },
+          metadata,
         },
       ],
     };
