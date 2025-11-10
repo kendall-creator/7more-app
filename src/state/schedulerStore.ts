@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { ref, set as firebaseSet, onValue, update as firebaseUpdate, remove } from "firebase/database";
 import { database } from "../config/firebase";
-import { Shift, ShiftAssignment, ShiftTemplate, UserRole, Meeting, MeetingInvitee, MeetingType, RSVPStatus } from "../types";
+import { Shift, ShiftAssignment, ShiftTemplate, UserRole, Meeting, MeetingInvitee, MeetingType, RSVPStatus, ShiftLocation } from "../types";
 
 interface SchedulerState {
   shifts: Shift[];
@@ -23,7 +23,8 @@ interface SchedulerActions {
     createdByName: string,
     maxVolunteers?: number,
     isRecurring?: boolean,
-    weeksToCreate?: number
+    weeksToCreate?: number,
+    location?: ShiftLocation
   ) => Promise<void>;
 
   // Update shift
@@ -147,7 +148,7 @@ export const useSchedulerStore = create<SchedulerStore>()((set, get) => ({
     });
   },
 
-  createShift: async (title, description, date, startTime, endTime, allowedRoles, createdBy, createdByName, maxVolunteers, isRecurring, weeksToCreate = 12) => {
+  createShift: async (title, description, date, startTime, endTime, allowedRoles, createdBy, createdByName, maxVolunteers, isRecurring, weeksToCreate = 12, location) => {
     if (!database) {
       throw new Error("Firebase not configured. Please add Firebase credentials in ENV tab.");
     }
@@ -155,6 +156,7 @@ export const useSchedulerStore = create<SchedulerStore>()((set, get) => ({
     const baseShift: Omit<Shift, 'id' | 'date'> = {
       title,
       description,
+      location,
       startTime,
       endTime,
       allowedRoles,

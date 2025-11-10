@@ -294,10 +294,13 @@ export interface Resource {
 }
 
 // Shift for volunteer scheduling
+export type ShiftLocation = "pam_lychner" | "huntsville" | "plane" | "hawaii";
+
 export interface Shift {
   id: string;
   title: string;
   description?: string;
+  location?: ShiftLocation; // Facility location
   date: string; // ISO date string
   startTime: string; // Time string like "09:00"
   endTime: string; // Time string like "17:00"

@@ -61,13 +61,11 @@ export default function AdminHomepageScreen() {
       const dayNum = String(day.getDate()).padStart(2, "0");
       const dateString = `${year}-${month}-${dayNum}`;
 
-      // Find Pam Lychner shifts for this day
+      // Find Pam Lychner shifts for this day (using location field)
       const dayShifts = shifts.filter(
         (shift) =>
           shift.date === dateString &&
-          (shift.title.toLowerCase().includes("pam lychner") ||
-           shift.title.toLowerCase().includes("pam") ||
-           shift.title.toLowerCase().includes("lychner"))
+          shift.location === "pam_lychner"
       );
 
       weekDays.push({

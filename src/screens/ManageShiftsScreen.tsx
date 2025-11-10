@@ -13,7 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useAuthStore } from "../state/authStore";
 import { useSchedulerStore } from "../state/schedulerStore";
-import { UserRole } from "../types";
+import { UserRole, ShiftLocation } from "../types";
 
 export default function ManageShiftsScreen({ navigation, route }: any) {
   const editShift = route?.params?.editShift;
@@ -48,6 +48,7 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
   // Form fields
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [location, setLocation] = useState<ShiftLocation | "">("");
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
@@ -84,6 +85,13 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
     { role: "board_member", label: "Board Member" },
   ];
 
+  const locationOptions: { value: ShiftLocation; label: string }[] = [
+    { value: "pam_lychner", label: "Pam Lychner" },
+    { value: "huntsville", label: "Huntsville" },
+    { value: "plane", label: "Plane" },
+    { value: "hawaii", label: "Hawaii" },
+  ];
+
   const upcomingShifts = useMemo(() => {
     const now = new Date().toISOString().split("T")[0];
     return shifts
@@ -100,6 +108,7 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
   const resetForm = () => {
     setTitle("");
     setDescription("");
+    setLocation("");
     setDate("");
     setStartTime("");
     setEndTime("");
@@ -177,6 +186,7 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
     setSelectedShift(shift);
     setTitle(shift.title);
     setDescription(shift.description || "");
+    setLocation(shift.location || "");
     setDate(shift.date);
     setStartTime(shift.startTime);
     setEndTime(shift.endTime);
@@ -195,7 +205,7 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
   }, [editShift]);
 
   const handleCreate = () => {
-    if (!title || !startTime || !endTime || !currentUser) return;
+    if (!title || !startTime || !endTime || !currentUser || !location) return;
     if (!date && selectedDaysOfWeek.length === 0) return;
 
     // If creating shifts for multiple days in the SAME week (not recurring)
@@ -223,7 +233,9 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
           currentUser.id,
           currentUser.name,
           maxVolunteers ? parseInt(maxVolunteers, 10) : undefined,
-          false
+          false,
+          12,
+          location as ShiftLocation
         );
         shiftsCreated++;
       }
@@ -243,7 +255,9 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
             currentUser.id,
             currentUser.name,
             maxVolunteers ? parseInt(maxVolunteers, 10) : undefined,
-            false
+            false,
+            12,
+            location as ShiftLocation
           );
           shiftsCreated++;
         }
@@ -282,7 +296,9 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
             currentUser.id,
             currentUser.name,
             maxVolunteers ? parseInt(maxVolunteers, 10) : undefined,
-            false
+            false,
+            12,
+            location as ShiftLocation
           );
           shiftsCreated++;
         }
@@ -309,7 +325,8 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
       currentUser.name,
       maxVolunteers ? parseInt(maxVolunteers, 10) : undefined,
       isRecurring && !selectedDaysOfWeek.length,
-      isRecurring && !selectedDaysOfWeek.length ? parseInt(weeksToCreate, 10) : undefined
+      isRecurring && !selectedDaysOfWeek.length ? parseInt(weeksToCreate, 10) : undefined,
+      location as ShiftLocation
     );
 
     setSuccessMessage(
@@ -323,11 +340,12 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
   };
 
   const handleUpdate = () => {
-    if (!selectedShift || !title || !date || !startTime || !endTime) return;
+    if (!selectedShift || !title || !date || !startTime || !endTime || !location) return;
 
     updateShift(selectedShift.id, {
       title,
       description,
+      location: location as ShiftLocation,
       date,
       startTime,
       endTime,
@@ -677,6 +695,32 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
                 numberOfLines={3}
                 textAlignVertical="top"
               />
+
+              {/* Location Selector */}
+              <Text className="text-sm font-semibold text-gray-700 mb-2">
+                Location <Text className="text-red-500">*</Text>
+              </Text>
+              <View className="flex-row flex-wrap gap-2 mb-4">
+                {locationOptions.map((loc) => (
+                  <Pressable
+                    key={loc.value}
+                    onPress={() => setLocation(loc.value)}
+                    className={`border-2 rounded-xl px-4 py-3 ${
+                      location === loc.value
+                        ? "bg-[#405b69] border-[#405b69]"
+                        : "bg-white border-gray-200"
+                    }`}
+                  >
+                    <Text
+                      className={`text-sm font-semibold ${
+                        location === loc.value ? "text-white" : "text-gray-700"
+                      }`}
+                    >
+                      {loc.label}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
 
               {/* Visual Calendar */}
               <Text className="text-sm font-semibold text-gray-700 mb-2">
@@ -1042,6 +1086,32 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
                 numberOfLines={3}
                 textAlignVertical="top"
               />
+
+              {/* Location Selector */}
+              <Text className="text-sm font-semibold text-gray-700 mb-2">
+                Location <Text className="text-red-500">*</Text>
+              </Text>
+              <View className="flex-row flex-wrap gap-2 mb-4">
+                {locationOptions.map((loc) => (
+                  <Pressable
+                    key={loc.value}
+                    onPress={() => setLocation(loc.value)}
+                    className={`border-2 rounded-xl px-4 py-3 ${
+                      location === loc.value
+                        ? "bg-[#405b69] border-[#405b69]"
+                        : "bg-white border-gray-200"
+                    }`}
+                  >
+                    <Text
+                      className={`text-sm font-semibold ${
+                        location === loc.value ? "text-white" : "text-gray-700"
+                      }`}
+                    >
+                      {loc.label}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
 
               <Text className="text-sm font-semibold text-gray-700 mb-2">
                 Date <Text className="text-red-500">*</Text>
