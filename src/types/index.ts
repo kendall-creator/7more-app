@@ -11,6 +11,7 @@ export type VolunteerCategory = "lead" | "support";
 export interface User {
   id: string;
   name: string;
+  nickname?: string;
   email: string;
   role: UserRole;
   requiresPasswordChange?: boolean;

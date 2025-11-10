@@ -6,6 +6,7 @@ import { User, UserRole } from "../types";
 interface InvitedUser {
   id: string;
   name: string;
+  nickname?: string; // Optional nickname
   email: string;
   phone?: string; // Phone number (optional)
   role: UserRole;
@@ -23,7 +24,7 @@ interface UsersState {
 }
 
 interface UsersActions {
-  addUser: (name: string, email: string, role: UserRole, password: string, invitedBy: string, phone?: string) => Promise<{ success: boolean; password: string }>;
+  addUser: (name: string, email: string, role: UserRole, password: string, invitedBy: string, phone?: string, nickname?: string) => Promise<{ success: boolean; password: string }>;
   removeUser: (userId: string) => Promise<void>;
   updateUser: (userId: string, updates: Partial<Omit<InvitedUser, "id">>) => Promise<void>;
   resetPassword: (userId: string, newPassword: string) => Promise<{ success: boolean; password: string }>;
@@ -63,7 +64,7 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
     });
   },
 
-  addUser: async (name, email, role, password, invitedBy, phone) => {
+  addUser: async (name, email, role, password, invitedBy, phone, nickname) => {
     if (!database) {
       throw new Error("Firebase not configured. Please add Firebase credentials in ENV tab.");
     }
@@ -71,6 +72,7 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
     const newUser: InvitedUser = {
       id: `user_${Date.now()}`,
       name,
+      nickname: nickname || undefined,
       email: email.toLowerCase().trim(),
       phone: phone || undefined,
       role,
@@ -157,6 +159,7 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
     return {
       id: user.id,
       name: user.name,
+      nickname: user.nickname,
       email: user.email,
       role: user.role,
       requiresPasswordChange: user.requiresPasswordChange,

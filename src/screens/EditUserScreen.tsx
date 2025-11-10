@@ -26,6 +26,7 @@ export default function EditUserScreen({ navigation, route }: any) {
   const user = getUserById(userId);
 
   const [name, setName] = useState("");
+  const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [selectedRole, setSelectedRole] = useState<UserRole>("bridge_team");
@@ -37,6 +38,7 @@ export default function EditUserScreen({ navigation, route }: any) {
   useEffect(() => {
     if (user) {
       setName(user.name);
+      setNickname(user.nickname || "");
       setEmail(user.email);
       setPhone(user.phone || "");
       setSelectedRole(user.role);
@@ -109,6 +111,7 @@ export default function EditUserScreen({ navigation, route }: any) {
     try {
       await updateUser(userId, {
         name: name.trim(),
+        nickname: nickname.trim() || undefined,
         email: email.trim(),
         phone: phone.trim() || undefined,
         role: selectedRole,
@@ -166,6 +169,23 @@ export default function EditUserScreen({ navigation, route }: any) {
               onChangeText={setName}
               autoCapitalize="words"
             />
+          </View>
+
+          {/* Nickname */}
+          <View className="mb-5">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              Nickname (Optional)
+            </Text>
+            <TextInput
+              className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base"
+              placeholder="Johnny"
+              value={nickname}
+              onChangeText={setNickname}
+              autoCapitalize="words"
+            />
+            <Text className="text-xs text-gray-500 mt-2">
+              If provided, will be displayed alongside full name
+            </Text>
           </View>
 
           {/* Email */}

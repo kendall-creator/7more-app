@@ -12,6 +12,7 @@ import { sendPasswordResetEmail, generatePasswordFromName } from "../services/em
 interface InvitedUserDisplay {
   id: string;
   name: string;
+  nickname?: string;
   email: string;
   role: UserRole;
 }
@@ -53,6 +54,7 @@ export default function ManageUsersScreen() {
   const allUsers: InvitedUserDisplay[] = invitedUsers.map((u) => ({
     id: u.id,
     name: u.name,
+    nickname: u.nickname,
     email: u.email,
     role: u.role,
   }));
@@ -69,7 +71,8 @@ export default function ManageUsersScreen() {
     const matchesSearch =
       !searchQuery ||
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase());
+      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (user.nickname && user.nickname.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesRole = filterRole === "all" || user.role === filterRole;
     return matchesSearch && matchesRole;
   });
@@ -107,6 +110,7 @@ export default function ManageUsersScreen() {
       const userToImpersonate = {
         id: selectedUser.id,
         name: selectedUser.name,
+        nickname: selectedUser.nickname,
         email: selectedUser.email,
         role: selectedUser.role,
       };
@@ -184,7 +188,12 @@ export default function ManageUsersScreen() {
         <View className="flex-row justify-between items-start mb-2">
           <View className="flex-1">
             <View className="flex-row items-center gap-2 mb-1">
-              <Text className="text-lg font-bold text-gray-900">{user.name}</Text>
+              <Text className="text-lg font-bold text-gray-900">
+                {user.name}
+                {user.nickname && (
+                  <Text className="text-gray-500 font-normal"> ({user.nickname})</Text>
+                )}
+              </Text>
               {isCurrentUser && (
                 <View className="bg-yellow-100 px-2 py-0.5 rounded">
                   <Text className="text-xs font-semibold text-gray-900">You</Text>

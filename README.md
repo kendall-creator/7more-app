@@ -367,12 +367,13 @@ The app supports seven distinct user roles:
 #### User Management (Admin Only)
 - **Invite-only system** - Add new users who can then log in with their credentials
 - **Automatic password generation** - System generates passwords based on user's name (first initial + last name, e.g., "John Doe" → "jdoe")
+- **Optional nickname field** - Add an optional nickname for users (displayed alongside full name)
 - **Welcome emails** - Automatically send welcome emails with login credentials (optional email service)
 - **Password reset** - Admins can reset any user's password (generates new password from their name)
 - **User-controlled password changes** - Users can change their password anytime they want (no forced changes)
-- **Create user accounts** - Set name, email, and role for each user (password generated automatically)
-- **View all invited users** - See complete list of staff with roles
-- **Search and filter** - Find users by name, email, or role
+- **Create user accounts** - Set name, optional nickname, email, and role for each user (password generated automatically)
+- **View all invited users** - See complete list of staff with roles and nicknames
+- **Search and filter** - Find users by name, email, nickname, or role
 - **Delete users** - Remove user accounts (except your own)
 - **Login as any user (Admin)** - Impersonate any user to see the app from their perspective
 - **Login as mentor (Mentorship Leaders)** - Mentorship leaders can login as any mentor to provide support and troubleshoot issues
