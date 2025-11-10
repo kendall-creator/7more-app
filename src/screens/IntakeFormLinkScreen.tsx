@@ -106,7 +106,7 @@ export default function IntakeFormLinkScreen() {
           {/* GitHub Pages */}
           <View className="bg-white rounded-2xl p-5 border border-gray-100 mb-3">
             <View className="flex-row items-center mb-3">
-              <View className="w-10 h-10 rounded-full bg-purple-100 items-center justify-center mr-3">
+              <View className="w-10 h-10 rounded-full bg-[#fcc85c]/20 items-center justify-center mr-3">
                 <Text className="text-2xl">📄</Text>
               </View>
               <Text className="text-base font-bold text-gray-900">GitHub Pages</Text>

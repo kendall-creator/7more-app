@@ -353,7 +353,7 @@ export default function SchedulerScreen({ navigation }: any) {
             ? "bg-red-50 border-red-300"
             : myRSVP === "maybe"
             ? "bg-blue-50 border-blue-300"
-            : "bg-purple-50 border-purple-300"
+            : "bg-[#fcc85c]/20 border-[#fcc85c]/30"
         }`}
       >
         <Pressable
@@ -401,7 +401,7 @@ export default function SchedulerScreen({ navigation }: any) {
                 <Text className="text-white text-xs font-bold">Maybe</Text>
               </View>
             ) : (
-              <View className="bg-purple-600 rounded-lg px-2 py-1">
+              <View className="bg-[#fcc85c] rounded-lg px-2 py-1">
                 <Text className="text-white text-xs font-bold">Pending</Text>
               </View>
             )}

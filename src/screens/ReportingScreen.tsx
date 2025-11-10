@@ -172,7 +172,7 @@ export default function ReportingScreen() {
           "Gender Distribution",
           "people-outline",
           genderDemographics.map((d) => ({ ...d, label: d.gender })),
-          "bg-purple-600"
+          "bg-[#fcc85c]"
         )}
 
         {/* Release Location Demographics */}

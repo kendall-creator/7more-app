@@ -30,7 +30,7 @@ export default function FileManagementScreen() {
       name: "vercel-project.zip",
       description: "Vercel deployment package",
       icon: "archive",
-      color: "bg-purple-500",
+      color: "bg-[#fcc85c]",
     },
     {
       name: "README.md",

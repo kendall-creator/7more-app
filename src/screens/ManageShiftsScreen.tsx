@@ -553,10 +553,10 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
             </Pressable>
             <Pressable
               onPress={() => setShowSaveTemplateModal(true)}
-              className="flex-1 bg-purple-50 border border-purple-600 rounded-xl py-3 items-center"
+              className="flex-1 bg-[#fcc85c]/20 border border-[#fcc85c] rounded-xl py-3 items-center"
             >
-              <Ionicons name="save-outline" size={18} color="#9333EA" />
-              <Text className="text-purple-700 text-xs font-semibold mt-1">Save Template</Text>
+              <Ionicons name="save-outline" size={18} color="#fcc85c" />
+              <Text className="text-[#d4a849] text-xs font-semibold mt-1">Save Template</Text>
             </Pressable>
             <Pressable
               onPress={() => setShowTemplateModal(true)}
@@ -1316,7 +1316,7 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
               onPress={handleSaveTemplate}
               disabled={!sourceWeek || !templateName}
               className={`rounded-xl py-4 items-center ${
-                sourceWeek && templateName ? "bg-purple-600" : "bg-gray-300"
+                sourceWeek && templateName ? "bg-[#fcc85c]" : "bg-gray-300"
               }`}
             >
               <Text className="text-white text-base font-bold">Save Template</Text>

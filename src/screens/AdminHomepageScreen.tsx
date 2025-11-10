@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { View, Text, ScrollView, Pressable, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useCurrentUser } from "../state/authStore";
 import { useParticipantStore } from "../state/participantStore";
@@ -121,10 +121,19 @@ export default function AdminHomepageScreen() {
     <View className="flex-1 bg-[#f8f8f8]">
       {/* Header */}
       <View className="bg-[#405b69] pt-16 pb-6 px-6">
-        <Text className="text-3xl font-bold text-white mb-1">
-          Welcome back, {currentUser?.name?.split(" ")[0]}!
-        </Text>
-        <Text className="text-white/90 text-sm">Here is your program overview</Text>
+        <View className="flex-row items-center justify-between">
+          <View className="flex-1">
+            <Text className="text-3xl font-bold text-white mb-1">
+              Welcome back, {currentUser?.name?.split(" ")[0]}!
+            </Text>
+            <Text className="text-white/90 text-sm">Here is your program overview</Text>
+          </View>
+          <Image
+            source={require("../../assets/7more-logo.jpeg")}
+            style={{ width: 60, height: 60 }}
+            resizeMode="contain"
+          />
+        </View>
       </View>
 
       <ScrollView className="flex-1 px-6 py-4" contentContainerStyle={{ paddingBottom: 20 }}>
@@ -141,7 +150,7 @@ export default function AdminHomepageScreen() {
             </Pressable>
             <Pressable
               onPress={() => navigation.navigate("AdminTaskManagement")}
-              className="flex-1 bg-purple-600 rounded-2xl p-4 active:opacity-80"
+              className="flex-1 bg-[#fcc85c] rounded-2xl p-4 active:opacity-80"
             >
               <Ionicons name="add-circle" size={24} color="white" />
               <Text className="text-white text-sm font-semibold mt-2">Create Task</Text>
@@ -309,7 +318,7 @@ export default function AdminHomepageScreen() {
         <View className="bg-white rounded-2xl p-5 mb-4 border border-[#d7d7d6]">
           <View className="flex-row items-center justify-between mb-4">
             <View className="flex-row items-center">
-              <Ionicons name="school" size={20} color="#7c3aed" />
+              <Ionicons name="school" size={20} color="#fcc85c" />
               <Text className="text-base font-bold text-[#3c3832] ml-2">Mentors</Text>
             </View>
             <Pressable onPress={() => navigation.navigate("Users")}>
@@ -319,12 +328,12 @@ export default function AdminHomepageScreen() {
 
           {/* Summary Stats */}
           <View className="flex-row gap-2 mb-4">
-            <View className="flex-1 bg-purple-50 rounded-xl p-3 border border-purple-200">
-              <Text className="text-2xl font-bold text-purple-600">{formatNumber(mentorStats.users)}</Text>
+            <View className="flex-1 bg-[#fcc85c]/20 rounded-xl p-3 border border-[#fcc85c]/30">
+              <Text className="text-2xl font-bold text-[#fcc85c]">{formatNumber(mentorStats.users)}</Text>
               <Text className="text-xs text-[#99896c] mt-1">Mentors & Leaders</Text>
             </View>
-            <View className="flex-1 bg-purple-50 rounded-xl p-3 border border-purple-200">
-              <Text className="text-2xl font-bold text-purple-600">{formatNumber(mentorStats.totalParticipants)}</Text>
+            <View className="flex-1 bg-[#fcc85c]/20 rounded-xl p-3 border border-[#fcc85c]/30">
+              <Text className="text-2xl font-bold text-[#fcc85c]">{formatNumber(mentorStats.totalParticipants)}</Text>
               <Text className="text-xs text-[#99896c] mt-1">Total Participants</Text>
             </View>
           </View>

@@ -237,17 +237,17 @@ export default function ResourcesScreen() {
 
         {/* Login As Mentor Card - For Mentorship Leaders Only */}
         {isMentorshipLeader && !isImpersonating && (
-          <View className="bg-purple-50 border border-purple-200 rounded-xl p-5 mb-4">
+          <View className="bg-[#fcc85c]/20 border border-[#fcc85c]/30 rounded-xl p-5 mb-4">
             <View className="flex-row items-center mb-3">
-              <Ionicons name="person-circle" size={24} color="#9333EA" />
-              <Text className="text-lg font-bold text-purple-900 ml-2">Login As Mentor</Text>
+              <Ionicons name="person-circle" size={24} color="#fcc85c" />
+              <Text className="text-lg font-bold text-[#d4a849] ml-2">Login As Mentor</Text>
             </View>
-            <Text className="text-sm text-purple-700 mb-4">
+            <Text className="text-sm text-[#99896c] mb-4">
               View the app from any mentor{"'"}s perspective to help troubleshoot issues or provide guidance.
             </Text>
             <Pressable
               onPress={() => setShowMentorModal(true)}
-              className="bg-purple-600 rounded-lg py-3 flex-row items-center justify-center active:opacity-80"
+              className="bg-[#fcc85c] rounded-lg py-3 flex-row items-center justify-center active:opacity-80"
             >
               <Ionicons name="log-in" size={18} color="white" />
               <Text className="text-white text-sm font-semibold ml-2">Select Mentor</Text>
