@@ -28,7 +28,16 @@ export default function MentorDashboardScreen() {
     return Math.floor(diffMs / (1000 * 60 * 60 * 24));
   };
 
-  const needsInitialContact = participants.filter((p) => p.status === "initial_contact_pending" || p.status === "mentor_attempted" || p.status === "mentor_unable");
+  // Include all participants that need initial contact, regardless of their status
+  // This handles edge cases where participants were assigned but status wasn't updated
+  const needsInitialContact = participants.filter((p) =>
+    p.status === "initial_contact_pending" ||
+    p.status === "mentor_attempted" ||
+    p.status === "mentor_unable" ||
+    p.status === "bridge_attempted" ||  // Include bridge_attempted if assigned to mentor
+    p.status === "bridge_unable" ||     // Include bridge_unable if assigned to mentor
+    (p.status === "assigned_mentor" && !p.initialContactCompletedAt)  // Include assigned_mentor without initial contact
+  );
   const activeParticipants = participants.filter((p) => p.status === "active_mentorship");
 
   // Check for participants with updates due or overdue
@@ -56,8 +65,8 @@ export default function MentorDashboardScreen() {
       new Date(participant.nextMonthlyReportDue) <= new Date();
 
     const isActive = participant.status === "active_mentorship";
-    const isAttempted = participant.status === "mentor_attempted";
-    const isUnable = participant.status === "mentor_unable";
+    const isAttempted = participant.status === "mentor_attempted" || participant.status === "bridge_attempted";
+    const isUnable = participant.status === "mentor_unable" || participant.status === "bridge_unable";
 
     return (
       <Pressable
