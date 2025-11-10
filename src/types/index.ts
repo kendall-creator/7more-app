@@ -477,6 +477,21 @@ export interface FinancialData {
   difference: number; // auto-calculated
 }
 
+// Social Media Metrics
+export interface SocialMediaMetrics {
+  reels: number | null;
+  postViews: number | null;
+  viewsFromNonFollowers: number | null;
+  followers: number | null;
+  followersGained: number | null; // Can be positive or negative
+}
+
+// Win or Concern entry with title and body
+export interface WinConcernEntry {
+  title: string;
+  body: string;
+}
+
 export interface MonthlyReport {
   id: string;
   month: number; // 1-12
@@ -497,9 +512,12 @@ export interface MonthlyReport {
   // 5. Financials
   financialData: FinancialData;
 
-  // 6. Wins & Concerns (Admin Notes)
-  winsForMonth: string;
-  concernsForMonth: string;
+  // 6. Social Media
+  socialMediaMetrics: SocialMediaMetrics;
+
+  // 7. Wins & Concerns (Admin Notes) - up to 5 each
+  wins: WinConcernEntry[]; // Max 5 entries
+  concerns: WinConcernEntry[]; // Max 5 entries
 
   createdBy: string;
   createdByName: string;

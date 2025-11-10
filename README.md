@@ -865,14 +865,14 @@ To enable automatic welcome and password reset emails:
   - Save each category independently
 
 - **By Category View:**
-  - Category Selection - Choose from Releasees, Calls, Donors, or Financials
+  - Category Selection - Choose from Releasees, Calls, Donors, Financials, or Social Media
   - Year Selection - Pick any year to view/edit all 12 months
   - Grid layout shows all months for the selected category
   - Enter data for each month in a compact 3-column grid (Jan, Feb, Mar, etc.)
   - Data auto-saves as you type for each field
   - Perfect for bulk data entry when you have annual reports to input
 
-- Six Reporting Categories with manual data entry:
+- Seven Reporting Categories with manual data entry:
 
 1. **Releasees Met (Manual Input)**
    - Pam Lychner - count of releasees
@@ -909,9 +909,21 @@ To enable automatic welcome and password reset emails:
    - Ending Balance (Month End) - dollar amount
    - Difference - auto-calculated (Ending - Beginning) with commas
 
-6. **Wins & Concerns (Admin Notes Only)**
-   - Wins for the Month - free-text field for admin notes
-   - Concerns for the Month - free-text field for admin notes
+6. **Social Media Metrics (Manual Input)**
+   - Reels - number of reels posted
+   - Post Views - total views across all posts
+   - Views from Non-Followers - views from users who don't follow the account
+   - Total Followers - current follower count
+   - Followers Gained (+/-) - net change in followers (positive for gains, negative for losses)
+
+7. **Wins & Concerns (Admin Notes Only)**
+   - **Wins** - Up to 5 structured entries, each with:
+     - Title (e.g., "Record Donations")
+     - Body/Description (detailed information)
+   - **Concerns** - Up to 5 structured entries, each with:
+     - Title (e.g., "Funding Shortfall")
+     - Body/Description (detailed information)
+   - All entries are optional
    - Only visible and editable by admins
 
 **Report Features:**

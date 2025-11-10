@@ -21,7 +21,7 @@ import { formatNumber, formatCurrency, formatPercentage } from "../utils/formatN
 export default function ManageReportingScreen() {
   const navigation = useNavigation<any>();
   const currentUser = useCurrentUser();
-  const { monthlyReports, createMonthlyReport, updateMonthlyReport, calculateMentorshipMetrics, updateReleaseFacilityCounts, updateCallMetrics, updateDonorData, updateFinancialData, updateWinsAndConcerns } = useReportingStore();
+  const { monthlyReports, createMonthlyReport, updateMonthlyReport, calculateMentorshipMetrics, updateReleaseFacilityCounts, updateCallMetrics, updateDonorData, updateFinancialData, updateSocialMediaMetrics, updateWinsAndConcerns } = useReportingStore();
   const participants = useParticipantStore((s) => s.participants);
 
   // View mode: "month" or "category"
@@ -33,7 +33,7 @@ export default function ManageReportingScreen() {
   const [showMonthPicker, setShowMonthPicker] = useState(false);
 
   // For category view
-  const [selectedCategory, setSelectedCategory] = useState<"releasees" | "calls" | "donors" | "financials">("releasees");
+  const [selectedCategory, setSelectedCategory] = useState<"releasees" | "calls" | "donors" | "financials" | "social_media">("releasees");
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
 
   // Current report (for month view)
@@ -71,9 +71,16 @@ export default function ManageReportingScreen() {
   const [beginningBalance, setBeginningBalance] = useState("");
   const [endingBalance, setEndingBalance] = useState("");
 
-  // Wins & Concerns
-  const [winsText, setWinsText] = useState("");
-  const [concernsText, setConcernsText] = useState("");
+  // Social Media Data
+  const [reels, setReels] = useState("");
+  const [postViews, setPostViews] = useState("");
+  const [viewsFromNonFollowers, setViewsFromNonFollowers] = useState("");
+  const [followers, setFollowers] = useState("");
+  const [followersGained, setFollowersGained] = useState("");
+
+  // Wins & Concerns - Array of up to 5 entries each
+  const [wins, setWins] = useState<{ title: string; body: string }[]>([]);
+  const [concerns, setConcerns] = useState<{ title: string; body: string }[]>([]);
 
   const months = [
     "January", "February", "March", "April", "May", "June",
@@ -124,8 +131,17 @@ export default function ManageReportingScreen() {
     setTotalFromChecks(report.donorData.totalFromChecks !== null ? report.donorData.totalFromChecks.toString() : "");
     setBeginningBalance(report.financialData.beginningBalance !== null ? report.financialData.beginningBalance.toString() : "");
     setEndingBalance(report.financialData.endingBalance !== null ? report.financialData.endingBalance.toString() : "");
-    setWinsText(report.winsForMonth);
-    setConcernsText(report.concernsForMonth);
+
+    // Populate social media fields
+    setReels(report.socialMediaMetrics?.reels !== null && report.socialMediaMetrics?.reels !== undefined ? report.socialMediaMetrics.reels.toString() : "");
+    setPostViews(report.socialMediaMetrics?.postViews !== null && report.socialMediaMetrics?.postViews !== undefined ? report.socialMediaMetrics.postViews.toString() : "");
+    setViewsFromNonFollowers(report.socialMediaMetrics?.viewsFromNonFollowers !== null && report.socialMediaMetrics?.viewsFromNonFollowers !== undefined ? report.socialMediaMetrics.viewsFromNonFollowers.toString() : "");
+    setFollowers(report.socialMediaMetrics?.followers !== null && report.socialMediaMetrics?.followers !== undefined ? report.socialMediaMetrics.followers.toString() : "");
+    setFollowersGained(report.socialMediaMetrics?.followersGained !== null && report.socialMediaMetrics?.followersGained !== undefined ? report.socialMediaMetrics.followersGained.toString() : "");
+
+    // Populate wins and concerns arrays
+    setWins(report.wins || []);
+    setConcerns(report.concerns || []);
   };
 
   const loadYearReports = async () => {
@@ -254,10 +270,24 @@ export default function ManageReportingScreen() {
     Alert.alert("Success", "Financial data saved");
   };
 
+  const handleSaveSocialMediaMetrics = async () => {
+    if (!currentReport) return;
+
+    await updateSocialMediaMetrics(currentReport.id, {
+      reels: reels === "" ? null : parseInt(reels) || null,
+      postViews: postViews === "" ? null : parseInt(postViews) || null,
+      viewsFromNonFollowers: viewsFromNonFollowers === "" ? null : parseInt(viewsFromNonFollowers) || null,
+      followers: followers === "" ? null : parseInt(followers) || null,
+      followersGained: followersGained === "" ? null : parseInt(followersGained) || null,
+    });
+
+    Alert.alert("Success", "Social media metrics saved");
+  };
+
   const handleSaveWinsAndConcerns = async () => {
     if (!currentReport) return;
 
-    await updateWinsAndConcerns(currentReport.id, winsText, concernsText);
+    await updateWinsAndConcerns(currentReport.id, wins, concerns);
 
     Alert.alert("Success", "Wins and concerns saved");
   };
@@ -793,45 +823,168 @@ export default function ManageReportingScreen() {
                 </View>
               </View>
 
-              {/* 6. Wins & Concerns (Admin Only) */}
-              {isAdmin && (
-                <View className="bg-white rounded-lg p-4 mb-4 border border-gray-200">
-                  <Text className="text-lg font-bold text-gray-900 mb-3">6. Wins & Concerns (Admin Notes)</Text>
+              {/* 6. Social Media Metrics */}
+              <View className="bg-white rounded-lg p-4 mb-4 border border-gray-200">
+                <Text className="text-lg font-bold text-gray-900 mb-3">6. Social Media Metrics</Text>
 
-                  <View className="space-y-3">
-                    <View>
-                      <Text className="text-gray-700 mb-1">Wins for the Month</Text>
-                      <TextInput
-                        className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-300"
-                        value={winsText}
-                        onChangeText={setWinsText}
-                        placeholder="Describe wins and accomplishments..."
-                        multiline
-                        numberOfLines={4}
-                        textAlignVertical="top"
-                      />
-                    </View>
+                <View className="space-y-3">
+                  <View>
+                    <Text className="text-gray-700 mb-1">Reels</Text>
+                    <TextInput
+                      className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-300"
+                      value={reels}
+                      onChangeText={setReels}
+                      placeholder="Number of reels"
+                      keyboardType="number-pad"
+                      editable={canEdit}
+                    />
+                  </View>
 
-                    <View>
-                      <Text className="text-gray-700 mb-1">Concerns for the Month</Text>
-                      <TextInput
-                        className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-300"
-                        value={concernsText}
-                        onChangeText={setConcernsText}
-                        placeholder="Describe concerns and challenges..."
-                        multiline
-                        numberOfLines={4}
-                        textAlignVertical="top"
-                      />
-                    </View>
+                  <View>
+                    <Text className="text-gray-700 mb-1">Post Views</Text>
+                    <TextInput
+                      className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-300"
+                      value={postViews}
+                      onChangeText={setPostViews}
+                      placeholder="Total post views"
+                      keyboardType="number-pad"
+                      editable={canEdit}
+                    />
+                  </View>
 
+                  <View>
+                    <Text className="text-gray-700 mb-1">Views from Non-Followers</Text>
+                    <TextInput
+                      className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-300"
+                      value={viewsFromNonFollowers}
+                      onChangeText={setViewsFromNonFollowers}
+                      placeholder="Views from non-followers"
+                      keyboardType="number-pad"
+                      editable={canEdit}
+                    />
+                  </View>
+
+                  <View>
+                    <Text className="text-gray-700 mb-1">Total Followers</Text>
+                    <TextInput
+                      className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-300"
+                      value={followers}
+                      onChangeText={setFollowers}
+                      placeholder="Current follower count"
+                      keyboardType="number-pad"
+                      editable={canEdit}
+                    />
+                  </View>
+
+                  <View>
+                    <Text className="text-gray-700 mb-1">Followers Gained (+/-)</Text>
+                    <TextInput
+                      className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-300"
+                      value={followersGained}
+                      onChangeText={setFollowersGained}
+                      placeholder="Enter positive or negative number"
+                      keyboardType="numeric"
+                      editable={canEdit}
+                    />
+                    <Text className="text-xs text-gray-500 mt-1">Use positive numbers for gains, negative for losses (e.g., +50 or -20)</Text>
+                  </View>
+
+                  {canEdit && (
                     <Pressable
                       className="bg-indigo-600 px-4 py-3 rounded-lg mt-2"
-                      onPress={handleSaveWinsAndConcerns}
+                      onPress={handleSaveSocialMediaMetrics}
                     >
-                      <Text className="text-white text-center font-semibold">Save Wins & Concerns</Text>
+                      <Text className="text-white text-center font-semibold">Save Social Media Metrics</Text>
                     </Pressable>
+                  )}
+                </View>
+              </View>
+
+              {/* 7. Wins & Concerns (Admin Only) */}
+              {isAdmin && (
+                <View className="bg-white rounded-lg p-4 mb-4 border border-gray-200">
+                  <Text className="text-lg font-bold text-gray-900 mb-3">7. Wins & Concerns</Text>
+
+                  {/* Wins Section */}
+                  <View className="mb-6">
+                    <Text className="text-base font-semibold text-gray-900 mb-2">Wins (up to 5)</Text>
+                    {[0, 1, 2, 3, 4].map((index) => (
+                      <View key={`win-${index}`} className="mb-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                        <Text className="text-xs text-gray-600 mb-2">Win #{index + 1} (Optional)</Text>
+                        <TextInput
+                          className="bg-white px-3 py-2 rounded-lg border border-gray-300 mb-2"
+                          value={wins[index]?.title || ""}
+                          onChangeText={(text) => {
+                            const newWins = [...wins];
+                            if (!newWins[index]) newWins[index] = { title: "", body: "" };
+                            newWins[index].title = text;
+                            setWins(newWins);
+                          }}
+                          placeholder="Title (e.g., Record Donations)"
+                          editable={canEdit}
+                        />
+                        <TextInput
+                          className="bg-white px-3 py-2 rounded-lg border border-gray-300"
+                          value={wins[index]?.body || ""}
+                          onChangeText={(text) => {
+                            const newWins = [...wins];
+                            if (!newWins[index]) newWins[index] = { title: "", body: "" };
+                            newWins[index].body = text;
+                            setWins(newWins);
+                          }}
+                          placeholder="Description..."
+                          multiline
+                          numberOfLines={3}
+                          textAlignVertical="top"
+                          editable={canEdit}
+                        />
+                      </View>
+                    ))}
                   </View>
+
+                  {/* Concerns Section */}
+                  <View className="mb-4">
+                    <Text className="text-base font-semibold text-gray-900 mb-2">Concerns (up to 5)</Text>
+                    {[0, 1, 2, 3, 4].map((index) => (
+                      <View key={`concern-${index}`} className="mb-4 p-3 bg-red-50 rounded-lg border border-red-200">
+                        <Text className="text-xs text-gray-600 mb-2">Concern #{index + 1} (Optional)</Text>
+                        <TextInput
+                          className="bg-white px-3 py-2 rounded-lg border border-gray-300 mb-2"
+                          value={concerns[index]?.title || ""}
+                          onChangeText={(text) => {
+                            const newConcerns = [...concerns];
+                            if (!newConcerns[index]) newConcerns[index] = { title: "", body: "" };
+                            newConcerns[index].title = text;
+                            setConcerns(newConcerns);
+                          }}
+                          placeholder="Title (e.g., Funding Shortfall)"
+                          editable={canEdit}
+                        />
+                        <TextInput
+                          className="bg-white px-3 py-2 rounded-lg border border-gray-300"
+                          value={concerns[index]?.body || ""}
+                          onChangeText={(text) => {
+                            const newConcerns = [...concerns];
+                            if (!newConcerns[index]) newConcerns[index] = { title: "", body: "" };
+                            newConcerns[index].body = text;
+                            setConcerns(newConcerns);
+                          }}
+                          placeholder="Description..."
+                          multiline
+                          numberOfLines={3}
+                          textAlignVertical="top"
+                          editable={canEdit}
+                        />
+                      </View>
+                    ))}
+                  </View>
+
+                  <Pressable
+                    className="bg-indigo-600 px-4 py-3 rounded-lg mt-2"
+                    onPress={handleSaveWinsAndConcerns}
+                  >
+                    <Text className="text-white text-center font-semibold">Save Wins & Concerns</Text>
+                  </Pressable>
                 </View>
               )}
             </>

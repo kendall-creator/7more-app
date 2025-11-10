@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { ref, set as firebaseSet, onValue, update as firebaseUpdate, remove } from "firebase/database";
 import { database } from "../config/firebase";
-import { MonthlyReport, ReleaseFacilityCount, CallMetrics, MentorshipMetrics, DonorData, FinancialData } from "../types";
+import { MonthlyReport, ReleaseFacilityCount, CallMetrics, MentorshipMetrics, DonorData, FinancialData, SocialMediaMetrics, WinConcernEntry } from "../types";
 import { useParticipantStore } from "./participantStore";
 
 interface ReportingState {
@@ -19,7 +19,8 @@ interface ReportingActions {
   updateCallMetrics: (reportId: string, callMetrics: CallMetrics) => Promise<void>;
   updateDonorData: (reportId: string, donorData: DonorData) => Promise<void>;
   updateFinancialData: (reportId: string, beginningBalance: number | null, endingBalance: number | null) => Promise<void>;
-  updateWinsAndConcerns: (reportId: string, wins: string, concerns: string) => Promise<void>;
+  updateSocialMediaMetrics: (reportId: string, socialMediaMetrics: SocialMediaMetrics) => Promise<void>;
+  updateWinsAndConcerns: (reportId: string, wins: WinConcernEntry[], concerns: WinConcernEntry[]) => Promise<void>;
 }
 
 type ReportingStore = ReportingState & ReportingActions;
@@ -95,8 +96,15 @@ export const useReportingStore = create<ReportingStore>()((set, get) => ({
         endingBalance: null,
         difference: 0,
       },
-      winsForMonth: "",
-      concernsForMonth: "",
+      socialMediaMetrics: {
+        reels: null,
+        postViews: null,
+        viewsFromNonFollowers: null,
+        followers: null,
+        followersGained: null,
+      },
+      wins: [],
+      concerns: [],
       createdBy,
       createdByName,
       createdAt: new Date().toISOString(),
@@ -196,14 +204,24 @@ export const useReportingStore = create<ReportingStore>()((set, get) => ({
     });
   },
 
+  updateSocialMediaMetrics: async (reportId, socialMediaMetrics) => {
+    if (!database) {
+      throw new Error("Firebase not configured. Please add Firebase credentials in ENV tab.");
+    }
+
+    await get().updateMonthlyReport(reportId, {
+      socialMediaMetrics,
+    });
+  },
+
   updateWinsAndConcerns: async (reportId, wins, concerns) => {
     if (!database) {
       throw new Error("Firebase not configured. Please add Firebase credentials in ENV tab.");
     }
 
     await get().updateMonthlyReport(reportId, {
-      winsForMonth: wins,
-      concernsForMonth: concerns,
+      wins,
+      concerns,
     });
   },
 }));
