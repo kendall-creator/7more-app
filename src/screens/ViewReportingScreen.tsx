@@ -14,7 +14,7 @@ import { formatNumber, formatCurrency, formatPercentage } from "../utils/formatN
 
 type ViewMode = "single" | "range";
 type AggregationType = "total" | "average";
-type CategoryFilter = "all" | "releasees" | "calls" | "mentorship" | "donors" | "financials";
+type CategoryFilter = "all" | "releasees" | "calls" | "mentorship" | "donors" | "financials" | "social_media";
 
 export default function ViewReportingScreen() {
   const navigation = useNavigation<any>();
@@ -126,6 +126,16 @@ export default function ViewReportingScreen() {
       endingBalance = reportsInRange.reduce((sum, r) => sum + (r.financialData?.endingBalance || 0), 0);
     }
 
+    // Social Media Metrics
+    const reelsPostViews = reportsInRange.reduce((sum, r) => sum + (r.socialMediaMetrics?.reelsPostViews || 0), 0) / divisor;
+    const viewsFromNonFollowers = reportsInRange.reduce((sum, r) => sum + (r.socialMediaMetrics?.viewsFromNonFollowers || 0), 0) / divisor;
+
+    // For followers, use the latest month's value (not averaged)
+    const followers = reportsInRange[reportsInRange.length - 1]?.socialMediaMetrics?.followers || 0;
+
+    // Followers gained - sum across all months
+    const followersGained = reportsInRange.reduce((sum, r) => sum + (r.socialMediaMetrics?.followersGained || 0), 0) / divisor;
+
     return {
       releasees: {
         total: totalReleasees,
@@ -155,6 +165,12 @@ export default function ViewReportingScreen() {
         endingBalance,
         difference: endingBalance - beginningBalance,
       },
+      socialMedia: {
+        reelsPostViews,
+        viewsFromNonFollowers,
+        followers,
+        followersGained,
+      },
     };
   }, [reportsInRange, aggregationType]);
 
@@ -181,6 +197,9 @@ export default function ViewReportingScreen() {
     } else if (field.startsWith("financialData.")) {
       const finField = field.split(".")[1] as keyof typeof prevReport.financialData;
       prevValue = prevReport.financialData?.[finField] || 0;
+    } else if (field.startsWith("socialMediaMetrics.")) {
+      const socialField = field.split(".")[1] as keyof typeof prevReport.socialMediaMetrics;
+      prevValue = prevReport.socialMediaMetrics?.[socialField] || 0;
     }
 
     const diff = currentValue - prevValue;
@@ -300,6 +319,25 @@ export default function ViewReportingScreen() {
               <Text className="text-2xl font-bold text-indigo-900">
                 {formatCurrency((report.financialData.endingBalance ?? 0) - (report.financialData.beginningBalance ?? 0))}
               </Text>
+            </View>
+          </View>
+        )}
+
+        {/* Social Media */}
+        {(categoryFilter === "all" || categoryFilter === "social_media") && report.socialMediaMetrics && (
+          <View className="bg-white rounded-lg p-4 mb-4 mx-4 border border-gray-200">
+            <Text className="text-lg font-bold text-gray-900 mb-3">Social Media</Text>
+            {renderMetricRow("Reels/Post Views", report.socialMediaMetrics.reelsPostViews ?? 0, "socialMediaMetrics.reelsPostViews", report)}
+            {renderMetricRow("Views from Non-Followers", report.socialMediaMetrics.viewsFromNonFollowers ?? 0, "socialMediaMetrics.viewsFromNonFollowers", report, false, true)}
+            {renderMetricRow("Total Followers", report.socialMediaMetrics.followers ?? 0, "socialMediaMetrics.followers", report)}
+            <View className="flex-row justify-between items-center py-2 border-b border-gray-100">
+              <Text className="text-gray-700 flex-1">Followers Gained</Text>
+              <View className="flex-row items-center">
+                <Text className={`font-semibold ${(report.socialMediaMetrics.followersGained ?? 0) >= 0 ? "text-green-600" : "text-red-600"}`}>
+                  {(report.socialMediaMetrics.followersGained ?? 0) >= 0 ? "+" : ""}{formatNumber(report.socialMediaMetrics.followersGained ?? 0)}
+                </Text>
+                {viewMode === "single" && <ComparisonIndicator value={report.socialMediaMetrics.followersGained ?? 0} field="socialMediaMetrics.followersGained" report={report} />}
+              </View>
             </View>
           </View>
         )}
@@ -440,6 +478,31 @@ export default function ViewReportingScreen() {
           </View>
         )}
 
+        {/* Social Media */}
+        {(categoryFilter === "all" || categoryFilter === "social_media") && (
+          <View className="bg-white rounded-lg p-4 mb-4 mx-4 border border-gray-200">
+            <Text className="text-lg font-bold text-gray-900 mb-3">Social Media</Text>
+            <View className="flex-row justify-between py-2 border-b border-gray-100">
+              <Text className="text-gray-700">Reels/Post Views</Text>
+              <Text className="text-gray-900 font-semibold">{formatNumber(aggregatedMetrics.socialMedia.reelsPostViews)}</Text>
+            </View>
+            <View className="flex-row justify-between py-2 border-b border-gray-100">
+              <Text className="text-gray-700">Views from Non-Followers</Text>
+              <Text className="text-gray-900 font-semibold">{formatPercentage(aggregatedMetrics.socialMedia.viewsFromNonFollowers)}</Text>
+            </View>
+            <View className="flex-row justify-between py-2 border-b border-gray-100">
+              <Text className="text-gray-700">Total Followers</Text>
+              <Text className="text-gray-900 font-semibold">{formatNumber(aggregatedMetrics.socialMedia.followers)}</Text>
+            </View>
+            <View className="flex-row justify-between py-2">
+              <Text className="text-gray-700">Followers Gained</Text>
+              <Text className={`font-semibold ${aggregatedMetrics.socialMedia.followersGained >= 0 ? "text-green-600" : "text-red-600"}`}>
+                {aggregatedMetrics.socialMedia.followersGained >= 0 ? "+" : ""}{formatNumber(aggregatedMetrics.socialMedia.followersGained)}
+              </Text>
+            </View>
+          </View>
+        )}
+
         <View className="h-20" />
       </ScrollView>
     );
@@ -533,6 +596,7 @@ export default function ViewReportingScreen() {
             { key: "mentorship", label: "Mentorship" },
             { key: "donors", label: "Donors" },
             { key: "financials", label: "Financials" },
+            { key: "social_media", label: "Social Media" },
           ].map(cat => (
             <Pressable
               key={cat.key}

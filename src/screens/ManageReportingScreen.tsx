@@ -349,18 +349,40 @@ export default function ManageReportingScreen() {
 
     // Determine which category and update accordingly
     if (selectedCategory === "releasees") {
+      const currentCounts = report.releaseFacilityCounts || {
+        pamLychner: null,
+        huntsville: null,
+        planeStateJail: null,
+        havinsUnit: null,
+        clemensUnit: null,
+        other: null,
+      };
       await updateReleaseFacilityCounts(report.id, {
-        ...report.releaseFacilityCounts,
+        ...currentCounts,
         [field]: numValue,
       });
     } else if (selectedCategory === "calls") {
+      const currentMetrics = report.callMetrics || {
+        inbound: null,
+        outbound: null,
+        missedCallsPercent: null,
+        hungUpPriorToWelcome: null,
+        hungUpWithin10Seconds: null,
+        missedDueToNoAnswer: null,
+      };
       await updateCallMetrics(report.id, {
-        ...report.callMetrics,
+        ...currentMetrics,
         [field]: numValue,
       });
     } else if (selectedCategory === "donors") {
+      const currentData = report.donorData || {
+        newDonors: null,
+        amountFromNewDonors: null,
+        checks: null,
+        totalFromChecks: null,
+      };
       await updateDonorData(report.id, {
-        ...report.donorData,
+        ...currentData,
         [field]: numValue,
       });
     } else if (selectedCategory === "financials") {
@@ -370,8 +392,14 @@ export default function ManageReportingScreen() {
         field === "endingBalance" ? numValue : report.financialData.endingBalance
       );
     } else if (selectedCategory === "social_media") {
+      const currentMetrics = report.socialMediaMetrics || {
+        reelsPostViews: null,
+        viewsFromNonFollowers: null,
+        followers: null,
+        followersGained: null,
+      };
       await updateSocialMediaMetrics(report.id, {
-        ...report.socialMediaMetrics,
+        ...currentMetrics,
         [field]: numValue,
       });
     }
