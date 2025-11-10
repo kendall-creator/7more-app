@@ -386,59 +386,95 @@ export default function AdminHomepageScreen() {
                   <Text className="text-xs text-[#99896c]">No shifts scheduled</Text>
                 </View>
               ) : (
-                day.shifts.map((shift) => (
-                  <View
-                    key={shift.id}
-                    className={`${
-                      shift.assignedUserId || (shift.assignedUsers && shift.assignedUsers.length > 0)
-                        ? "bg-green-50 border-green-200"
-                        : "bg-red-50 border-red-200"
-                    } border rounded-xl p-3 mb-2`}
-                  >
-                    <View className="flex-row items-center justify-between">
-                      <View className="flex-1">
-                        <Text className="text-sm font-semibold text-[#3c3832]">
-                          {shift.startTime} - {shift.endTime}
-                        </Text>
-                        {shift.assignedUserId ? (
-                          <View className="flex-row items-center mt-1">
-                            <Ionicons
-                              name="checkmark-circle"
-                              size={14}
-                              color="#22c55e"
-                            />
-                            <Text className="text-xs text-green-700 ml-1 font-medium">
-                              Covered by {shift.assignedUserName}
-                            </Text>
-                          </View>
-                        ) : shift.assignedUsers && shift.assignedUsers.length > 0 ? (
-                          <View className="mt-1">
-                            <View className="flex-row items-center">
+                day.shifts.map((shift) => {
+                  // If this is a holiday/placeholder, show special styling
+                  if (shift.holiday) {
+                    return (
+                      <View
+                        key={shift.id}
+                        className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-2"
+                      >
+                        <View className="flex-row items-center">
+                          <Ionicons name="calendar" size={16} color="#3b82f6" />
+                          <Text className="text-sm font-semibold text-blue-900 ml-2">
+                            {shift.holiday}
+                          </Text>
+                        </View>
+                        {shift.description && (
+                          <Text className="text-xs text-blue-700 mt-1">
+                            {shift.description}
+                          </Text>
+                        )}
+                      </View>
+                    );
+                  }
+
+                  // Regular shift display
+                  return (
+                    <View
+                      key={shift.id}
+                      className={`${
+                        shift.assignedUserId || (shift.assignedUsers && shift.assignedUsers.length > 0) || shift.assignedToSupportNetwork
+                          ? "bg-green-50 border-green-200"
+                          : "bg-red-50 border-red-200"
+                      } border rounded-xl p-3 mb-2`}
+                    >
+                      <View className="flex-row items-center justify-between">
+                        <View className="flex-1">
+                          <Text className="text-sm font-semibold text-[#3c3832]">
+                            {shift.startTime} - {shift.endTime}
+                          </Text>
+                          {shift.assignedUserId ? (
+                            <View className="flex-row items-center mt-1">
                               <Ionicons
                                 name="checkmark-circle"
                                 size={14}
                                 color="#22c55e"
                               />
                               <Text className="text-xs text-green-700 ml-1 font-medium">
-                                Covered by {shift.assignedUsers.length} volunteer{shift.assignedUsers.length > 1 ? "s" : ""}
+                                Covered by {shift.assignedUserName}
                               </Text>
                             </View>
-                            <Text className="text-xs text-green-600 ml-5 mt-0.5">
-                              {shift.assignedUsers.map((u) => u.userName).join(", ")}
-                            </Text>
-                          </View>
-                        ) : (
-                          <View className="flex-row items-center mt-1">
-                            <Ionicons name="alert-circle" size={14} color="#ef4444" />
-                            <Text className="text-xs text-red-700 ml-1 font-medium">
-                              Not covered
-                            </Text>
-                          </View>
-                        )}
+                          ) : shift.assignedToSupportNetwork ? (
+                            <View className="flex-row items-center mt-1">
+                              <Ionicons
+                                name="people"
+                                size={14}
+                                color="#22c55e"
+                              />
+                              <Text className="text-xs text-green-700 ml-1 font-medium">
+                                Support Network: {shift.assignedToSupportNetwork}
+                              </Text>
+                            </View>
+                          ) : shift.assignedUsers && shift.assignedUsers.length > 0 ? (
+                            <View className="mt-1">
+                              <View className="flex-row items-center">
+                                <Ionicons
+                                  name="checkmark-circle"
+                                  size={14}
+                                  color="#22c55e"
+                                />
+                                <Text className="text-xs text-green-700 ml-1 font-medium">
+                                  Covered by {shift.assignedUsers.length} volunteer{shift.assignedUsers.length > 1 ? "s" : ""}
+                                </Text>
+                              </View>
+                              <Text className="text-xs text-green-600 ml-5 mt-0.5">
+                                {shift.assignedUsers.map((u) => u.userName).join(", ")}
+                              </Text>
+                            </View>
+                          ) : (
+                            <View className="flex-row items-center mt-1">
+                              <Ionicons name="alert-circle" size={14} color="#ef4444" />
+                              <Text className="text-xs text-red-700 ml-1 font-medium">
+                                Not covered
+                              </Text>
+                            </View>
+                          )}
+                        </View>
                       </View>
                     </View>
-                  </View>
-                ))
+                  );
+                })
               )}
             </View>
           ))}

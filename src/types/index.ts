@@ -301,12 +301,14 @@ export interface Shift {
   title: string;
   description?: string;
   location?: ShiftLocation; // Facility location
+  holiday?: string; // Holiday/placeholder reason (e.g., "Christmas Day", "Facility Closed")
   date: string; // ISO date string
   startTime: string; // Time string like "09:00"
   endTime: string; // Time string like "17:00"
   allowedRoles: UserRole[]; // Who can sign up for this shift
   assignedUserId?: string; // User ID of who signed up
   assignedUserName?: string; // Name of who signed up
+  assignedToSupportNetwork?: string; // Name of support network member (non-user)
   createdBy: string; // Admin user ID
   createdByName: string;
   createdAt: string; // ISO timestamp

@@ -49,6 +49,7 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState<ShiftLocation | "">("");
+  const [holiday, setHoliday] = useState("");
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
@@ -109,6 +110,7 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
     setTitle("");
     setDescription("");
     setLocation("");
+    setHoliday("");
     setDate("");
     setStartTime("");
     setEndTime("");
@@ -187,6 +189,7 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
     setTitle(shift.title);
     setDescription(shift.description || "");
     setLocation(shift.location || "");
+    setHoliday(shift.holiday || "");
     setDate(shift.date);
     setStartTime(shift.startTime);
     setEndTime(shift.endTime);
@@ -346,6 +349,7 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
       title,
       description,
       location: location as ShiftLocation,
+      holiday,
       date,
       startTime,
       endTime,
@@ -695,6 +699,18 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
                 numberOfLines={3}
                 textAlignVertical="top"
               />
+
+              {/* Holiday Placeholder (Optional) */}
+              <Text className="text-sm font-semibold text-gray-700 mb-2">Holiday/Placeholder (Optional)</Text>
+              <TextInput
+                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-base mb-4"
+                placeholder="e.g., Christmas Day, Facility Closed"
+                value={holiday}
+                onChangeText={setHoliday}
+              />
+              <Text className="text-xs text-gray-500 mb-4">
+                Use this to mark days when no regular shifts are needed (holidays, closures, etc.)
+              </Text>
 
               {/* Location Selector */}
               <Text className="text-sm font-semibold text-gray-700 mb-2">
@@ -1086,6 +1102,18 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
                 numberOfLines={3}
                 textAlignVertical="top"
               />
+
+              {/* Holiday Placeholder (Optional) */}
+              <Text className="text-sm font-semibold text-gray-700 mb-2">Holiday/Placeholder (Optional)</Text>
+              <TextInput
+                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-base mb-4"
+                placeholder="e.g., Christmas Day, Facility Closed"
+                value={holiday}
+                onChangeText={setHoliday}
+              />
+              <Text className="text-xs text-gray-500 mb-4">
+                Use this to mark days when no regular shifts are needed (holidays, closures, etc.)
+              </Text>
 
               {/* Location Selector */}
               <Text className="text-sm font-semibold text-gray-700 mb-2">
