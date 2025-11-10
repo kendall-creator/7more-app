@@ -206,7 +206,7 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
       <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 20 }}>
         {/* Quick Actions - Show for Admins or relevant role */}
         {(userRole === "admin" ||
-          (userRole === "bridge_team" && ["pending_bridge", "bridge_contacted", "bridge_attempted"].includes(participant.status)) ||
+          (userRole === "bridge_team" && ["pending_bridge", "bridge_contacted", "bridge_attempted", "bridge_unable"].includes(participant.status)) ||
           (userRole === "mentorship_leader" && ["pending_mentor", "assigned_mentor"].includes(participant.status)) ||
           (userRole === "mentor" && ["initial_contact_pending", "active_mentorship"].includes(participant.status))
         ) && (
@@ -215,7 +215,7 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
 
             {/* Bridge Team Actions */}
             {(userRole === "admin" || userRole === "bridge_team") &&
-             ["pending_bridge", "bridge_contacted", "bridge_attempted"].includes(participant.status) && (
+             ["pending_bridge", "bridge_contacted", "bridge_attempted", "bridge_unable"].includes(participant.status) && (
               <View className="gap-2">
                 <View className="flex-row gap-2">
                   <Pressable
@@ -260,6 +260,46 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
                     <Text className="text-gray-700 text-sm font-semibold mt-1">Unable to Contact</Text>
                   </Pressable>
                 </View>
+
+                {/* Move back to Pending button - only show for attempted or unable */}
+                {["bridge_attempted", "bridge_unable"].includes(participant.status) && (
+                  <Pressable
+                    onPress={() => {
+                      Alert.alert(
+                        "Move to Pending",
+                        "Move this participant back to Pending Bridge for another contact attempt?",
+                        [
+                          { text: "Cancel", style: "cancel" },
+                          {
+                            text: "Move to Pending",
+                            style: "default",
+                            onPress: async () => {
+                              try {
+                                await updateParticipantStatus(
+                                  participant.id,
+                                  "pending_bridge",
+                                  currentUser.id,
+                                  currentUser.name,
+                                  "Moved back to Pending Bridge for another contact attempt"
+                                );
+                                Alert.alert("Success", "Participant moved back to Pending Bridge");
+                              } catch (error) {
+                                console.error("Error moving participant:", error);
+                                Alert.alert("Error", "Failed to move participant. Please try again.");
+                              }
+                            },
+                          },
+                        ]
+                      );
+                    }}
+                    className="bg-blue-50 border border-blue-200 rounded-xl py-3 items-center active:opacity-70"
+                  >
+                    <View className="flex-row items-center">
+                      <Ionicons name="refresh" size={20} color="#3B82F6" />
+                      <Text className="text-blue-700 text-sm font-semibold ml-2">Move Back to Pending</Text>
+                    </View>
+                  </Pressable>
+                )}
               </View>
             )}
 

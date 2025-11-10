@@ -18,7 +18,7 @@ export default function BridgeTeamDashboardScreen() {
   const participants = React.useMemo(
     () =>
       allParticipants.filter((p) =>
-        ["pending_bridge", "bridge_attempted", "bridge_contacted"].includes(p.status)
+        ["pending_bridge", "bridge_attempted", "bridge_contacted", "bridge_unable"].includes(p.status)
       ),
     [allParticipants]
   );
@@ -67,6 +67,8 @@ export default function BridgeTeamDashboardScreen() {
         return { text: "Attempted", color: "bg-amber-100 text-amber-700" };
       case "bridge_contacted":
         return { text: "Contacted", color: "bg-yellow-100 text-gray-900" };
+      case "bridge_unable":
+        return { text: "Unable", color: "bg-gray-100 text-gray-700" };
       default:
         return { text: "Unknown", color: "bg-gray-100 text-gray-700" };
     }
@@ -219,6 +221,12 @@ export default function BridgeTeamDashboardScreen() {
             {participants.filter((p) => p.status === "bridge_contacted").length}
           </Text>
           <Text className="text-xs text-gray-600 mt-1">Contacted</Text>
+        </View>
+        <View className="flex-1 bg-white rounded-xl p-4 border border-gray-100">
+          <Text className="text-2xl font-bold text-gray-900">
+            {participants.filter((p) => p.status === "bridge_unable").length}
+          </Text>
+          <Text className="text-xs text-gray-600 mt-1">Unable</Text>
         </View>
       </View>
 
