@@ -419,21 +419,28 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
 
     const now = new Date();
 
+    // Determine if this is a mentor or bridge team context based on current status
+    const isMentorContext = ["initial_contact_pending", "mentor_attempted", "mentor_unable", "active_mentorship"].includes(participant.status);
+
     // Handle different contact outcomes
     if (formData.contactOutcome === "attempted") {
       console.log("📝 Recording attempted contact for participant:", participant.firstName, participant.lastName);
       console.log("Current status:", participant.status);
+      console.log("Context:", isMentorContext ? "Mentor" : "Bridge Team");
 
-      // Contact was attempted but not successful - update status to bridge_attempted
+      // Determine new status based on context
+      const newStatus: ParticipantStatus = isMentorContext ? "mentor_attempted" : "bridge_attempted";
+
+      // Contact was attempted but not successful
       const updatedParticipant = {
         ...participant,
-        status: "bridge_attempted" as ParticipantStatus,
+        status: newStatus,
         history: [
           ...participant.history,
           {
             id: `history_${Date.now()}`,
             type: "contact_attempt" as const,
-            description: "Contact attempt recorded",
+            description: isMentorContext ? "Mentor contact attempt recorded" : "Bridge Team contact attempt recorded",
             details: formData.attemptNotes,
             createdBy: userId,
             createdByName: userName,
@@ -458,16 +465,23 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
     }
 
     if (formData.contactOutcome === "unable") {
-      // Unable to contact participant - update status to bridge_unable
+      console.log("📝 Recording unable to contact for participant:", participant.firstName, participant.lastName);
+      console.log("Current status:", participant.status);
+      console.log("Context:", isMentorContext ? "Mentor" : "Bridge Team");
+
+      // Determine new status based on context
+      const newStatus: ParticipantStatus = isMentorContext ? "mentor_unable" : "bridge_unable";
+
+      // Unable to contact participant
       const updatedParticipant = {
         ...participant,
-        status: "bridge_unable" as ParticipantStatus,
+        status: newStatus,
         history: [
           ...participant.history,
           {
             id: `history_${Date.now()}`,
             type: "contact_attempt" as const,
-            description: "Unable to contact participant",
+            description: isMentorContext ? "Mentor unable to contact participant" : "Bridge Team unable to contact participant",
             details: formData.unableReason,
             createdBy: userId,
             createdByName: userName,
@@ -480,8 +494,12 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
         ],
       };
 
+      console.log("✅ Updating participant status to:", updatedParticipant.status);
+
       const participantRef = ref(database, `participants/${formData.participantId}`);
       await firebaseSet(participantRef, updatedParticipant);
+
+      console.log("✅ Firebase update complete for participant:", formData.participantId);
       return;
     }
 

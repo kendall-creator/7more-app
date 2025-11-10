@@ -28,10 +28,10 @@ export default function MyMenteesScreen() {
     return Math.floor(diffMs / (1000 * 60 * 60 * 24));
   };
 
-  const needsInitialContact = assignedParticipants.filter((p) => p.status === "initial_contact_pending");
+  const needsInitialContact = assignedParticipants.filter((p) => p.status === "initial_contact_pending" || p.status === "mentor_attempted" || p.status === "mentor_unable");
   const activeParticipants = assignedParticipants.filter((p) => p.status === "active_mentorship");
   const otherStatuses = assignedParticipants.filter(
-    (p) => p.status !== "initial_contact_pending" && p.status !== "active_mentorship"
+    (p) => p.status !== "initial_contact_pending" && p.status !== "mentor_attempted" && p.status !== "mentor_unable" && p.status !== "active_mentorship"
   );
 
   const renderParticipantCard = (participant: Participant, needsAction: boolean) => {

@@ -107,6 +107,10 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
         return "bg-yellow-100 text-gray-700";
       case "initial_contact_pending":
         return "bg-orange-100 text-orange-700";
+      case "mentor_attempted":
+        return "bg-amber-100 text-amber-700";
+      case "mentor_unable":
+        return "bg-gray-100 text-gray-700";
       case "active_mentorship":
         return "bg-yellow-100 text-gray-900";
       case "graduated":
@@ -126,6 +130,8 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
       bridge_unable: "Bridge Unable",
       pending_mentor: "Awaiting Mentor",
       initial_contact_pending: "Initial Contact Pending",
+      mentor_attempted: "Mentor Attempted",
+      mentor_unable: "Mentor Unable",
       active_mentorship: "Active Mentorship",
       graduated: "Graduated",
       ceased_contact: "Ceased Contact",
@@ -208,7 +214,7 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
         {(userRole === "admin" ||
           (userRole === "bridge_team" && ["pending_bridge", "bridge_contacted", "bridge_attempted", "bridge_unable"].includes(participant.status)) ||
           (userRole === "mentorship_leader" && ["pending_mentor", "assigned_mentor"].includes(participant.status)) ||
-          (userRole === "mentor" && ["initial_contact_pending", "active_mentorship"].includes(participant.status))
+          (userRole === "mentor" && ["initial_contact_pending", "mentor_attempted", "mentor_unable", "active_mentorship"].includes(participant.status))
         ) && (
           <View className="px-6 py-5 bg-white border-b border-gray-100">
             <Text className="text-sm font-bold text-gray-900 mb-4 uppercase">Quick Actions</Text>
@@ -325,6 +331,60 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
                 <Ionicons name="call" size={20} color="#EA580C" />
                 <Text className="text-orange-700 text-sm font-semibold mt-1">Complete Initial Contact</Text>
               </Pressable>
+            )}
+
+            {/* Mentor Actions for attempted/unable statuses */}
+            {(userRole === "admin" || userRole === "mentor") &&
+             ["mentor_attempted", "mentor_unable"].includes(participant.status) && (
+              <View className="gap-2">
+                <View className="flex-row gap-2">
+                  <Pressable
+                    onPress={() => navigation.navigate("InitialContactForm", { participantId: participant.id })}
+                    className="flex-1 bg-orange-50 border border-orange-200 rounded-xl py-3 items-center active:opacity-70"
+                  >
+                    <Ionicons name="call" size={20} color="#EA580C" />
+                    <Text className="text-orange-700 text-sm font-semibold mt-1">Try Contact Again</Text>
+                  </Pressable>
+                </View>
+
+                {/* Move back to Initial Contact Pending */}
+                <Pressable
+                  onPress={() => {
+                    Alert.alert(
+                      "Move to Initial Contact Pending",
+                      "Move this participant back to Initial Contact Pending status?",
+                      [
+                        { text: "Cancel", style: "cancel" },
+                        {
+                          text: "Move",
+                          style: "default",
+                          onPress: async () => {
+                            try {
+                              await updateParticipantStatus(
+                                participant.id,
+                                "initial_contact_pending",
+                                currentUser.id,
+                                currentUser.name,
+                                "Moved back to Initial Contact Pending for another contact attempt"
+                              );
+                              Alert.alert("Success", "Participant moved back to Initial Contact Pending");
+                            } catch (error) {
+                              console.error("Error moving participant:", error);
+                              Alert.alert("Error", "Failed to move participant. Please try again.");
+                            }
+                          },
+                        },
+                      ]
+                    );
+                  }}
+                  className="bg-blue-50 border border-blue-200 rounded-xl py-3 items-center active:opacity-70"
+                >
+                  <View className="flex-row items-center">
+                    <Ionicons name="refresh" size={20} color="#3B82F6" />
+                    <Text className="text-blue-700 text-sm font-semibold ml-2">Move Back to Pending</Text>
+                  </View>
+                </Pressable>
+              </View>
             )}
 
             {(userRole === "admin" || userRole === "mentor") &&

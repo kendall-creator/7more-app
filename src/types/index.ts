@@ -48,6 +48,8 @@ export type ParticipantStatus =
   | "pending_mentor"        // Waiting for mentor assignment
   | "assigned_mentor"       // Has assigned mentor
   | "initial_contact_pending" // Mentor needs to do initial contact
+  | "mentor_attempted"      // Mentor attempted contact (after assignment)
+  | "mentor_unable"         // Mentor unable to contact (after assignment)
   | "active_mentorship"     // Active in mentorship program
   | "unable_to_contact"     // Unable to contact (from Bridge Team or Mentorship)
   | "graduated"             // Completed program
