@@ -161,6 +161,14 @@ function MainTabs() {
             }}
           />
           <Tab.Screen
+            name="Scheduler"
+            component={SchedulerScreen}
+            options={{
+              tabBarLabel: "Scheduler",
+              tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />,
+            }}
+          />
+          <Tab.Screen
             name="TaskList"
             component={TaskListScreen}
             options={{

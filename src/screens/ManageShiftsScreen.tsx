@@ -76,6 +76,7 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
 
   const roleOptions: { role: UserRole; label: string }[] = [
     { role: "admin", label: "Admin" },
+    { role: "bridge_team", label: "Bridge Team" },
     { role: "mentorship_leader", label: "Mentor Leader" },
     { role: "mentor", label: "Mentor" },
     { role: "volunteer", label: "Lead Volunteer" },
