@@ -109,13 +109,30 @@ export default function EditUserScreen({ navigation, route }: any) {
     setIsLoading(true);
 
     try {
-      await updateUser(userId, {
+      // Build updates object, using null to explicitly remove optional fields
+      const updates: any = {
         name: name.trim(),
-        nickname: nickname.trim() || undefined,
         email: email.trim(),
-        phone: phone.trim() || undefined,
         role: selectedRole,
-      });
+      };
+
+      // Use null to remove fields, undefined to skip updating them
+      const nicknameValue = nickname.trim();
+      const phoneValue = phone.trim();
+
+      if (nicknameValue) {
+        updates.nickname = nicknameValue;
+      } else {
+        updates.nickname = null; // Explicitly remove nickname from Firebase
+      }
+
+      if (phoneValue) {
+        updates.phone = phoneValue;
+      } else {
+        updates.phone = null; // Explicitly remove phone from Firebase
+      }
+
+      await updateUser(userId, updates);
 
       setShowSuccessModal(true);
     } catch (error) {
