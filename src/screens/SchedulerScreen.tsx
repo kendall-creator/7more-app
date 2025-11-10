@@ -26,17 +26,35 @@ export default function SchedulerScreen({ navigation }: any) {
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
 
   const userRole = currentUser?.role || "volunteer";
+  const isAdmin = userRole === "admin";
   const isSupportVolunteer = userRole === "volunteer_support";
 
-  // Filter shifts based on user role
+  // Default to "My Schedule" for non-admins, "Manage Schedule" for admins
+  const [activeTab, setActiveTab] = useState<"my" | "manage">(isAdmin ? "manage" : "my");
+
+  // Filter shifts based on active tab and user role
   const visibleShifts = useMemo(() => {
-    if (isSupportVolunteer) {
-      // Support volunteers only see shifts that include volunteer_support role
-      return shifts.filter((shift) => shift.allowedRoles.includes("volunteer_support"));
+    let filtered = shifts;
+
+    if (activeTab === "my") {
+      // My Schedule: Only show shifts the user is signed up for
+      if (!currentUser) return [];
+      filtered = shifts.filter((shift) =>
+        shift.assignedUsers?.some((assignment) => assignment.userId === currentUser.id)
+      );
+    } else {
+      // Manage Schedule: Show all shifts based on role permissions
+      if (isSupportVolunteer) {
+        // Support volunteers only see shifts that include volunteer_support role
+        filtered = shifts.filter((shift) => shift.allowedRoles.includes("volunteer_support"));
+      } else {
+        // Everyone else sees all shifts they have permission for
+        filtered = shifts.filter((shift) => shift.allowedRoles.includes(userRole));
+      }
     }
-    // Everyone else sees all shifts they have permission for
-    return shifts.filter((shift) => shift.allowedRoles.includes(userRole));
-  }, [shifts, userRole, isSupportVolunteer]);
+
+    return filtered;
+  }, [shifts, userRole, isSupportVolunteer, activeTab, currentUser]);
 
   // Get the start of the current week (Monday)
   const getWeekStart = (offset: number = 0) => {
@@ -269,15 +287,15 @@ export default function SchedulerScreen({ navigation }: any) {
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
-      <View className="bg-gray-600 pt-16 pb-6 px-6">
+      <View className="bg-gray-600 pt-16 pb-4 px-6">
         <View className="flex-row items-center justify-between mb-4">
           <View className="flex-1">
             <Text className="text-3xl font-bold text-white mb-1">Scheduler</Text>
             <Text className="text-yellow-100 text-sm">
-              {isSupportVolunteer ? "Support Volunteer Shifts" : "All Available Shifts"}
+              {activeTab === "my" ? "Your Scheduled Shifts" : isSupportVolunteer ? "Support Volunteer Shifts" : "All Available Shifts"}
             </Text>
           </View>
-          {(userRole === "admin" || userRole === "mentorship_leader") && (
+          {activeTab === "manage" && (userRole === "admin" || userRole === "mentorship_leader") && (
             <Pressable
               onPress={() => navigation.navigate("ManageShifts")}
               className="bg-yellow-500 rounded-xl px-4 py-2"
@@ -285,12 +303,40 @@ export default function SchedulerScreen({ navigation }: any) {
               <Text className="text-gray-900 text-sm font-bold">+ Create</Text>
             </Pressable>
           )}
+          {activeTab === "my" && isAdmin && (
+            <Pressable
+              onPress={() => navigation.navigate("ManageShifts")}
+              className="bg-yellow-500 rounded-xl px-4 py-2"
+            >
+              <Text className="text-gray-900 text-sm font-bold">+ Meeting</Text>
+            </Pressable>
+          )}
+        </View>
+
+        {/* Tab Selector */}
+        <View className="flex-row bg-gray-700 rounded-xl p-1">
+          <Pressable
+            onPress={() => setActiveTab("my")}
+            className={`flex-1 py-2 rounded-lg ${activeTab === "my" ? "bg-white" : ""}`}
+          >
+            <Text className={`text-center font-semibold ${activeTab === "my" ? "text-gray-900" : "text-gray-300"}`}>
+              My Schedule
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => setActiveTab("manage")}
+            className={`flex-1 py-2 rounded-lg ${activeTab === "manage" ? "bg-white" : ""}`}
+          >
+            <Text className={`text-center font-semibold ${activeTab === "manage" ? "text-gray-900" : "text-gray-300"}`}>
+              Manage Schedule
+            </Text>
+          </Pressable>
         </View>
       </View>
 
       <ScrollView className="flex-1">
-        {/* My Shifts Section */}
-        {myShifts.length > 0 && (
+        {/* My Shifts Section - Only show in Manage Schedule tab */}
+        {activeTab === "manage" && myShifts.length > 0 && (
           <View className="px-6 pt-4 pb-3 bg-yellow-50 border-b-2 border-yellow-200">
             <View className="flex-row items-center mb-3">
               <Ionicons name="checkmark-circle" size={20} color="#CA8A04" />

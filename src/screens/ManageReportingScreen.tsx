@@ -72,8 +72,7 @@ export default function ManageReportingScreen() {
   const [endingBalance, setEndingBalance] = useState("");
 
   // Social Media Data
-  const [reels, setReels] = useState("");
-  const [postViews, setPostViews] = useState("");
+  const [reelsPostViews, setReelsPostViews] = useState("");
   const [viewsFromNonFollowers, setViewsFromNonFollowers] = useState("");
   const [followers, setFollowers] = useState("");
   const [followersGained, setFollowersGained] = useState("");
@@ -133,8 +132,7 @@ export default function ManageReportingScreen() {
     setEndingBalance(report.financialData.endingBalance !== null ? report.financialData.endingBalance.toString() : "");
 
     // Populate social media fields
-    setReels(report.socialMediaMetrics?.reels !== null && report.socialMediaMetrics?.reels !== undefined ? report.socialMediaMetrics.reels.toString() : "");
-    setPostViews(report.socialMediaMetrics?.postViews !== null && report.socialMediaMetrics?.postViews !== undefined ? report.socialMediaMetrics.postViews.toString() : "");
+    setReelsPostViews(report.socialMediaMetrics?.reelsPostViews !== null && report.socialMediaMetrics?.reelsPostViews !== undefined ? report.socialMediaMetrics.reelsPostViews.toString() : "");
     setViewsFromNonFollowers(report.socialMediaMetrics?.viewsFromNonFollowers !== null && report.socialMediaMetrics?.viewsFromNonFollowers !== undefined ? report.socialMediaMetrics.viewsFromNonFollowers.toString() : "");
     setFollowers(report.socialMediaMetrics?.followers !== null && report.socialMediaMetrics?.followers !== undefined ? report.socialMediaMetrics.followers.toString() : "");
     setFollowersGained(report.socialMediaMetrics?.followersGained !== null && report.socialMediaMetrics?.followersGained !== undefined ? report.socialMediaMetrics.followersGained.toString() : "");
@@ -274,8 +272,7 @@ export default function ManageReportingScreen() {
     if (!currentReport) return;
 
     await updateSocialMediaMetrics(currentReport.id, {
-      reels: reels === "" ? null : parseInt(reels) || null,
-      postViews: postViews === "" ? null : parseInt(postViews) || null,
+      reelsPostViews: reelsPostViews === "" ? null : parseInt(reelsPostViews) || null,
       viewsFromNonFollowers: viewsFromNonFollowers === "" ? null : parseInt(viewsFromNonFollowers) || null,
       followers: followers === "" ? null : parseInt(followers) || null,
       followersGained: followersGained === "" ? null : parseInt(followersGained) || null,
@@ -829,24 +826,12 @@ export default function ManageReportingScreen() {
 
                 <View className="space-y-3">
                   <View>
-                    <Text className="text-gray-700 mb-1">Reels</Text>
+                    <Text className="text-gray-700 mb-1">Reels/Post Views</Text>
                     <TextInput
                       className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-300"
-                      value={reels}
-                      onChangeText={setReels}
-                      placeholder="Number of reels"
-                      keyboardType="number-pad"
-                      editable={canEdit}
-                    />
-                  </View>
-
-                  <View>
-                    <Text className="text-gray-700 mb-1">Post Views</Text>
-                    <TextInput
-                      className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-300"
-                      value={postViews}
-                      onChangeText={setPostViews}
-                      placeholder="Total post views"
+                      value={reelsPostViews}
+                      onChangeText={setReelsPostViews}
+                      placeholder="Combined reels and post views"
                       keyboardType="number-pad"
                       editable={canEdit}
                     />

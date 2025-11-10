@@ -482,8 +482,7 @@ export interface FinancialData {
 
 // Social Media Metrics
 export interface SocialMediaMetrics {
-  reels: number | null;
-  postViews: number | null;
+  reelsPostViews: number | null; // Combined reels and post views
   viewsFromNonFollowers: number | null;
   followers: number | null;
   followersGained: number | null; // Can be positive or negative

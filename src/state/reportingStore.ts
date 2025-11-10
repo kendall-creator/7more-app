@@ -97,8 +97,7 @@ export const useReportingStore = create<ReportingStore>()((set, get) => ({
         difference: 0,
       },
       socialMediaMetrics: {
-        reels: null,
-        postViews: null,
+        reelsPostViews: null,
         viewsFromNonFollowers: null,
         followers: null,
         followersGained: null,

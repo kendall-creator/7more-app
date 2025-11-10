@@ -657,6 +657,17 @@ To enable automatic welcome and password reset emails:
 - **Smart Empty States** - Clear guidance when no participants or tasks assigned
 
 #### Volunteer Shift Scheduling
+
+- **Two Tab View**:
+  - **My Schedule Tab** - View only your personally scheduled shifts and meetings
+    - Default view for non-admin users
+    - Shows shifts you've signed up for
+    - **Admin Meeting Creation** - Admins can create personal meetings/events from this tab
+  - **Manage Schedule Tab** - View all available shifts in the system
+    - Default view for admins
+    - Shows all shifts based on role permissions
+    - Create new volunteer shifts (admins and mentor leaders only)
+
 - **Admin and Mentor Leader Management**:
   - Create new shifts with title, description, date, time, and max volunteers
   - **Calendar Date Picker** - Tap to select dates from visual calendar instead of typing
@@ -677,12 +688,16 @@ To enable automatic welcome and password reset emails:
     - Search and select from all invited users
     - See which users are already assigned
     - Bypasses normal role restrictions for manual assignments
+  - **Admin Meeting/Event Creation** - Admins can add personal meetings to staff schedules
+    - Create meetings that appear in specific users' My Schedule
+    - Useful for one-on-one meetings, training sessions, etc.
   - Set which roles can sign up for each shift (admin, mentor leader, mentor, volunteer types)
   - Edit shifts directly from scheduler view with pre-filled form
   - Delete shifts with all signups
   - View all upcoming shifts with signup counts
   - See who has signed up for each shift
-  - "Create" button in scheduler header for quick shift creation
+  - "Create" button in Manage Schedule tab for quick shift creation
+  - "+ Meeting" button in My Schedule tab (admin only) for personal event creation
 
 - **Shift Signup (All Staff)**:
   - View all upcoming shifts organized by week (Monday-Sunday)
@@ -917,8 +932,7 @@ To enable automatic welcome and password reset emails:
    - Difference - auto-calculated (Ending - Beginning) with commas
 
 6. **Social Media Metrics (Manual Input)**
-   - Reels - number of reels posted
-   - Post Views - total views across all posts
+   - Reels/Post Views - combined total of reels and post views
    - Views from Non-Followers - views from users who don't follow the account
    - Total Followers - current follower count
    - Followers Gained (+/-) - net change in followers (positive for gains, negative for losses)
