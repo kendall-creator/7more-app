@@ -59,6 +59,7 @@ import EmbeddableFormScreen from "../screens/EmbeddableFormScreen";
 import FileManagementScreen from "../screens/FileManagementScreen";
 import ManageFormsScreen from "../screens/ManageFormsScreen";
 import EditFormQuestionsScreen from "../screens/EditFormQuestionsScreen";
+import TaskManagementScreen from "../screens/TaskManagementScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -116,9 +117,9 @@ function MainTabs() {
           />
           <Tab.Screen
             name="TaskList"
-            component={TaskListScreen}
+            component={TaskManagementScreen}
             options={{
-              tabBarLabel: "My Tasks",
+              tabBarLabel: "Tasks",
               tabBarIcon: ({ color, size }) => (
                 <Ionicons name="checkbox" size={size} color={color} />
               ),
