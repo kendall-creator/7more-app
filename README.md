@@ -267,14 +267,14 @@ The app features a role-based tab navigation system:
 6. **Resources** - Resource library and admin tools
 
 **For Mentorship Leaders (5 tabs):**
-1. **Homepage** - Dashboard showing all current items needing attention
+1. **Homepage** - MentorshipLeaderDashboardScreen showing participants awaiting mentor assignment
 2. **My Mentees** - Full list of assigned participants
 3. **My Tasks** - Tasks assigned to them
 4. **Assign Tasks** - Create and assign tasks to mentors
 5. **Resources** - Resource library and system tools
 
 **For Mentors (4 tabs):**
-1. **Homepage** - Dashboard showing all current items needing attention
+1. **Homepage** - MentorDashboardScreen showing assigned participants with quick action buttons for contact management, organized by status (Initial Contact Pending, Attempted Contact, Unable to Contact, Active Mentorship)
 2. **My Mentees** - Full list of assigned participants
 3. **My Tasks** - Tasks assigned by admins or mentorship leaders
 4. **Resources** - Resource library and system tools

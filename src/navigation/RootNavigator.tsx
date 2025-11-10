@@ -255,12 +255,12 @@ function MainTabs() {
         </>
       )}
 
-      {/* Mentors and Mentorship Leaders see Homepage as first tab */}
-      {isMentor && (
+      {/* Mentors see MentorDashboardScreen as first tab */}
+      {userRole === "mentor" && (
         <>
           <Tab.Screen
             name="Homepage"
-            component={HomepageScreen}
+            component={MentorDashboardScreen}
             options={{
               tabBarLabel: "Homepage",
               tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
@@ -282,17 +282,52 @@ function MainTabs() {
               tabBarIcon: ({ color, size }) => <Ionicons name="checkbox" size={size} color={color} />,
             }}
           />
-          {/* Tasks tab for mentorship leaders only - for creating/assigning tasks */}
-          {userRole === "mentorship_leader" && (
-            <Tab.Screen
-              name="Tasks"
-              component={AdminTaskManagementScreen}
-              options={{
-                tabBarLabel: "Assign Tasks",
-                tabBarIcon: ({ color, size }) => <Ionicons name="add-circle" size={size} color={color} />,
-              }}
-            />
-          )}
+          <Tab.Screen
+            name="Resources"
+            component={ResourcesScreen}
+            options={{
+              tabBarLabel: "Resources",
+              tabBarIcon: ({ color, size}) => <Ionicons name="document-text" size={size} color={color} />,
+            }}
+          />
+        </>
+      )}
+
+      {/* Mentorship Leaders see MentorshipLeaderDashboardScreen as first tab */}
+      {userRole === "mentorship_leader" && (
+        <>
+          <Tab.Screen
+            name="Homepage"
+            component={MentorshipLeaderDashboardScreen}
+            options={{
+              tabBarLabel: "Homepage",
+              tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
+            }}
+          />
+          <Tab.Screen
+            name="MyMentees"
+            component={MyMenteesScreen}
+            options={{
+              tabBarLabel: "My Mentees",
+              tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />,
+            }}
+          />
+          <Tab.Screen
+            name="TaskList"
+            component={TaskListScreen}
+            options={{
+              tabBarLabel: "My Tasks",
+              tabBarIcon: ({ color, size }) => <Ionicons name="checkbox" size={size} color={color} />,
+            }}
+          />
+          <Tab.Screen
+            name="Tasks"
+            component={AdminTaskManagementScreen}
+            options={{
+              tabBarLabel: "Assign Tasks",
+              tabBarIcon: ({ color, size }) => <Ionicons name="add-circle" size={size} color={color} />,
+            }}
+          />
           <Tab.Screen
             name="Resources"
             component={ResourcesScreen}

@@ -28,6 +28,9 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
     return null;
   }
 
+  // Check if mentor is assigned to this participant
+  const isAssignedMentor = userRole === "mentor" && participant.assignedMentor === currentUser.id;
+
   // Debug logging to help troubleshoot Quick Actions visibility
   console.log("=== ParticipantProfileScreen Debug ===");
   console.log("Participant:", participant.firstName, participant.lastName);
@@ -35,10 +38,11 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
   console.log("User Role:", userRole);
   console.log("Current User:", currentUser.name, currentUser.role);
   console.log("Assigned Mentor:", participant.assignedMentor);
+  console.log("Is Assigned Mentor:", isAssignedMentor);
   console.log("Quick Actions Should Show:", (userRole === "admin" ||
     (userRole === "bridge_team" && ["pending_bridge", "bridge_contacted", "bridge_attempted", "bridge_unable"].includes(participant.status)) ||
     (userRole === "mentorship_leader" && ["pending_mentor", "assigned_mentor"].includes(participant.status)) ||
-    (userRole === "mentor" && ["initial_contact_pending", "mentor_attempted", "mentor_unable", "active_mentorship"].includes(participant.status))
+    (isAssignedMentor && ["initial_contact_pending", "bridge_attempted", "bridge_unable", "mentor_attempted", "mentor_unable", "active_mentorship"].includes(participant.status))
   ));
   console.log("======================================");
 
@@ -228,7 +232,7 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
         {(userRole === "admin" ||
           (userRole === "bridge_team" && ["pending_bridge", "bridge_contacted", "bridge_attempted", "bridge_unable"].includes(participant.status)) ||
           (userRole === "mentorship_leader" && ["pending_mentor", "assigned_mentor"].includes(participant.status)) ||
-          (userRole === "mentor" && ["initial_contact_pending", "mentor_attempted", "mentor_unable", "active_mentorship"].includes(participant.status))
+          (isAssignedMentor && ["initial_contact_pending", "bridge_attempted", "bridge_unable", "mentor_attempted", "mentor_unable", "active_mentorship"].includes(participant.status))
         ) && (
           <View className="px-6 py-5 bg-white border-b border-gray-100">
             <Text className="text-sm font-bold text-gray-900 mb-4 uppercase">Quick Actions</Text>
@@ -335,8 +339,21 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
               </Pressable>
             )}
 
+            {/* Mentor Actions for bridge_attempted or bridge_unable status (assigned but not yet contacted) */}
+            {isAssignedMentor && ["bridge_attempted", "bridge_unable"].includes(participant.status) && (
+              <View className="gap-2">
+                <Pressable
+                  onPress={() => navigation.navigate("InitialContactForm", { participantId: participant.id })}
+                  className="bg-orange-50 border border-orange-200 rounded-xl py-3 items-center active:opacity-70"
+                >
+                  <Ionicons name="call" size={20} color="#EA580C" />
+                  <Text className="text-orange-700 text-sm font-semibold mt-1">Complete Initial Contact</Text>
+                </Pressable>
+              </View>
+            )}
+
             {/* Mentor Actions */}
-            {(userRole === "admin" || userRole === "mentor") &&
+            {(userRole === "admin" || isAssignedMentor) &&
              participant.status === "initial_contact_pending" && (
               <Pressable
                 onPress={() => navigation.navigate("InitialContactForm", { participantId: participant.id })}
@@ -348,7 +365,7 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
             )}
 
             {/* Mentor Actions for attempted/unable statuses */}
-            {(userRole === "admin" || userRole === "mentor") &&
+            {(userRole === "admin" || isAssignedMentor) &&
              ["mentor_attempted", "mentor_unable"].includes(participant.status) && (
               <View className="gap-2">
                 <View className="flex-row gap-2">
@@ -401,7 +418,7 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
               </View>
             )}
 
-            {(userRole === "admin" || userRole === "mentor") &&
+            {(userRole === "admin" || isAssignedMentor) &&
              participant.status === "active_mentorship" && (
               <View className="space-y-3">
                 {/* Weekly Update Button */}
