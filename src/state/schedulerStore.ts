@@ -1,10 +1,11 @@
 import { create } from "zustand";
 import { ref, set as firebaseSet, onValue, update as firebaseUpdate, remove } from "firebase/database";
 import { database } from "../config/firebase";
-import { Shift, ShiftAssignment, ShiftTemplate, UserRole } from "../types";
+import { Shift, ShiftAssignment, ShiftTemplate, UserRole, Meeting, MeetingInvitee, MeetingType, RSVPStatus } from "../types";
 
 interface SchedulerState {
   shifts: Shift[];
+  meetings: Meeting[];
   templates: ShiftTemplate[];
   isLoading: boolean;
 }
@@ -70,6 +71,27 @@ interface SchedulerActions {
   // Get all templates
   getTemplates: () => ShiftTemplate[];
 
+  // Meeting functions
+  createMeeting: (
+    title: string,
+    description: string,
+    type: MeetingType,
+    date: string,
+    startTime: string,
+    endTime: string,
+    inviteeUserIds: string[],
+    createdBy: string,
+    createdByName: string,
+    createdByNickname?: string,
+    videoCallLink?: string
+  ) => Promise<void>;
+
+  updateMeetingRSVP: (meetingId: string, userId: string, rsvpStatus: RSVPStatus) => Promise<void>;
+
+  getMeetingsForUser: (userId: string) => Meeting[];
+
+  deleteMeeting: (meetingId: string) => Promise<void>;
+
   // Initialize Firebase listener
   initializeFirebaseListener: () => void;
 }
@@ -78,6 +100,7 @@ type SchedulerStore = SchedulerState & SchedulerActions;
 
 export const useSchedulerStore = create<SchedulerStore>()((set, get) => ({
   shifts: [],
+  meetings: [],
   templates: [],
   isLoading: false,
 
@@ -90,6 +113,7 @@ export const useSchedulerStore = create<SchedulerStore>()((set, get) => ({
     }
 
     const shiftsRef = ref(database, "shifts");
+    const meetingsRef = ref(database, "meetings");
     const templatesRef = ref(database, "shiftTemplates");
 
     onValue(shiftsRef, (snapshot) => {
@@ -99,6 +123,16 @@ export const useSchedulerStore = create<SchedulerStore>()((set, get) => ({
         set({ shifts: shiftsArray, isLoading: false });
       } else {
         set({ shifts: [], isLoading: false });
+      }
+    });
+
+    onValue(meetingsRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const meetingsArray = Object.values(data) as Meeting[];
+        set({ meetings: meetingsArray });
+      } else {
+        set({ meetings: [] });
       }
     });
 
@@ -481,5 +515,84 @@ export const useSchedulerStore = create<SchedulerStore>()((set, get) => ({
 
   getTemplates: () => {
     return get().templates;
+  },
+
+  // Meeting functions
+  createMeeting: async (title, description, type, date, startTime, endTime, inviteeUserIds, createdBy, createdByName, createdByNickname, videoCallLink) => {
+    if (!database) {
+      throw new Error("Firebase not configured. Please add Firebase credentials in ENV tab.");
+    }
+
+    const meetingId = `meeting_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // Get invitedUsers to map user IDs to names
+    const { invitedUsers } = await import("./usersStore").then(m => m.useUsersStore.getState());
+
+    const invitees: MeetingInvitee[] = inviteeUserIds.map(userId => {
+      const user = invitedUsers.find(u => u.id === userId);
+      return {
+        userId,
+        userName: user?.name || "Unknown User",
+        userNickname: user?.nickname,
+        rsvpStatus: "pending" as RSVPStatus,
+      };
+    });
+
+    const newMeeting: Meeting = {
+      id: meetingId,
+      title,
+      description,
+      type,
+      videoCallLink: type === "virtual" ? videoCallLink : undefined,
+      date,
+      startTime,
+      endTime,
+      createdBy,
+      createdByName,
+      createdByNickname,
+      createdAt: new Date().toISOString(),
+      invitees,
+    };
+
+    const meetingRef = ref(database, `meetings/${meetingId}`);
+    await firebaseSet(meetingRef, newMeeting);
+  },
+
+  updateMeetingRSVP: async (meetingId, userId, rsvpStatus) => {
+    if (!database) {
+      throw new Error("Firebase not configured. Please add Firebase credentials in ENV tab.");
+    }
+
+    const meeting = get().meetings.find(m => m.id === meetingId);
+    if (!meeting) return;
+
+    const updatedInvitees = meeting.invitees.map(invitee => {
+      if (invitee.userId === userId) {
+        return {
+          ...invitee,
+          rsvpStatus,
+          rsvpAt: new Date().toISOString(),
+        };
+      }
+      return invitee;
+    });
+
+    const meetingRef = ref(database, `meetings/${meetingId}`);
+    await firebaseUpdate(meetingRef, { invitees: updatedInvitees });
+  },
+
+  getMeetingsForUser: (userId) => {
+    return get().meetings.filter(meeting =>
+      meeting.createdBy === userId || meeting.invitees.some(invitee => invitee.userId === userId)
+    );
+  },
+
+  deleteMeeting: async (meetingId) => {
+    if (!database) {
+      throw new Error("Firebase not configured. Please add Firebase credentials in ENV tab.");
+    }
+
+    const meetingRef = ref(database, `meetings/${meetingId}`);
+    await remove(meetingRef);
   },
 }));

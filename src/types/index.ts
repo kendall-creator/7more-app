@@ -527,3 +527,31 @@ export interface MonthlyReport {
   updatedAt: string;
 }
 
+// Meeting System
+export type MeetingType = "virtual" | "in-person";
+export type RSVPStatus = "yes" | "no" | "maybe" | "pending";
+
+export interface MeetingInvitee {
+  userId: string;
+  userName: string;
+  userNickname?: string;
+  rsvpStatus: RSVPStatus;
+  rsvpAt?: string; // ISO timestamp when they responded
+}
+
+export interface Meeting {
+  id: string;
+  title: string;
+  description: string;
+  type: MeetingType;
+  videoCallLink?: string; // Only for virtual meetings
+  date: string; // ISO date string
+  startTime: string; // Time string like "09:00"
+  endTime: string; // Time string like "17:00"
+  createdBy: string;
+  createdByName: string;
+  createdByNickname?: string;
+  createdAt: string; // ISO timestamp
+  invitees: MeetingInvitee[]; // List of invited users with RSVP status
+}
+

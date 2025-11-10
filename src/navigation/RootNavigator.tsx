@@ -39,6 +39,7 @@ import EditUserScreen from "../screens/EditUserScreen";
 import EditResourceScreen from "../screens/EditResourceScreen";
 import MentorshipScreen from "../screens/MentorshipScreen";
 import SchedulerScreen from "../screens/SchedulerScreen";
+import CreateMeetingScreen from "../screens/CreateMeetingScreen";
 import ManageShiftsScreen from "../screens/ManageShiftsScreen";
 import AssignUserToShiftScreen from "../screens/AssignUserToShiftScreen";
 import TaskListScreen from "../screens/TaskListScreen";
@@ -341,6 +342,7 @@ export default function RootNavigator() {
           <Stack.Screen name="EditResource" component={EditResourceScreen} />
           <Stack.Screen name="Mentorship" component={MentorshipScreen} />
           <Stack.Screen name="SchedulerScreen" component={SchedulerScreen} />
+          <Stack.Screen name="CreateMeeting" component={CreateMeetingScreen} />
           <Stack.Screen name="ManageShifts" component={ManageShiftsScreen} />
           <Stack.Screen name="AssignUserToShift" component={AssignUserToShiftScreen} />
           <Stack.Screen name="TaskDetail" component={TaskDetailScreen} />

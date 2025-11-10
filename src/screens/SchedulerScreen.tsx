@@ -14,11 +14,16 @@ import { formatUserDisplayName } from "../utils/displayName";
 export default function SchedulerScreen({ navigation }: any) {
   const currentUser = useAuthStore((s) => s.currentUser);
   const shifts = useSchedulerStore((s) => s.shifts);
+  const meetings = useSchedulerStore((s) => s.meetings);
+  const getMeetingsForUser = useSchedulerStore((s) => s.getMeetingsForUser);
+  const updateMeetingRSVP = useSchedulerStore((s) => s.updateMeetingRSVP);
   const signUpForShift = useSchedulerStore((s) => s.signUpForShift);
   const cancelShiftSignup = useSchedulerStore((s) => s.cancelShiftSignup);
 
   const [selectedShift, setSelectedShift] = useState<any>(null);
+  const [selectedMeeting, setSelectedMeeting] = useState<any>(null);
   const [showShiftModal, setShowShiftModal] = useState(false);
+  const [showMeetingModal, setShowMeetingModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [showErrorModal, setShowErrorModal] = useState(false);
@@ -99,6 +104,20 @@ export default function SchedulerScreen({ navigation }: any) {
 
   const weekDays = useMemo(() => getCurrentWeekDays(), [currentWeekOffset]);
 
+  // Get user's signed up shifts
+  const myShifts = useMemo(() => {
+    if (!currentUser) return [];
+    return shifts.filter((shift) =>
+      (shift.assignedUsers || []).some((assignment) => assignment.userId === currentUser.id)
+    );
+  }, [shifts, currentUser]);
+
+  // Get user's meetings (created by or invited to)
+  const myMeetings = useMemo(() => {
+    if (!currentUser) return [];
+    return getMeetingsForUser(currentUser.id);
+  }, [meetings, currentUser, getMeetingsForUser]);
+
   // Group shifts by date
   const shiftsByDate = useMemo(() => {
     const grouped: { [key: string]: any[] } = {};
@@ -118,13 +137,26 @@ export default function SchedulerScreen({ navigation }: any) {
     return grouped;
   }, [visibleShifts]);
 
-  // Get user's signed up shifts
-  const myShifts = useMemo(() => {
-    if (!currentUser) return [];
-    return shifts.filter((shift) =>
-      (shift.assignedUsers || []).some((assignment) => assignment.userId === currentUser.id)
-    );
-  }, [shifts, currentUser]);
+  // Group meetings by date (only for My Schedule tab)
+  const meetingsByDate = useMemo(() => {
+    const grouped: { [key: string]: any[] } = {};
+
+    if (activeTab === "my") {
+      myMeetings.forEach((meeting) => {
+        if (!grouped[meeting.date]) {
+          grouped[meeting.date] = [];
+        }
+        grouped[meeting.date].push(meeting);
+      });
+
+      // Sort meetings within each date by start time
+      Object.keys(grouped).forEach((date) => {
+        grouped[date].sort((a, b) => a.startTime.localeCompare(b.startTime));
+      });
+    }
+
+    return grouped;
+  }, [myMeetings, activeTab]);
 
   const canSignUp = (shift: any) => {
     if (!currentUser) return false;
@@ -167,6 +199,26 @@ export default function SchedulerScreen({ navigation }: any) {
     setSuccessMessage(`You have cancelled your signup for ${selectedShift.title}`);
     setShowSuccessModal(true);
     setShowShiftModal(false);
+  };
+
+  const handleMeetingPress = (meeting: any) => {
+    setSelectedMeeting(meeting);
+    setShowMeetingModal(true);
+  };
+
+  const handleRSVP = async (rsvpStatus: "yes" | "no" | "maybe") => {
+    if (!selectedMeeting || !currentUser) return;
+
+    try {
+      await updateMeetingRSVP(selectedMeeting.id, currentUser.id, rsvpStatus);
+      setSuccessMessage(`RSVP updated to "${rsvpStatus.toUpperCase()}" for ${selectedMeeting.title}`);
+      setShowSuccessModal(true);
+      setShowMeetingModal(false);
+    } catch (error) {
+      console.error("Error updating RSVP:", error);
+      setErrorMessage("Failed to update RSVP. Please try again.");
+      setShowErrorModal(true);
+    }
   };
 
   const getWeekLabel = () => {
@@ -284,6 +336,81 @@ export default function SchedulerScreen({ navigation }: any) {
     );
   };
 
+  const renderMeetingCard = (meeting: any, index: number) => {
+    if (!currentUser) return null;
+
+    const myInvite = meeting.invitees.find((inv: any) => inv.userId === currentUser.id);
+    const myRSVP = myInvite?.rsvpStatus || "pending";
+    const isCreator = meeting.createdBy === currentUser.id;
+
+    return (
+      <View
+        key={meeting.id}
+        className={`border-2 rounded-xl p-3 mb-2 ${
+          myRSVP === "yes"
+            ? "bg-green-50 border-green-500"
+            : myRSVP === "no"
+            ? "bg-red-50 border-red-300"
+            : myRSVP === "maybe"
+            ? "bg-blue-50 border-blue-300"
+            : "bg-purple-50 border-purple-300"
+        }`}
+      >
+        <Pressable
+          onPress={() => handleMeetingPress(meeting)}
+          className="flex-row items-start justify-between"
+        >
+          <View className="flex-1">
+            <View className="flex-row items-center mb-1">
+              <Ionicons
+                name={meeting.type === "virtual" ? "videocam" : "people"}
+                size={14}
+                color={
+                  myRSVP === "yes"
+                    ? "#16A34A"
+                    : myRSVP === "no"
+                    ? "#DC2626"
+                    : myRSVP === "maybe"
+                    ? "#2563EB"
+                    : "#9333EA"
+                }
+              />
+              <Text className="text-xs font-semibold text-gray-500 ml-1 uppercase">Meeting</Text>
+            </View>
+            <Text className={`text-sm font-semibold ${myRSVP === "no" ? "text-gray-400" : "text-gray-900"}`}>
+              {meeting.title}
+            </Text>
+            <Text className={`text-xs mt-1 ${myRSVP === "no" ? "text-gray-400" : "text-gray-500"}`}>
+              {meeting.startTime} - {meeting.endTime}
+            </Text>
+            {isCreator && (
+              <Text className="text-xs text-gray-500 mt-1 italic">You created this</Text>
+            )}
+          </View>
+          <View className="ml-2">
+            {myRSVP === "yes" ? (
+              <View className="bg-green-600 rounded-lg px-2 py-1">
+                <Text className="text-white text-xs font-bold">Going</Text>
+              </View>
+            ) : myRSVP === "no" ? (
+              <View className="bg-red-600 rounded-lg px-2 py-1">
+                <Text className="text-white text-xs font-bold">Not Going</Text>
+              </View>
+            ) : myRSVP === "maybe" ? (
+              <View className="bg-blue-600 rounded-lg px-2 py-1">
+                <Text className="text-white text-xs font-bold">Maybe</Text>
+              </View>
+            ) : (
+              <View className="bg-purple-600 rounded-lg px-2 py-1">
+                <Text className="text-white text-xs font-bold">Pending</Text>
+              </View>
+            )}
+          </View>
+        </Pressable>
+      </View>
+    );
+  };
+
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
@@ -305,7 +432,7 @@ export default function SchedulerScreen({ navigation }: any) {
           )}
           {activeTab === "my" && isAdmin && (
             <Pressable
-              onPress={() => navigation.navigate("ManageShifts")}
+              onPress={() => navigation.navigate("CreateMeeting")}
               className="bg-yellow-500 rounded-xl px-4 py-2"
             >
               <Text className="text-gray-900 text-sm font-bold">+ Meeting</Text>
@@ -414,7 +541,10 @@ export default function SchedulerScreen({ navigation }: any) {
         <View className="px-6 py-4">
           {weekDays.map((day, index) => {
             const dayShifts = shiftsByDate[day.dateString] || [];
+            const dayMeetings = meetingsByDate[day.dateString] || [];
             const hasShifts = dayShifts.length > 0;
+            const hasMeetings = dayMeetings.length > 0;
+            const hasContent = hasShifts || hasMeetings;
 
             return (
               <View key={day.dateString}>
@@ -456,21 +586,24 @@ export default function SchedulerScreen({ navigation }: any) {
                       {day.dayName}
                     </Text>
                   </View>
-                  {hasShifts && (
+                  {hasContent && (
                     <View className="bg-gray-600 rounded-full px-3 py-1">
-                      <Text className="text-white text-xs font-bold">{dayShifts.length}</Text>
+                      <Text className="text-white text-xs font-bold">{dayShifts.length + dayMeetings.length}</Text>
                     </View>
                   )}
                 </View>
 
-                {/* Shifts for this day */}
-                {hasShifts ? (
+                {/* Shifts and Meetings for this day */}
+                {hasContent ? (
                   <View className="mb-4 pl-4">
                     {dayShifts.map((shift, idx) => renderShiftCard(shift, idx))}
+                    {dayMeetings.map((meeting, idx) => renderMeetingCard(meeting, idx))}
                   </View>
                 ) : (
                   <View className="mb-4 pl-4">
-                    <Text className="text-sm text-gray-400 italic">No shifts scheduled</Text>
+                    <Text className="text-sm text-gray-400 italic">
+                      {activeTab === "my" ? "Nothing scheduled" : "No shifts scheduled"}
+                    </Text>
                   </View>
                 )}
 
@@ -634,6 +767,172 @@ export default function SchedulerScreen({ navigation }: any) {
             >
               <Text className="text-white font-semibold">OK</Text>
             </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Meeting Details Modal */}
+      <Modal
+        visible={showMeetingModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowMeetingModal(false)}
+      >
+        <View className="flex-1 bg-black/50 justify-end">
+          <View className="bg-white rounded-t-3xl pt-6 pb-10 px-6 max-h-[80%]">
+            <View className="flex-row items-center justify-between mb-6">
+              <Text className="text-xl font-bold text-gray-900">Meeting Details</Text>
+              <Pressable onPress={() => setShowMeetingModal(false)} className="w-8 h-8 items-center justify-center">
+                <Ionicons name="close" size={24} color="#374151" />
+              </Pressable>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {selectedMeeting && currentUser && (
+                <>
+                  <View className="mb-6">
+                    <Text className="text-2xl font-bold text-gray-900 mb-3">{selectedMeeting.title}</Text>
+
+                    <View className="flex-row items-center mb-2">
+                      <Ionicons
+                        name={selectedMeeting.type === "virtual" ? "videocam" : "people"}
+                        size={20}
+                        color="#6B7280"
+                      />
+                      <Text className="text-base text-gray-700 ml-2 capitalize">
+                        {selectedMeeting.type} Meeting
+                      </Text>
+                    </View>
+
+                    <View className="flex-row items-center mb-2">
+                      <Ionicons name="calendar-outline" size={20} color="#6B7280" />
+                      <Text className="text-base text-gray-700 ml-2">
+                        {(() => {
+                          const [year, month, day] = selectedMeeting.date.split("-").map(Number);
+                          const meetingDate = new Date(year, month - 1, day);
+                          return meetingDate.toLocaleDateString("en-US", {
+                            weekday: "long",
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                          });
+                        })()}
+                      </Text>
+                    </View>
+
+                    <View className="flex-row items-center mb-2">
+                      <Ionicons name="time-outline" size={20} color="#6B7280" />
+                      <Text className="text-base text-gray-700 ml-2">
+                        {selectedMeeting.startTime} - {selectedMeeting.endTime}
+                      </Text>
+                    </View>
+
+                    {selectedMeeting.type === "virtual" && selectedMeeting.videoCallLink && (
+                      <View className="flex-row items-start mb-2">
+                        <Ionicons name="link-outline" size={20} color="#6B7280" />
+                        <Text className="text-base text-blue-600 ml-2 flex-1 underline">
+                          {selectedMeeting.videoCallLink}
+                        </Text>
+                      </View>
+                    )}
+
+                    {selectedMeeting.description && (
+                      <View className="mt-3">
+                        <Text className="text-sm text-gray-500 mb-1">Description</Text>
+                        <Text className="text-base text-gray-700">{selectedMeeting.description}</Text>
+                      </View>
+                    )}
+
+                    <View className="mt-4">
+                      <Text className="text-sm text-gray-500 mb-1">Organized by</Text>
+                      <Text className="text-base text-gray-700">
+                        {formatUserDisplayName(selectedMeeting.createdByName, selectedMeeting.createdByNickname)}
+                      </Text>
+                    </View>
+
+                    {selectedMeeting.invitees && selectedMeeting.invitees.length > 0 && (
+                      <View className="mt-4">
+                        <Text className="text-sm font-semibold text-gray-700 mb-2">
+                          Invitees ({selectedMeeting.invitees.length})
+                        </Text>
+                        {selectedMeeting.invitees.map((invitee: any) => (
+                          <View key={invitee.userId} className="flex-row items-center justify-between mb-2">
+                            <View className="flex-row items-center flex-1">
+                              <Ionicons name="person" size={16} color="#6B7280" />
+                              <Text className="text-sm text-gray-700 ml-2 flex-1">
+                                {formatUserDisplayName(invitee.userName, invitee.userNickname)}
+                                {invitee.userId === currentUser.id && " (You)"}
+                              </Text>
+                            </View>
+                            <View
+                              className={`px-2 py-1 rounded ${
+                                invitee.rsvpStatus === "yes"
+                                  ? "bg-green-100"
+                                  : invitee.rsvpStatus === "no"
+                                  ? "bg-red-100"
+                                  : invitee.rsvpStatus === "maybe"
+                                  ? "bg-blue-100"
+                                  : "bg-gray-100"
+                              }`}
+                            >
+                              <Text
+                                className={`text-xs font-semibold ${
+                                  invitee.rsvpStatus === "yes"
+                                    ? "text-green-700"
+                                    : invitee.rsvpStatus === "no"
+                                    ? "text-red-700"
+                                    : invitee.rsvpStatus === "maybe"
+                                    ? "text-blue-700"
+                                    : "text-gray-600"
+                                }`}
+                              >
+                                {invitee.rsvpStatus === "yes"
+                                  ? "Going"
+                                  : invitee.rsvpStatus === "no"
+                                  ? "Not Going"
+                                  : invitee.rsvpStatus === "maybe"
+                                  ? "Maybe"
+                                  : "Pending"}
+                              </Text>
+                            </View>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+                  </View>
+
+                  {/* RSVP Buttons - only show if user is an invitee */}
+                  {selectedMeeting.invitees.some((inv: any) => inv.userId === currentUser.id) && (
+                    <View className="gap-3">
+                      <Text className="text-sm font-semibold text-gray-700 mb-2">Your Response</Text>
+                      <View className="flex-row gap-2">
+                        <Pressable
+                          onPress={() => handleRSVP("yes")}
+                          className="flex-1 bg-green-600 rounded-xl py-4 items-center active:opacity-80"
+                        >
+                          <Ionicons name="checkmark-circle" size={20} color="white" />
+                          <Text className="text-white text-sm font-bold mt-1">Yes</Text>
+                        </Pressable>
+                        <Pressable
+                          onPress={() => handleRSVP("maybe")}
+                          className="flex-1 bg-blue-600 rounded-xl py-4 items-center active:opacity-80"
+                        >
+                          <Ionicons name="help-circle" size={20} color="white" />
+                          <Text className="text-white text-sm font-bold mt-1">Maybe</Text>
+                        </Pressable>
+                        <Pressable
+                          onPress={() => handleRSVP("no")}
+                          className="flex-1 bg-red-600 rounded-xl py-4 items-center active:opacity-80"
+                        >
+                          <Ionicons name="close-circle" size={20} color="white" />
+                          <Text className="text-white text-sm font-bold mt-1">No</Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  )}
+                </>
+              )}
+            </ScrollView>
           </View>
         </View>
       </Modal>

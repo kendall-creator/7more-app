@@ -699,6 +699,30 @@ To enable automatic welcome and password reset emails:
   - "Create" button in Manage Schedule tab for quick shift creation
   - "+ Meeting" button in My Schedule tab (admin only) for personal event creation
 
+- **Meeting System**:
+  - **Create Meetings** - Any user with My Schedule access can create meetings
+    - Admins can create meetings that automatically appear in invitees' schedules
+    - **Meeting Types**: Virtual (with video call link) or In-Person
+    - **Required Fields**: Title, description, date, start time, end time
+    - **Invitations**: Select multiple users to invite to the meeting
+    - **Video Call Links**: For virtual meetings, add Zoom/Teams/Google Meet links
+  - **RSVP System** - All invited users can respond to meeting invitations
+    - **Yes** - Confirms attendance (shown in green)
+    - **No** - Declines meeting (shown in red)
+    - **Maybe** - Tentative attendance (shown in blue)
+    - **Pending** - Not yet responded (shown in purple)
+    - RSVP status visible to all invitees to coordinate attendance
+  - **Meeting Display** - Meetings appear in My Schedule tab alongside shifts
+    - Color-coded cards based on RSVP status
+    - Shows meeting type icon (video camera for virtual, people for in-person)
+    - Click to view full details including description, invitee list, and video call link
+  - **Meeting Details Modal** - View comprehensive meeting information
+    - Meeting type, date, time, and location/link
+    - Full list of invitees with their RSVP statuses
+    - Organizer name with nickname display
+    - Quick RSVP buttons (Yes/Maybe/No) for invited users
+    - Video call link (clickable for virtual meetings)
+
 - **Shift Signup (All Staff)**:
   - View all upcoming shifts organized by week (Monday-Sunday)
   - Week-based calendar view with actual dates displayed
