@@ -194,6 +194,12 @@ export default function TaskListScreen() {
         }}
         className={`bg-white rounded-2xl p-4 mb-3 border-2 ${statusColor} active:opacity-70`}
       >
+        {/* Task Owner Section */}
+        <View className="mb-3 pb-3 border-b border-[#d7d7d6]">
+          <Text className="text-xs font-semibold text-[#99896c] uppercase">Task for</Text>
+          <Text className="text-base font-bold text-[#3c3832] mt-1">{task.assignedToUserName}</Text>
+        </View>
+
         {/* Header Row */}
         <View className="flex-row justify-between items-start mb-2">
           <View className="flex-1 mr-2">

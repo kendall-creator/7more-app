@@ -42,13 +42,25 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
 
         // Auto-update overdue tasks
         const now = new Date();
+        now.setHours(0, 0, 0, 0); // Set to start of today
+
         const updatedTasks = tasksArray.map((task) => {
           if (
             task.status !== "completed" &&
-            task.dueDate &&
-            new Date(task.dueDate) < now
+            task.dueDate
           ) {
-            return { ...task, status: "overdue" as TaskStatus };
+            // Parse the due date
+            const parts = task.dueDate.split("-");
+            if (parts.length === 3) {
+              const [year, month, day] = parts.map(Number);
+              const dueDate = new Date(year, month - 1, day);
+              dueDate.setHours(0, 0, 0, 0); // Set to start of due date
+
+              // Only mark as overdue if current date is AFTER the due date (not on the same day)
+              if (now.getTime() > dueDate.getTime()) {
+                return { ...task, status: "overdue" as TaskStatus };
+              }
+            }
           }
           return task;
         });
@@ -148,12 +160,23 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
 
   getOverdueTasks: () => {
     const now = new Date();
-    return get().tasks.filter(
-      (task) =>
-        task.status !== "completed" &&
-        task.dueDate &&
-        new Date(task.dueDate) < now
-    );
+    now.setHours(0, 0, 0, 0); // Set to start of today
+
+    return get().tasks.filter((task) => {
+      if (task.status === "completed" || !task.dueDate) return false;
+
+      // Parse the due date
+      const parts = task.dueDate.split("-");
+      if (parts.length === 3) {
+        const [year, month, day] = parts.map(Number);
+        const dueDate = new Date(year, month - 1, day);
+        dueDate.setHours(0, 0, 0, 0);
+
+        // Only overdue if current date is AFTER the due date (not on the same day)
+        return now.getTime() > dueDate.getTime();
+      }
+      return false;
+    });
   },
 }));
 
