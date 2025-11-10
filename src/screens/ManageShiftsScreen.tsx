@@ -80,6 +80,7 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
     { role: "mentor", label: "Mentor" },
     { role: "volunteer", label: "Lead Volunteer" },
     { role: "volunteer_support", label: "Support Volunteer" },
+    { role: "board_member", label: "Board Member" },
   ];
 
   const upcomingShifts = useMemo(() => {

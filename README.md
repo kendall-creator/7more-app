@@ -305,7 +305,7 @@ The app supports seven distinct user roles:
 2. **Bridge Team** - Initial contact and participant intake management
 3. **Mentorship Leader** - Assigns participants to mentors (can assign to themselves) and manages shifts
 4. **Mentor** - Direct participant engagement, progress tracking, and shift volunteering
-5. **Board Member** - View scheduler, can have tasks assigned and assign tasks to others, read-only access to monthly reporting
+5. **Board Member** - View scheduler, can sign up for volunteer shifts, can have tasks assigned and assign tasks to others, read-only access to monthly reporting
 6. **Lead Volunteer** - Can sign up for any available volunteer shift
 7. **Support Volunteer** - Can only sign up for shifts specifically designated for support volunteers
 
