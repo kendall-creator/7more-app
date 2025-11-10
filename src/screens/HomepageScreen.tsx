@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { View, Text, ScrollView, Pressable, Image } from "react-native";
 import { useNavigation, CommonActions } from "@react-navigation/native";
 import { useCurrentUser, useIsImpersonating, useOriginalAdmin, useAuthStore } from "../state/authStore";
 import { useParticipantStore } from "../state/participantStore";
@@ -75,6 +75,48 @@ export default function HomepageScreen() {
     return allParticipants.filter((p) => p.status === "pending_mentor");
   }, [isMentorshipLeader, allParticipants]);
 
+  // Pam Lychner Schedule (Monday-Friday current week) - For Bridge Team
+  const pamLychnerSchedule = useMemo(() => {
+    const now = new Date();
+    const currentDayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+
+    // Calculate start of current week (Monday)
+    const startOfWeek = new Date(now);
+    const daysToMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek; // If Sunday, go back 6 days
+    startOfWeek.setDate(now.getDate() + daysToMonday);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    // Create array for Monday through Friday
+    const weekDays = [];
+    for (let i = 0; i < 5; i++) { // Monday to Friday
+      const day = new Date(startOfWeek);
+      day.setDate(startOfWeek.getDate() + i);
+
+      const year = day.getFullYear();
+      const month = String(day.getMonth() + 1).padStart(2, "0");
+      const dayNum = String(day.getDate()).padStart(2, "0");
+      const dateString = `${year}-${month}-${dayNum}`;
+
+      // Find Pam Lychner shifts for this day (using location field)
+      const dayShifts = shifts.filter(
+        (shift) =>
+          shift.date === dateString &&
+          shift.location === "pam_lychner"
+      );
+
+      weekDays.push({
+        date: dateString,
+        dayName: day.toLocaleDateString("en-US", { weekday: "long" }),
+        dayLabel: day.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        shifts: dayShifts,
+      });
+    }
+
+    return weekDays;
+  }, [shifts]);
+
+  const isBridgeTeam = currentUser?.role === "bridge_team";
+
   const handleReturnToAdmin = () => {
     stopImpersonation();
     navigation.dispatch(
@@ -103,10 +145,19 @@ export default function HomepageScreen() {
     <View className="flex-1 bg-[#f8f8f8]">
       {/* Header */}
       <View className="bg-[#405b69] pt-16 pb-6 px-6">
-        <Text className="text-3xl font-bold text-white mb-1">
-          Welcome back, {currentUser?.name?.split(" ")[0]}!
-        </Text>
-        <Text className="text-white/90 text-sm">Here is your overview for today</Text>
+        <View className="flex-row items-center justify-between">
+          <View className="flex-1">
+            <Text className="text-3xl font-bold text-white mb-1">
+              Welcome back, {currentUser?.name?.split(" ")[0]}!
+            </Text>
+            <Text className="text-white/90 text-sm">Here is your overview for today</Text>
+          </View>
+          <Image
+            source={require("../../assets/7more-logo.jpeg")}
+            style={{ width: 60, height: 60 }}
+            resizeMode="contain"
+          />
+        </View>
       </View>
 
       <ScrollView className="flex-1 px-6 py-4" contentContainerStyle={contentContainerStyle}>
@@ -269,6 +320,87 @@ export default function HomepageScreen() {
             ))
           )}
         </View>
+
+        {/* Pam Lychner Schedule - Bridge Team Only */}
+        {isBridgeTeam && (
+          <View className="bg-white rounded-2xl p-5 mb-4 border border-[#d7d7d6]">
+            <View className="flex-row items-center justify-between mb-3">
+              <View className="flex-row items-center">
+                <Ionicons name="calendar" size={20} color="#99896c" />
+                <Text className="text-base font-bold text-[#3c3832] ml-2">Pam Lychner Schedule</Text>
+              </View>
+              <Pressable onPress={() => navigation.navigate("Scheduler")}>
+                <Text className="text-[#405b69] text-sm font-semibold">View All</Text>
+              </Pressable>
+            </View>
+            {pamLychnerSchedule.map((day) => (
+              <View key={day.date} className="mb-3">
+                <Text className="text-sm font-bold text-[#3c3832] mb-1">
+                  {day.dayName} - {day.dayLabel}
+                </Text>
+                {day.shifts.length === 0 ? (
+                  <View className="bg-gray-50 border border-gray-200 rounded-xl p-3">
+                    <Text className="text-xs text-[#99896c]">No shifts scheduled</Text>
+                  </View>
+                ) : (
+                  day.shifts.map((shift) => (
+                    <View
+                      key={shift.id}
+                      className={`${
+                        shift.assignedUserId || (shift.assignedUsers && shift.assignedUsers.length > 0)
+                          ? "bg-green-50 border-green-200"
+                          : "bg-red-50 border-red-200"
+                      } border rounded-xl p-3 mb-2`}
+                    >
+                      <View className="flex-row items-center justify-between">
+                        <View className="flex-1">
+                          <Text className="text-sm font-semibold text-[#3c3832]">
+                            {shift.startTime} - {shift.endTime}
+                          </Text>
+                          {shift.assignedUserId ? (
+                            <View className="flex-row items-center mt-1">
+                              <Ionicons
+                                name="checkmark-circle"
+                                size={14}
+                                color="#22c55e"
+                              />
+                              <Text className="text-xs text-green-700 ml-1 font-medium">
+                                Covered by {shift.assignedUserName}
+                              </Text>
+                            </View>
+                          ) : shift.assignedUsers && shift.assignedUsers.length > 0 ? (
+                            <View className="mt-1">
+                              <View className="flex-row items-center">
+                                <Ionicons
+                                  name="checkmark-circle"
+                                  size={14}
+                                  color="#22c55e"
+                                />
+                                <Text className="text-xs text-green-700 ml-1 font-medium">
+                                  Covered by {shift.assignedUsers.length} volunteer{shift.assignedUsers.length > 1 ? "s" : ""}
+                                </Text>
+                              </View>
+                              <Text className="text-xs text-green-600 ml-5 mt-0.5">
+                                {shift.assignedUsers.map((u) => u.userName).join(", ")}
+                              </Text>
+                            </View>
+                          ) : (
+                            <View className="flex-row items-center mt-1">
+                              <Ionicons name="alert-circle" size={14} color="#ef4444" />
+                              <Text className="text-xs text-red-700 ml-1 font-medium">
+                                Not covered
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                    </View>
+                  ))
+                )}
+              </View>
+            ))}
+          </View>
+        )}
       </ScrollView>
 
       {/* Impersonation Banner */}
