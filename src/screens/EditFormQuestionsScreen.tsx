@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, Pressable, TextInput, Modal, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useFormConfigStore, FormQuestion } from "../state/formConfigStore";
@@ -9,6 +9,7 @@ export default function EditFormQuestionsScreen({ route, navigation }: any) {
   const updateQuestion = useFormConfigStore((s) => s.updateQuestion);
   const deleteQuestion = useFormConfigStore((s) => s.deleteQuestion);
   const addQuestion = useFormConfigStore((s) => s.addQuestion);
+  const allQuestions = useFormConfigStore((s) => s.questions);
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -22,6 +23,16 @@ export default function EditFormQuestionsScreen({ route, navigation }: any) {
   const [editType, setEditType] = useState<FormQuestion["type"]>("text");
 
   const questions = getQuestionsByFormType(formType);
+
+  // Debug log to see what questions are loaded
+  useEffect(() => {
+    console.log("=== EditFormQuestionsScreen Debug ===");
+    console.log("Form Type:", formType);
+    console.log("All Questions in Store:", allQuestions.length);
+    console.log("Filtered Questions for this form:", questions.length);
+    console.log("Questions:", questions);
+    console.log("=====================================");
+  }, [formType, allQuestions, questions]);
 
   const formTitles: Record<string, string> = {
     initial_contact: "Initial Contact Form",
