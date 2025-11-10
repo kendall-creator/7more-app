@@ -9,6 +9,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "../state/authStore";
 import { useSchedulerStore } from "../state/schedulerStore";
+import { formatUserDisplayName } from "../utils/displayName";
 
 export default function SchedulerScreen({ navigation }: any) {
   const currentUser = useAuthStore((s) => s.currentUser);
@@ -129,7 +130,7 @@ export default function SchedulerScreen({ navigation }: any) {
   const handleSignUp = async () => {
     if (!selectedShift || !currentUser) return;
 
-    const success = await signUpForShift(selectedShift.id, currentUser.id, currentUser.name, userRole);
+    const success = await signUpForShift(selectedShift.id, currentUser.id, currentUser.name, userRole, currentUser.nickname);
 
     if (success) {
       setSuccessMessage(`You are signed up for ${selectedShift.title}`);
@@ -235,7 +236,7 @@ export default function SchedulerScreen({ navigation }: any) {
             <View className="flex-row flex-wrap gap-2">
               {assignedUsers.map((user: any, idx: number) => (
                 <View key={idx} className="bg-gray-100 rounded-lg px-2 py-1">
-                  <Text className="text-xs text-gray-700">{user.userName}</Text>
+                  <Text className="text-xs text-gray-700">{formatUserDisplayName(user.userName, user.userNickname)}</Text>
                 </View>
               ))}
             </View>
@@ -503,7 +504,7 @@ export default function SchedulerScreen({ navigation }: any) {
                       {selectedShift.assignedUsers.map((assignment: any) => (
                         <View key={assignment.userId} className="flex-row items-center mb-1">
                           <Ionicons name="person" size={16} color="#6B7280" />
-                          <Text className="text-sm text-gray-600 ml-2">{assignment.userName}</Text>
+                          <Text className="text-sm text-gray-600 ml-2">{formatUserDisplayName(assignment.userName, assignment.userNickname)}</Text>
                         </View>
                       ))}
                     </View>

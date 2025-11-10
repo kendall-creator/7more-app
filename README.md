@@ -367,7 +367,14 @@ The app supports seven distinct user roles:
 #### User Management (Admin Only)
 - **Invite-only system** - Add new users who can then log in with their credentials
 - **Automatic password generation** - System generates passwords based on user's name (first initial + last name, e.g., "John Doe" → "jdoe")
-- **Optional nickname field** - Add an optional nickname for users (displayed alongside full name)
+- **Optional nickname field** - Add an optional nickname for users (displayed alongside full name throughout the app)
+- **Nickname display** - Nicknames appear in format "John Doe (Johnny)" wherever users are shown:
+  - Scheduler and shift assignments
+  - User management screens
+  - Search results
+  - Mentorship assignments
+  - Task assignments
+  - All other user name displays
 - **Welcome emails** - Automatically send welcome emails with login credentials (optional email service)
 - **Password reset** - Admins can reset any user's password (generates new password from their name)
 - **User-controlled password changes** - Users can change their password anytime they want (no forced changes)

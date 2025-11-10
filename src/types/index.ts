@@ -306,6 +306,7 @@ export interface ShiftTemplate {
 export interface ShiftAssignment {
   userId: string;
   userName: string;
+  userNickname?: string; // Optional nickname
   userRole: UserRole;
   signedUpAt: string; // ISO timestamp
 }
@@ -315,10 +316,12 @@ export interface MentorshipAssignment {
   id: string;
   mentorId: string;
   mentorName: string;
+  mentorNickname?: string; // Optional nickname
   menteeId: string; // Participant ID
   menteeName: string;
   assignedBy: string; // Mentor leader or admin user ID
   assignedByName: string;
+  assignedByNickname?: string; // Optional nickname
   assignedAt: string; // ISO timestamp
   status: "active" | "completed" | "inactive";
   notes?: string;

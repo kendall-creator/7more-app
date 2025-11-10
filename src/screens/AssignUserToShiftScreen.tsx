@@ -4,10 +4,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { useUsersStore } from "../state/usersStore";
 import { useSchedulerStore } from "../state/schedulerStore";
 import { UserRole } from "../types";
+import { formatUserDisplayName } from "../utils/displayName";
 
 interface InvitedUser {
   id: string;
   name: string;
+  nickname?: string;
   email: string;
   role: UserRole;
   password: string;
@@ -31,17 +33,18 @@ export default function AssignUserToShiftScreen({ route, navigation }: any) {
     return invitedUsers.filter((user: InvitedUser) => {
       const matchesSearch =
         user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchQuery.toLowerCase());
+        user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (user.nickname && user.nickname.toLowerCase().includes(searchQuery.toLowerCase()));
       return matchesSearch;
     });
   }, [invitedUsers, searchQuery]);
 
-  const handleAssignUser = async (userId: string, userName: string, userRole: UserRole) => {
+  const handleAssignUser = async (userId: string, userName: string, userRole: UserRole, userNickname?: string) => {
     setIsAssigning(true);
     try {
-      const success = await adminAssignUserToShift(shift.id, userId, userName, userRole);
+      const success = await adminAssignUserToShift(shift.id, userId, userName, userRole, userNickname);
       if (success) {
-        Alert.alert("Success", `${userName} has been assigned to this shift.`, [
+        Alert.alert("Success", `${formatUserDisplayName(userName, userNickname)} has been assigned to this shift.`, [
           {
             text: "OK",
             onPress: () => navigation.goBack(),
@@ -93,7 +96,7 @@ export default function AssignUserToShiftScreen({ route, navigation }: any) {
                 className="bg-green-50 border border-green-200 rounded-lg px-3 py-2 flex-row items-center"
               >
                 <Ionicons name="person" size={16} color="#16A34A" />
-                <Text className="text-sm text-green-900 ml-2 flex-1">{assignment.userName}</Text>
+                <Text className="text-sm text-green-900 ml-2 flex-1">{formatUserDisplayName(assignment.userName, assignment.userNickname)}</Text>
                 <Text className="text-xs text-green-600">{assignment.userRole}</Text>
               </View>
             ))}
@@ -134,7 +137,7 @@ export default function AssignUserToShiftScreen({ route, navigation }: any) {
                   key={user.id}
                   onPress={() => {
                     if (!isAssigned && !isAssigning) {
-                      handleAssignUser(user.id, user.name, user.role);
+                      handleAssignUser(user.id, user.name, user.role, user.nickname);
                     }
                   }}
                   disabled={isAssigned || isAssigning}
@@ -149,7 +152,7 @@ export default function AssignUserToShiftScreen({ route, navigation }: any) {
                   <View className="flex-row items-center justify-between">
                     <View className="flex-1">
                       <Text className={`text-base font-semibold ${isAssigned ? "text-gray-400" : "text-gray-900"}`}>
-                        {user.name}
+                        {formatUserDisplayName(user.name, user.nickname)}
                       </Text>
                       <Text className={`text-sm ${isAssigned ? "text-gray-400" : "text-gray-600"}`}>
                         {user.email}

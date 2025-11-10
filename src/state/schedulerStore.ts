@@ -35,13 +35,13 @@ interface SchedulerActions {
   deleteRecurringGroup: (recurringGroupId: string) => Promise<void>;
 
   // Sign up for shift
-  signUpForShift: (shiftId: string, userId: string, userName: string, userRole: UserRole) => Promise<boolean>;
+  signUpForShift: (shiftId: string, userId: string, userName: string, userRole: UserRole, userNickname?: string) => Promise<boolean>;
 
   // Cancel shift signup
   cancelShiftSignup: (shiftId: string, userId: string) => Promise<void>;
 
   // Admin assign user to shift
-  adminAssignUserToShift: (shiftId: string, userId: string, userName: string, userRole: UserRole) => Promise<boolean>;
+  adminAssignUserToShift: (shiftId: string, userId: string, userName: string, userRole: UserRole, userNickname?: string) => Promise<boolean>;
 
   // Get shifts for a specific date range
   getShiftsByDateRange: (startDate: string, endDate: string) => Shift[];
@@ -198,7 +198,7 @@ export const useSchedulerStore = create<SchedulerStore>()((set, get) => ({
     }
   },
 
-  signUpForShift: async (shiftId, userId, userName, userRole) => {
+  signUpForShift: async (shiftId, userId, userName, userRole, userNickname) => {
     if (!database) {
       throw new Error("Firebase not configured. Please add Firebase credentials in ENV tab.");
     }
@@ -219,6 +219,7 @@ export const useSchedulerStore = create<SchedulerStore>()((set, get) => ({
     const newAssignment: ShiftAssignment = {
       userId,
       userName,
+      userNickname,
       userRole,
       signedUpAt: new Date().toISOString(),
     };
@@ -259,8 +260,8 @@ export const useSchedulerStore = create<SchedulerStore>()((set, get) => ({
     await firebaseSet(shiftRef, updatedShift);
   },
 
-  adminAssignUserToShift: async (shiftId, userId, userName, userRole) => {
-    console.log("adminAssignUserToShift called:", { shiftId, userId, userName, userRole });
+  adminAssignUserToShift: async (shiftId, userId, userName, userRole, userNickname) => {
+    console.log("adminAssignUserToShift called:", { shiftId, userId, userName, userRole, userNickname });
 
     if (!database) {
       console.error("Firebase not configured");
@@ -291,6 +292,7 @@ export const useSchedulerStore = create<SchedulerStore>()((set, get) => ({
     const newAssignment: ShiftAssignment = {
       userId,
       userName,
+      userNickname,
       userRole,
       signedUpAt: new Date().toISOString(),
     };
