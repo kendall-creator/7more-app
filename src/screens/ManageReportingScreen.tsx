@@ -273,7 +273,7 @@ export default function ManageReportingScreen() {
 
     await updateSocialMediaMetrics(currentReport.id, {
       reelsPostViews: reelsPostViews === "" ? null : parseInt(reelsPostViews) || null,
-      viewsFromNonFollowers: viewsFromNonFollowers === "" ? null : parseInt(viewsFromNonFollowers) || null,
+      viewsFromNonFollowers: viewsFromNonFollowers === "" ? null : parseFloat(viewsFromNonFollowers) || null,
       followers: followers === "" ? null : parseInt(followers) || null,
       followersGained: followersGained === "" ? null : parseInt(followersGained) || null,
     });
@@ -838,15 +838,16 @@ export default function ManageReportingScreen() {
                   </View>
 
                   <View>
-                    <Text className="text-gray-700 mb-1">Views from Non-Followers</Text>
+                    <Text className="text-gray-700 mb-1">Views from Non-Followers (%)</Text>
                     <TextInput
                       className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-300"
                       value={viewsFromNonFollowers}
                       onChangeText={setViewsFromNonFollowers}
-                      placeholder="Views from non-followers"
-                      keyboardType="number-pad"
+                      placeholder="Percentage (e.g., 45 for 45%)"
+                      keyboardType="decimal-pad"
                       editable={canEdit}
                     />
+                    <Text className="text-xs text-gray-500 mt-1">Enter as a percentage (0-100)</Text>
                   </View>
 
                   <View>

@@ -933,7 +933,7 @@ To enable automatic welcome and password reset emails:
 
 6. **Social Media Metrics (Manual Input)**
    - Reels/Post Views - combined total of reels and post views
-   - Views from Non-Followers - views from users who don't follow the account
+   - Views from Non-Followers (%) - percentage of views from non-followers (0-100)
    - Total Followers - current follower count
    - Followers Gained (+/-) - net change in followers (positive for gains, negative for losses)
 
