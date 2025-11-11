@@ -8,12 +8,20 @@ A comprehensive mobile application built with Expo and React Native to help nonp
 - `.env` file is in `.gitignore` - will never be committed to git
 - `.env.backup` file created as recovery backup (also in `.gitignore`)
 - `.env.example` template updated for easy restoration if needed
+- **Backend has separate `.env` file** in `/backend/.env` with email credentials
 - All environment variables are properly secured
 
 **If your `.env` file gets deleted again:**
 1. Check the `.env.backup` file in your workspace directory
-2. Copy contents from `.env.backup` to a new `.env` file
+2. Copy contents from `.env.backup` to a new `.env` file: `cp .env.backup .env`
 3. Or reference `.env.example` and re-add your values from the ENV tab in Vibecode app
+
+**Backend Email Service:**
+- Backend server automatically starts with email credentials
+- Server runs on port 3001 with Gmail SMTP configured
+- Auto-start script available: `./backend/auto-start.sh`
+- Backend `.env` contains: BRIDGE_TEAM_EMAIL, BRIDGE_TEAM_EMAIL_PASSWORD, EMAIL_API_KEY
+- Frontend `.env` contains: EXPO_PUBLIC_BACKEND_URL, EXPO_PUBLIC_BACKEND_API_KEY
 
 ## IMPORTANT: Firebase Setup Required
 
@@ -226,7 +234,8 @@ Your app now sends emails directly from **bridgeteam@7more.net** using Gmail SMT
 - Default backend URL: http://172.17.0.1:3001 (Docker host IP)
 - Check health: `curl http://172.17.0.1:3001/api/health`
 - View logs: Check expo.log file or backend console output
-- Restart if needed: `cd backend && node server.js &`
+- Restart if needed: `cd backend && node server.js > /tmp/backend-server.log 2>&1 &`
+- **Backend now has its own `.env` file** with email credentials (separate from app `.env`)
 
 **Troubleshooting Connection Issues**:
 If you see "Network request failed" errors:
