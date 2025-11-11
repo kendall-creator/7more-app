@@ -57,6 +57,11 @@ export default function EditUserScreen({ navigation, route }: any) {
       description: "Initial contact and participant processing",
     },
     {
+      value: "bridge_team_leader",
+      label: "Bridge Team Leader",
+      description: "Admin capabilities but only for Bridge Team items",
+    },
+    {
       value: "mentorship_leader",
       label: "Mentorship Leader",
       description: "Assign participants to mentors and manage shifts",
