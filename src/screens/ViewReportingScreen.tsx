@@ -258,6 +258,23 @@ export default function ViewReportingScreen() {
     } else if (field.startsWith("callMetrics.")) {
       const callField = field.split(".")[1] as keyof typeof prevReport.callMetrics;
       prevValue = prevReport.callMetrics?.[callField] || 0;
+    } else if (field.startsWith("bridgeTeamMetrics.")) {
+      // Handle Bridge Team metrics with manual override support
+      const fieldParts = field.split(".");
+      if (fieldParts.length === 3 && fieldParts[1] === "participantsReceived") {
+        // bridgeTeamMetrics.participantsReceived.autoCalculated
+        prevValue = prevReport.bridgeTeamMetrics?.participantsReceived?.manualOverride ??
+                    prevReport.bridgeTeamMetrics?.participantsReceived?.autoCalculated ?? 0;
+      } else if (fieldParts.length === 4 && fieldParts[1] === "statusCounts") {
+        // bridgeTeamMetrics.statusCounts.pendingBridge.autoCalculated
+        const statusField = fieldParts[2] as "pendingBridge" | "attemptedToContact" | "contacted" | "unableToContact";
+        prevValue = prevReport.bridgeTeamMetrics?.statusCounts?.[statusField]?.manualOverride ??
+                    prevReport.bridgeTeamMetrics?.statusCounts?.[statusField]?.autoCalculated ?? 0;
+      } else if (fieldParts.length === 3 && fieldParts[1] === "averageDaysToFirstOutreach") {
+        // bridgeTeamMetrics.averageDaysToFirstOutreach.autoCalculated
+        prevValue = prevReport.bridgeTeamMetrics?.averageDaysToFirstOutreach?.manualOverride ??
+                    prevReport.bridgeTeamMetrics?.averageDaysToFirstOutreach?.autoCalculated ?? 0;
+      }
     } else if (field.startsWith("mentorshipMetrics.")) {
       const mentorField = field.split(".")[1] as keyof typeof prevReport.mentorshipMetrics;
       prevValue = prevReport.mentorshipMetrics?.[mentorField] || 0;
