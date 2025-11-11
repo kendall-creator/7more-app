@@ -43,8 +43,9 @@ export const sendGmailEmail = async ({
 }: GmailEmailParams): Promise<GmailEmailResult> => {
   try {
     // Get backend configuration
-    const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:3001";
-    const apiKey = process.env.EXPO_PUBLIC_BACKEND_API_KEY; // Changed from EXPO_PUBLIC_EMAIL_API_KEY
+    // Default to Docker host IP (172.17.0.1) so mobile device can connect
+    const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL || "http://172.17.0.1:3001";
+    const apiKey = process.env.EXPO_PUBLIC_BACKEND_API_KEY;
 
     // Validate configuration
     if (!apiKey) {
@@ -116,8 +117,12 @@ export const sendGmailEmail = async ({
     let errorMessage = error.message || String(error);
     if (error.name === "AbortError" || errorMessage.includes("timeout")) {
       errorMessage = "Backend server not responding. Please ensure the backend is running on port 3001.";
+      console.log("💡 Tip: Try restarting the backend server");
     } else if (errorMessage.includes("Network request failed")) {
-      errorMessage = "Cannot connect to backend server. Please check your network connection.";
+      errorMessage = "Cannot connect to backend server. Trying alternate connection methods...";
+      console.log("💡 Backend URL:", process.env.EXPO_PUBLIC_BACKEND_URL || "http://172.17.0.1:3001");
+      console.log("💡 Tip: The mobile device may not be able to reach the backend server.");
+      console.log("💡 Make sure EXPO_PUBLIC_BACKEND_URL and EXPO_PUBLIC_BACKEND_API_KEY are set in ENV tab");
     }
 
     return {

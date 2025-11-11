@@ -209,9 +209,20 @@ Your app now sends emails directly from **bridgeteam@7more.net** using Gmail SMT
 
 **Backend Server Management**:
 - Server runs automatically on port 3001
-- Check health: `curl http://172.17.0.2:3001/api/health`
+- Backend listens on 0.0.0.0 (all interfaces) to accept connections from mobile devices
+- Default backend URL: http://172.17.0.1:3001 (Docker host IP)
+- Check health: `curl http://172.17.0.1:3001/api/health`
 - View logs: Check expo.log file or backend console output
 - Restart if needed: `cd backend && node server.js &`
+
+**Troubleshooting Connection Issues**:
+If you see "Network request failed" errors:
+1. **Add environment variables in ENV tab** (most common fix):
+   - `EXPO_PUBLIC_BACKEND_URL` = `http://172.17.0.1:3001`
+   - `EXPO_PUBLIC_BACKEND_API_KEY` = `7more-secure-api-key-2024`
+2. **Restart the Vibecode app** after adding ENV variables
+3. Check logs for connection details: Look for "Backend URL:" in expo.log
+4. Verify backend is running: Run `ps aux | grep "node server.js"`
 
 ### 📧 Resend Email Integration (Alternative - Optional)
 
