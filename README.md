@@ -2,42 +2,28 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## ✅ LATEST UPDATE: Email Button Now Working!
+## 🚨 ENVIRONMENT VARIABLES KEEP DISAPPEARING?
 
-**What was fixed:**
-- Backend server is now running on port 3001
-- Email service is configured and ready
-- The Email button on Bridge Team Follow-Up Form now works!
+**👉 SEE [ENVIRONMENT_VARIABLES_REQUIRED.md](./ENVIRONMENT_VARIABLES_REQUIRED.md) FOR COMPLETE RESTORATION GUIDE**
 
-**To use the Email button:**
+This is a **Vibecode platform issue**. Environment variables are managed through the **ENV tab** in your Vibecode mobile app, NOT through `.env` files.
+
+**Why This Keeps Happening:**
+- Vibecode injects environment variables at runtime through their infrastructure
+- The ENV tab data can be cleared during workspace resets or app updates
+- This is NOT a code issue - it's how the Vibecode platform works
+
+**Quick Fix (2 minutes):**
 1. Open the **ENV tab** in your Vibecode app
-2. Add these two environment variables:
+2. Add these minimum required variables for email functionality:
    - `EXPO_PUBLIC_BACKEND_URL` = `http://172.17.0.1:3001`
    - `EXPO_PUBLIC_BACKEND_API_KEY` = `bridge-email-v1-7more-secure-2025`
-3. The Email button will now send emails successfully via Gmail SMTP!
+3. Add all 8 Firebase variables (see reference document above)
 
-The backend server will automatically restart when you reopen your workspace.
-
-## IMPORTANT: Environment Variable Protection
-
-**Your environment variables are protected with multiple safeguards:**
-- `.env` file is in `.gitignore` - will never be committed to git
-- `.env.backup` file created as recovery backup (also in `.gitignore`)
-- `.env.example` template updated for easy restoration if needed
-- **Backend has separate `.env` file** in `/backend/.env` with email credentials
-- All environment variables are properly secured
-
-**If your `.env` file gets deleted again:**
-1. Check the `.env.backup` file in your workspace directory
-2. Copy contents from `.env.backup` to a new `.env` file: `cp .env.backup .env`
-3. Or reference `.env.example` and re-add your values from the ENV tab in Vibecode app
-
-**Backend Email Service:**
-- Backend server runs on port 3001 with Gmail SMTP configured for Bridge Team emails
-- Server must be running for email functionality to work
-- Backend `.env` contains: BRIDGE_TEAM_EMAIL, BRIDGE_TEAM_EMAIL_PASSWORD, EMAIL_API_KEY
-- Frontend `.env` contains: EXPO_PUBLIC_BACKEND_URL (http://172.17.0.1:3001), EXPO_PUBLIC_BACKEND_API_KEY
-- Email button on Bridge Team follow-up form now works via backend server
+**Backend Server Status:**
+- ✅ Backend server is running on port 3001
+- ✅ Gmail SMTP is configured for bridgeteam@7more.net
+- ✅ Email button is ready to work once you add the ENV variables
 
 ## IMPORTANT: Firebase Setup Required
 
