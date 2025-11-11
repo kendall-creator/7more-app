@@ -43,7 +43,7 @@ export const sendGmailEmail = async ({
 }: GmailEmailParams): Promise<GmailEmailResult> => {
   try {
     // Get backend configuration
-    const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL || "http://172.17.0.2:3001";
+    const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:3001";
     const apiKey = process.env.EXPO_PUBLIC_BACKEND_API_KEY; // Changed from EXPO_PUBLIC_EMAIL_API_KEY
 
     // Validate configuration
@@ -64,45 +64,65 @@ export const sendGmailEmail = async ({
     console.log(`   Subject: ${subject}`);
     if (replyTo) console.log(`   Reply-To: ${replyTo}`);
 
-    // Send request to backend email endpoint
-    const response = await fetch(`${backendUrl}/api/send-email`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        to,
-        subject,
-        body: html || body,
-        replyTo,
-      }),
-    });
+    // Send request to backend email endpoint with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-    const result = await response.json();
+    try {
+      const response = await fetch(`${backendUrl}/api/send-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          to,
+          subject,
+          body: html || body,
+          replyTo,
+        }),
+        signal: controller.signal,
+      });
 
-    if (!response.ok) {
-      console.error("❌ Backend email service error:", result.error);
+      clearTimeout(timeoutId);
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.error("❌ Backend email service error:", result.error);
+        return {
+          success: false,
+          error: result.error || `Backend returned ${response.status}`,
+        };
+      }
+
+      console.log("✅ Email sent successfully via Gmail SMTP");
+      if (result.messageId) {
+        console.log(`   Message ID: ${result.messageId}`);
+      }
+
       return {
-        success: false,
-        error: result.error || `Backend returned ${response.status}`,
+        success: true,
+        messageId: result.messageId,
       };
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId);
+      throw fetchError;
     }
-
-    console.log("✅ Email sent successfully via Gmail SMTP");
-    if (result.messageId) {
-      console.log(`   Message ID: ${result.messageId}`);
-    }
-
-    return {
-      success: true,
-      messageId: result.messageId,
-    };
   } catch (error: any) {
     console.error("Error sending Gmail SMTP email:", error);
+
+    // Provide more helpful error messages
+    let errorMessage = error.message || String(error);
+    if (error.name === "AbortError" || errorMessage.includes("timeout")) {
+      errorMessage = "Backend server not responding. Please ensure the backend is running on port 3001.";
+    } else if (errorMessage.includes("Network request failed")) {
+      errorMessage = "Cannot connect to backend server. Please check your network connection.";
+    }
+
     return {
       success: false,
-      error: error.message || String(error),
+      error: errorMessage,
     };
   }
 };
