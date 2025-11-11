@@ -974,7 +974,7 @@ To enable automatic welcome and password reset emails:
   - Save each category independently
 
 - **By Category View:**
-  - Category Selection - Choose from Releasees, Calls, Mentorship, Bridge Team, Donors, Financials, or Social Media
+  - Category Selection - Choose from Releasees, Calls, Bridge Team, Mentorship, Donors, Financials, or Social Media
   - Year Selection - Pick any year to view/edit all 12 months
   - Grid layout shows all months for the selected category
   - Enter data for each month in a compact 3-column grid (Jan, Feb, Mar, etc.)
@@ -1002,12 +1002,7 @@ To enable automatic welcome and password reset emails:
      - Missed call due to users not answering (%)
    - Validation: Warns if subcategories don't equal Missed Calls %
 
-3. **Mentorship (Auto-Calculated)**
-   - Participants Assigned to Mentorship - automatically pulled from app data
-   - Calculated from previous month's assignments
-   - Refresh button to update from current data
-
-4. **Bridge Team (Auto-Calculated)**
+3. **Bridge Team (Auto-Calculated)**
    - Participants Received - total participants received by Bridge Team during the month
    - Status Activity:
      - Pending Bridge - participants in pending status
@@ -1017,6 +1012,11 @@ To enable automatic welcome and password reset emails:
    - Average Days to First Outreach - average time from submission to first contact
    - Forms by Day of Week - distribution of intake form submissions by day
    - All metrics automatically calculated from app data
+   - Refresh button to update from current data
+
+4. **Mentorship (Auto-Calculated)**
+   - Participants Assigned to Mentorship - automatically pulled from app data
+   - Calculated from previous month's assignments
    - Refresh button to update from current data
 
 5. **Donors (Manual Input)**

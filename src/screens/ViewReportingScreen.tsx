@@ -16,7 +16,7 @@ import { ReportingCategory } from "../types";
 
 type ViewMode = "single" | "range";
 type AggregationType = "total" | "average";
-type CategoryFilter = "all" | "releasees" | "calls" | "mentorship" | "bridge_team" | "donors" | "financials" | "social_media";
+type CategoryFilter = "all" | "releasees" | "calls" | "bridge_team" | "mentorship" | "donors" | "financials" | "social_media";
 
 export default function ViewReportingScreen() {
   const navigation = useNavigation<any>();
@@ -359,14 +359,6 @@ export default function ViewReportingScreen() {
           </View>
         )}
 
-        {/* Mentorship */}
-        {canViewCategory("mentorship") && (categoryFilter === "all" || categoryFilter === "mentorship") && report.mentorshipMetrics && (
-          <View className="bg-white rounded-lg p-4 mb-4 mx-4 border border-gray-200">
-            <Text className="text-lg font-bold text-gray-900 mb-3">Mentorship</Text>
-            {renderMetricRow("Participants Assigned", report.mentorshipMetrics.participantsAssignedToMentorship, "mentorshipMetrics.participantsAssignedToMentorship", report)}
-          </View>
-        )}
-
         {/* Bridge Team */}
         {canViewCategory("bridge_team") && (categoryFilter === "all" || categoryFilter === "bridge_team") && report.bridgeTeamMetrics?.participantsReceived && (
           <View className="bg-white rounded-lg p-4 mb-4 mx-4 border border-gray-200">
@@ -390,6 +382,14 @@ export default function ViewReportingScreen() {
                 {viewMode === "single" && <ComparisonIndicator value={report.bridgeTeamMetrics.averageDaysToFirstOutreach?.manualOverride ?? report.bridgeTeamMetrics.averageDaysToFirstOutreach?.autoCalculated ?? 0} field="bridgeTeamMetrics.averageDaysToFirstOutreach.autoCalculated" report={report} />}
               </View>
             </View>
+          </View>
+        )}
+
+        {/* Mentorship */}
+        {canViewCategory("mentorship") && (categoryFilter === "all" || categoryFilter === "mentorship") && report.mentorshipMetrics && (
+          <View className="bg-white rounded-lg p-4 mb-4 mx-4 border border-gray-200">
+            <Text className="text-lg font-bold text-gray-900 mb-3">Mentorship</Text>
+            {renderMetricRow("Participants Assigned", report.mentorshipMetrics.participantsAssignedToMentorship, "mentorshipMetrics.participantsAssignedToMentorship", report)}
           </View>
         )}
 
@@ -519,17 +519,6 @@ export default function ViewReportingScreen() {
           </View>
         )}
 
-        {/* Mentorship */}
-        {(categoryFilter === "all" || categoryFilter === "mentorship") && (
-          <View className="bg-white rounded-lg p-4 mb-4 mx-4 border border-gray-200">
-            <Text className="text-lg font-bold text-gray-900 mb-3">Mentorship</Text>
-            <View className="flex-row justify-between py-2">
-              <Text className="text-gray-700">Participants Assigned</Text>
-              <Text className="text-gray-900 font-semibold">{formatNumber(aggregatedMetrics.mentorship.participantsAssignedToMentorship)}</Text>
-            </View>
-          </View>
-        )}
-
         {/* Bridge Team */}
         {(categoryFilter === "all" || categoryFilter === "bridge_team") && (
           <View className="bg-white rounded-lg p-4 mb-4 mx-4 border border-gray-200">
@@ -562,6 +551,17 @@ export default function ViewReportingScreen() {
             <View className="flex-row justify-between py-2 border-t border-gray-100 mt-2">
               <Text className="text-gray-700">Avg Days to First Outreach</Text>
               <Text className="text-gray-900 font-semibold">{formatNumber(aggregatedMetrics.bridgeTeam.averageDaysToFirstOutreach)} days</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Mentorship */}
+        {(categoryFilter === "all" || categoryFilter === "mentorship") && (
+          <View className="bg-white rounded-lg p-4 mb-4 mx-4 border border-gray-200">
+            <Text className="text-lg font-bold text-gray-900 mb-3">Mentorship</Text>
+            <View className="flex-row justify-between py-2">
+              <Text className="text-gray-700">Participants Assigned</Text>
+              <Text className="text-gray-900 font-semibold">{formatNumber(aggregatedMetrics.mentorship.participantsAssignedToMentorship)}</Text>
             </View>
           </View>
         )}
@@ -725,8 +725,8 @@ export default function ViewReportingScreen() {
             { key: "all", label: "All" },
             { key: "releasees", label: "Releasees" },
             { key: "calls", label: "Calls" },
-            { key: "mentorship", label: "Mentorship" },
             { key: "bridge_team", label: "Bridge Team" },
+            { key: "mentorship", label: "Mentorship" },
             { key: "donors", label: "Donors" },
             { key: "financials", label: "Financials" },
             { key: "social_media", label: "Social Media" },
