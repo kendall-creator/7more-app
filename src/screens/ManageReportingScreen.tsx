@@ -821,7 +821,7 @@ export default function ManageReportingScreen() {
               </View>
 
               {/* 4. Bridge Team Metrics (Auto-Calculated) */}
-              {currentReport.bridgeTeamMetrics && (
+              {currentReport.bridgeTeamMetrics?.participantsReceived && (
                 <View className="bg-white rounded-lg p-4 mb-4 border border-gray-200">
                   <Text className="text-lg font-bold text-gray-900 mb-3">4. Bridge Team</Text>
                   <Text className="text-sm text-gray-500 mb-3">Auto-calculated from app data</Text>
@@ -842,28 +842,28 @@ export default function ManageReportingScreen() {
                       <View className="flex-row justify-between py-1 pl-4">
                         <Text className="text-gray-600">Pending Bridge</Text>
                         <Text className="text-gray-900">
-                          {formatNumber(currentReport.bridgeTeamMetrics.statusCounts.pendingBridge.manualOverride ?? currentReport.bridgeTeamMetrics.statusCounts.pendingBridge.autoCalculated)}
+                          {formatNumber(currentReport.bridgeTeamMetrics.statusCounts?.pendingBridge?.manualOverride ?? currentReport.bridgeTeamMetrics.statusCounts?.pendingBridge?.autoCalculated ?? 0)}
                         </Text>
                       </View>
 
                       <View className="flex-row justify-between py-1 pl-4">
                         <Text className="text-gray-600">Attempted to Contact</Text>
                         <Text className="text-gray-900">
-                          {formatNumber(currentReport.bridgeTeamMetrics.statusCounts.attemptedToContact.manualOverride ?? currentReport.bridgeTeamMetrics.statusCounts.attemptedToContact.autoCalculated)}
+                          {formatNumber(currentReport.bridgeTeamMetrics.statusCounts?.attemptedToContact?.manualOverride ?? currentReport.bridgeTeamMetrics.statusCounts?.attemptedToContact?.autoCalculated ?? 0)}
                         </Text>
                       </View>
 
                       <View className="flex-row justify-between py-1 pl-4">
                         <Text className="text-gray-600">Contacted</Text>
                         <Text className="text-gray-900">
-                          {formatNumber(currentReport.bridgeTeamMetrics.statusCounts.contacted.manualOverride ?? currentReport.bridgeTeamMetrics.statusCounts.contacted.autoCalculated)}
+                          {formatNumber(currentReport.bridgeTeamMetrics.statusCounts?.contacted?.manualOverride ?? currentReport.bridgeTeamMetrics.statusCounts?.contacted?.autoCalculated ?? 0)}
                         </Text>
                       </View>
 
                       <View className="flex-row justify-between py-1 pl-4">
                         <Text className="text-gray-600">Unable to Contact</Text>
                         <Text className="text-gray-900">
-                          {formatNumber(currentReport.bridgeTeamMetrics.statusCounts.unableToContact.manualOverride ?? currentReport.bridgeTeamMetrics.statusCounts.unableToContact.autoCalculated)}
+                          {formatNumber(currentReport.bridgeTeamMetrics.statusCounts?.unableToContact?.manualOverride ?? currentReport.bridgeTeamMetrics.statusCounts?.unableToContact?.autoCalculated ?? 0)}
                         </Text>
                       </View>
                     </View>
@@ -872,30 +872,32 @@ export default function ManageReportingScreen() {
                     <View className="flex-row justify-between py-2 border-t border-gray-100 mt-2 pt-2">
                       <Text className="text-gray-700">Avg Days to First Outreach</Text>
                       <Text className="text-gray-900 font-semibold">
-                        {formatNumber(currentReport.bridgeTeamMetrics.averageDaysToFirstOutreach.manualOverride ?? currentReport.bridgeTeamMetrics.averageDaysToFirstOutreach.autoCalculated)} days
+                        {formatNumber(currentReport.bridgeTeamMetrics.averageDaysToFirstOutreach?.manualOverride ?? currentReport.bridgeTeamMetrics.averageDaysToFirstOutreach?.autoCalculated ?? 0)} days
                       </Text>
                     </View>
 
                     {/* Forms by Day of Week */}
-                    <View className="mt-2 pt-2 border-t border-gray-100">
-                      <Text className="text-sm font-semibold text-gray-700 mb-2">Forms Received by Day:</Text>
-                      <View className="flex-row flex-wrap gap-2">
-                        {Object.entries(currentReport.bridgeTeamMetrics.formsByDayOfWeek)
-                          .filter(([key]) => key !== "topDay")
-                          .map(([day, count]) => (
-                            <View key={day} className="bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
-                              <Text className="text-xs text-gray-600 capitalize">{day.substring(0, 3)}</Text>
-                              <Text className="text-sm font-bold text-gray-900">{String(count)}</Text>
-                            </View>
-                          ))}
+                    {currentReport.bridgeTeamMetrics.formsByDayOfWeek && (
+                      <View className="mt-2 pt-2 border-t border-gray-100">
+                        <Text className="text-sm font-semibold text-gray-700 mb-2">Forms Received by Day:</Text>
+                        <View className="flex-row flex-wrap gap-2">
+                          {Object.entries(currentReport.bridgeTeamMetrics.formsByDayOfWeek)
+                            .filter(([key]) => key !== "topDay")
+                            .map(([day, count]) => (
+                              <View key={day} className="bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
+                                <Text className="text-xs text-gray-600 capitalize">{day.substring(0, 3)}</Text>
+                                <Text className="text-sm font-bold text-gray-900">{String(count)}</Text>
+                              </View>
+                            ))}
+                        </View>
+                        <View className="mt-2 bg-indigo-50 px-3 py-2 rounded-lg border border-indigo-200">
+                          <Text className="text-sm text-indigo-900">
+                            <Text className="font-semibold">Top Day: </Text>
+                            {currentReport.bridgeTeamMetrics.formsByDayOfWeek.topDay}
+                          </Text>
+                        </View>
                       </View>
-                      <View className="mt-2 bg-indigo-50 px-3 py-2 rounded-lg border border-indigo-200">
-                        <Text className="text-sm text-indigo-900">
-                          <Text className="font-semibold">Top Day: </Text>
-                          {currentReport.bridgeTeamMetrics.formsByDayOfWeek.topDay}
-                        </Text>
-                      </View>
-                    </View>
+                    )}
                   </View>
                 </View>
               )}
