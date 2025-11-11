@@ -464,6 +464,11 @@ export interface Task {
   relatedParticipantName?: string;
 
   notes?: string;
+
+  // Recurring task fields
+  isRecurring?: boolean;
+  recurringFrequency?: "daily" | "weekly" | "monthly";
+  recurringParentId?: string; // ID of the original task if this is a recurrence
 }
 
 export interface TaskTemplate {

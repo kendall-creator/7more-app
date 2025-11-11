@@ -646,6 +646,7 @@ To enable automatic welcome and password reset emails:
   - Displays who assigned the task
   - **Participant attachment displayed immediately** - When tasks are linked to participants, the participant name is shown dynamically and is clickable to navigate to their profile
   - Custom form indicators when forms are attached
+  - **Recurring task badges** - Visual indicators show which tasks repeat (daily, weekly, monthly)
 - **Task Creation & Management** (Admins & Mentorship Leaders)
   - Admins have dedicated "Tasks" tab for full task management
   - Mentorship Leaders have "Assign Tasks" tab to create tasks for their mentors
@@ -655,6 +656,14 @@ To enable automatic welcome and password reset emails:
   - Dates stored and displayed consistently using YYYY-MM-DD format
   - Assign to specific users by role
   - Link tasks to specific participants (optional)
+  - **Recurring Tasks** - Set tasks to automatically repeat:
+    - Toggle recurring option on/off
+    - Choose frequency: Daily, Weekly, or Monthly
+    - When a recurring task is completed, a new instance is automatically created with the next due date
+    - Original task moves to completed status
+    - New task inherits all properties: title, description, assignee, priority, custom forms, and linked participants
+    - Visual badge shows recurring status and frequency on task cards
+    - Requires a due date to enable recurring
   - Create custom forms with multiple field types:
     - Text input
     - Text area (multi-line)
@@ -685,6 +694,7 @@ To enable automatic welcome and password reset emails:
     - **"Mark as Complete"** - Complete tasks with optional completion comments
     - **Completion Comments** - Add notes about what was accomplished when completing a task
     - **Visual Status Indicators** - Clear modals confirm status changes (blue for in progress, green for complete)
+    - **Automatic Recurring Task Creation** - When a recurring task is completed, a new instance is automatically created with the next due date
   - Submit forms with validation
 - **Automatic Status Updates** - Tasks become overdue automatically based on due date
 - **Smart Empty States** - Clear guidance when no participants or tasks assigned

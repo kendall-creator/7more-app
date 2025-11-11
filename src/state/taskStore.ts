@@ -13,6 +13,7 @@ interface TaskActions {
   updateTaskStatus: (taskId: string, status: TaskStatus, userId: string, completionComment?: string) => Promise<void>;
   submitTaskForm: (taskId: string, formResponse: TaskFormResponse[], userId: string, completionComment?: string) => Promise<void>;
   deleteTask: (taskId: string) => Promise<void>;
+  createRecurringTask: (completedTask: Task) => Promise<void>;
   getTasksForUser: (userId: string) => Task[];
   getTasksByStatus: (status: TaskStatus) => Task[];
   getOverdueTasks: () => Task[];
@@ -113,6 +114,11 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
       if (completionComment?.trim()) {
         updates.completionComment = completionComment.trim();
       }
+
+      // If this is a recurring task, create a new instance
+      if (task.isRecurring && task.recurringFrequency && task.dueDate) {
+        await get().createRecurringTask(task);
+      }
     }
 
     const taskRef = ref(database, `tasks/${taskId}`);
@@ -139,6 +145,71 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
 
     const taskRef = ref(database, `tasks/${taskId}`);
     await firebaseUpdate(taskRef, updates);
+
+    // If this is a recurring task, create a new instance
+    if (task.isRecurring && task.recurringFrequency && task.dueDate) {
+      await get().createRecurringTask(task);
+    }
+  },
+
+  createRecurringTask: async (completedTask: Task) => {
+    if (!database || !completedTask.dueDate || !completedTask.recurringFrequency) {
+      return;
+    }
+
+    // Calculate next due date based on frequency
+    const parts = completedTask.dueDate.split("-");
+    if (parts.length !== 3) return;
+
+    const [year, month, day] = parts.map(Number);
+    const currentDueDate = new Date(year, month - 1, day);
+
+    let nextDueDate = new Date(currentDueDate);
+
+    switch (completedTask.recurringFrequency) {
+      case "daily":
+        nextDueDate.setDate(nextDueDate.getDate() + 1);
+        break;
+      case "weekly":
+        nextDueDate.setDate(nextDueDate.getDate() + 7);
+        break;
+      case "monthly":
+        nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+        break;
+    }
+
+    // Format next due date as YYYY-MM-DD
+    const nextYear = nextDueDate.getFullYear();
+    const nextMonth = String(nextDueDate.getMonth() + 1).padStart(2, "0");
+    const nextDay = String(nextDueDate.getDate()).padStart(2, "0");
+    const nextDueDateString = `${nextYear}-${nextMonth}-${nextDay}`;
+
+    // Create new task with same properties but new due date
+    const newTaskData: any = {
+      title: completedTask.title,
+      description: completedTask.description,
+      assignedToUserId: completedTask.assignedToUserId,
+      assignedToUserName: completedTask.assignedToUserName,
+      assignedToUserRole: completedTask.assignedToUserRole,
+      assignedByUserId: completedTask.assignedByUserId,
+      assignedByUserName: completedTask.assignedByUserName,
+      priority: completedTask.priority,
+      dueDate: nextDueDateString,
+      isRecurring: true,
+      recurringFrequency: completedTask.recurringFrequency,
+      recurringParentId: completedTask.recurringParentId || completedTask.id,
+    };
+
+    // Copy optional fields if they exist
+    if (completedTask.customForm) {
+      newTaskData.customForm = completedTask.customForm;
+    }
+    if (completedTask.relatedParticipantId) {
+      newTaskData.relatedParticipantId = completedTask.relatedParticipantId;
+      newTaskData.relatedParticipantName = completedTask.relatedParticipantName;
+    }
+
+    await get().createTask(newTaskData);
   },
 
   deleteTask: async (taskId) => {

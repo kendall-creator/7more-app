@@ -25,6 +25,8 @@ export default function AdminTaskManagementScreen() {
   const [selectedParticipantId, setSelectedParticipantId] = useState("");
   const [priority, setPriority] = useState<TaskPriority>("medium");
   const [dueDate, setDueDate] = useState("");
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringFrequency, setRecurringFrequency] = useState<"daily" | "weekly" | "monthly">("weekly");
   const [customFormFields, setCustomFormFields] = useState<TaskFormField[]>([]);
   const [showAddFieldModal, setShowAddFieldModal] = useState(false);
   const [showParticipantModal, setShowParticipantModal] = useState(false);
@@ -55,6 +57,8 @@ export default function AdminTaskManagementScreen() {
     setSelectedParticipantId("");
     setPriority("medium");
     setDueDate("");
+    setIsRecurring(false);
+    setRecurringFrequency("weekly");
     setCustomFormFields([]);
     setParticipantSearchQuery("");
   };
@@ -109,6 +113,12 @@ export default function AdminTaskManagementScreen() {
       return;
     }
 
+    // Require due date if recurring is enabled
+    if (isRecurring && !dueDate) {
+      Alert.alert("Error", "Due date is required for recurring tasks");
+      return;
+    }
+
     const selectedUser = users.find((u) => u.id === selectedUserId);
     if (!selectedUser) return;
 
@@ -141,6 +151,12 @@ export default function AdminTaskManagementScreen() {
       if (selectedParticipant) {
         taskData.relatedParticipantId = selectedParticipant.id;
         taskData.relatedParticipantName = `${selectedParticipant.firstName} ${selectedParticipant.lastName}`;
+      }
+
+      // Add recurring fields if enabled
+      if (isRecurring) {
+        taskData.isRecurring = true;
+        taskData.recurringFrequency = recurringFrequency;
       }
 
       await createTask(taskData);
@@ -233,6 +249,14 @@ export default function AdminTaskManagementScreen() {
             <Ionicons name={statusIcons[task.status] as any} size={14} color="#99896c" />
             <Text className="text-xs text-[#99896c] ml-1">{task.status.replace("_", " ")}</Text>
           </View>
+          {task.isRecurring && (
+            <View className="flex-row items-center bg-blue-100 px-2 py-1 rounded-md">
+              <Ionicons name="repeat" size={12} color="#2563EB" />
+              <Text className="text-xs text-blue-700 ml-1 font-semibold">
+                {task.recurringFrequency}
+              </Text>
+            </View>
+          )}
           {task.dueDate && (
             <View className="flex-row items-center">
               <Ionicons name="calendar-outline" size={14} color="#99896c" />
@@ -455,6 +479,119 @@ export default function AdminTaskManagementScreen() {
                 >
                   <Text className="text-sm text-red-600 text-center">Clear date</Text>
                 </Pressable>
+              )}
+            </View>
+
+            {/* Recurring Task Options */}
+            <View className="mb-4">
+              <View className="flex-row items-center justify-between mb-3">
+                <Text className="text-sm font-semibold text-[#3c3832]">Recurring Task</Text>
+                <Pressable
+                  onPress={() => setIsRecurring(!isRecurring)}
+                  className="flex-row items-center"
+                >
+                  <View
+                    className={`w-12 h-6 rounded-full ${isRecurring ? "bg-[#fcc85c]" : "bg-[#d7d7d6]"}`}
+                  >
+                    <View
+                      className={`w-5 h-5 bg-white rounded-full m-0.5 ${
+                        isRecurring ? "translate-x-6" : "translate-x-0"
+                      }`}
+                    />
+                  </View>
+                </Pressable>
+              </View>
+
+              {isRecurring && (
+                <View>
+                  <Text className="text-sm text-[#99896c] mb-3">
+                    This task will automatically create a new instance when completed
+                  </Text>
+                  <Text className="text-xs font-semibold text-[#3c3832] mb-2 uppercase">
+                    Frequency
+                  </Text>
+                  <View className="flex-row gap-2">
+                    <Pressable
+                      onPress={() => setRecurringFrequency("daily")}
+                      className={`flex-1 px-3 py-3 rounded-xl border-2 ${
+                        recurringFrequency === "daily"
+                          ? "border-[#fcc85c] bg-[#fcc85c]/20"
+                          : "border-[#d7d7d6] bg-white"
+                      }`}
+                    >
+                      <View className="items-center">
+                        <Ionicons
+                          name="sunny-outline"
+                          size={20}
+                          color={recurringFrequency === "daily" ? "#fcc85c" : "#99896c"}
+                        />
+                        <Text
+                          className={`text-sm font-semibold mt-1 ${
+                            recurringFrequency === "daily" ? "text-[#291403]" : "text-[#99896c]"
+                          }`}
+                        >
+                          Daily
+                        </Text>
+                      </View>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => setRecurringFrequency("weekly")}
+                      className={`flex-1 px-3 py-3 rounded-xl border-2 ${
+                        recurringFrequency === "weekly"
+                          ? "border-[#fcc85c] bg-[#fcc85c]/20"
+                          : "border-[#d7d7d6] bg-white"
+                      }`}
+                    >
+                      <View className="items-center">
+                        <Ionicons
+                          name="calendar-outline"
+                          size={20}
+                          color={recurringFrequency === "weekly" ? "#fcc85c" : "#99896c"}
+                        />
+                        <Text
+                          className={`text-sm font-semibold mt-1 ${
+                            recurringFrequency === "weekly" ? "text-[#291403]" : "text-[#99896c]"
+                          }`}
+                        >
+                          Weekly
+                        </Text>
+                      </View>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => setRecurringFrequency("monthly")}
+                      className={`flex-1 px-3 py-3 rounded-xl border-2 ${
+                        recurringFrequency === "monthly"
+                          ? "border-[#fcc85c] bg-[#fcc85c]/20"
+                          : "border-[#d7d7d6] bg-white"
+                      }`}
+                    >
+                      <View className="items-center">
+                        <Ionicons
+                          name="calendar"
+                          size={20}
+                          color={recurringFrequency === "monthly" ? "#fcc85c" : "#99896c"}
+                        />
+                        <Text
+                          className={`text-sm font-semibold mt-1 ${
+                            recurringFrequency === "monthly" ? "text-[#291403]" : "text-[#99896c]"
+                          }`}
+                        >
+                          Monthly
+                        </Text>
+                      </View>
+                    </Pressable>
+                  </View>
+                  {!dueDate && (
+                    <View className="bg-amber-50 border border-amber-200 rounded-xl p-3 mt-3">
+                      <View className="flex-row">
+                        <Ionicons name="information-circle" size={18} color="#F59E0B" />
+                        <Text className="text-xs text-amber-800 ml-2 flex-1">
+                          A due date is required for recurring tasks
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                </View>
               )}
             </View>
 
