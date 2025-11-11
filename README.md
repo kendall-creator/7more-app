@@ -670,7 +670,12 @@ To enable automatic welcome and password reset emails:
   - View linked participant (if attached)
   - See due date with relative time display
   - Complete custom forms inline
-  - Update task status (Start Working, Mark Complete)
+  - **Enhanced Task Status Management**:
+    - **"Mark as In Progress"** - When a task is pending, users can mark it as in progress with optional progress notes
+    - **Progress Notes Field** - Add notes about starting work on a task
+    - **"Mark as Complete"** - Complete tasks with optional completion comments
+    - **Completion Comments** - Add notes about what was accomplished when completing a task
+    - **Visual Status Indicators** - Clear modals confirm status changes (blue for in progress, green for complete)
   - Submit forms with validation
 - **Automatic Status Updates** - Tasks become overdue automatically based on due date
 - **Smart Empty States** - Clear guidance when no participants or tasks assigned
@@ -775,7 +780,13 @@ To enable automatic welcome and password reset emails:
   - Max volunteer limits to prevent overstaffing
 
 #### Mentor Dashboard
-- View all assigned participants
+- View all assigned participants with improved navigation
+- **Back Button on Monthly Check-In** - Easy navigation back from the monthly check-in form
+- **30-Day Countdown for Monthly Check-Ins** - See exactly how many days remain until the next monthly check-in is due
+  - Shows "X days to go" for upcoming check-ins
+  - Shows "Due today" when check-in is due
+  - Shows "X days overdue" for overdue check-ins
+  - Appears directly on monthly check-in buttons in mentor dashboard
 - **Days-since tracking** - See "assigned X days ago" for each participant
   - Shows time since participant was assigned to mentor
   - Helps track initial contact timing and follow-up requirements

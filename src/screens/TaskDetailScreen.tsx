@@ -20,8 +20,10 @@ export default function TaskDetailScreen() {
 
   const [formResponses, setFormResponses] = useState<Record<string, string | number | boolean>>({});
   const [completionComment, setCompletionComment] = useState("");
+  const [progressNotes, setProgressNotes] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [showProgressModal, setShowProgressModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   // Debug logging - must be before early return
@@ -99,6 +101,17 @@ export default function TaskDetailScreen() {
       setShowSuccessModal(true);
     } catch (error) {
       setErrorMessage("Failed to complete task. Please try again.");
+      setShowErrorModal(true);
+    }
+  };
+
+  const handleMarkInProgress = async () => {
+    if (!currentUser) return;
+    try {
+      await updateTaskStatus(taskId, "in_progress", currentUser.id, progressNotes);
+      setShowProgressModal(true);
+    } catch (error) {
+      setErrorMessage("Failed to update task status. Please try again.");
       setShowErrorModal(true);
     }
   };
@@ -378,12 +391,28 @@ export default function TaskDetailScreen() {
         {task.assignedToUserId === currentUser?.id && !isCompleted && (
           <View className="mb-4">
             {task.status === "pending" && (
-              <Pressable
-                onPress={() => handleUpdateStatus("in_progress")}
-                className="bg-blue-600 rounded-xl py-4 items-center active:opacity-80 mb-3"
-              >
-                <Text className="text-white text-base font-bold">Start Working</Text>
-              </Pressable>
+              <View className="mb-3">
+                <View className="bg-white rounded-2xl p-5 mb-3 border border-gray-100">
+                  <Text className="text-sm font-semibold text-gray-900 mb-2">
+                    Progress Notes (Optional)
+                  </Text>
+                  <TextInput
+                    className="bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-base"
+                    placeholder="Add notes about starting this task..."
+                    value={progressNotes}
+                    onChangeText={setProgressNotes}
+                    multiline
+                    numberOfLines={3}
+                    textAlignVertical="top"
+                  />
+                </View>
+                <Pressable
+                  onPress={handleMarkInProgress}
+                  className="bg-blue-600 rounded-xl py-4 items-center active:opacity-80 mb-3"
+                >
+                  <Text className="text-white text-base font-bold">Mark as In Progress</Text>
+                </Pressable>
+              </View>
             )}
 
             {/* Completion Comment Field */}
@@ -407,7 +436,7 @@ export default function TaskDetailScreen() {
                 onPress={handleSubmitForm}
                 className="bg-green-600 rounded-xl py-4 items-center active:opacity-80"
               >
-                <Text className="text-white text-base font-bold">Submit & Complete</Text>
+                <Text className="text-white text-base font-bold">Mark as Complete</Text>
               </Pressable>
             ) : (
               <Pressable
@@ -471,6 +500,32 @@ export default function TaskDetailScreen() {
               className="bg-red-600 rounded-xl py-3 items-center active:opacity-80"
             >
               <Text className="text-white text-base font-bold">Close</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Progress Modal */}
+      <Modal visible={showProgressModal} transparent animationType="fade">
+        <View className="flex-1 items-center justify-center bg-black/50">
+          <View className="bg-white rounded-2xl p-6 mx-8 w-80">
+            <View className="items-center mb-4">
+              <View className="w-16 h-16 bg-blue-100 rounded-full items-center justify-center mb-3">
+                <Ionicons name="play-circle" size={40} color="#2563EB" />
+              </View>
+              <Text className="text-xl font-bold text-gray-900 mb-2">Task In Progress</Text>
+              <Text className="text-sm text-gray-600 text-center">
+                The task has been marked as in progress. Keep up the good work!
+              </Text>
+            </View>
+            <Pressable
+              onPress={() => {
+                setShowProgressModal(false);
+                navigation.goBack();
+              }}
+              className="bg-blue-600 rounded-xl py-3 items-center active:opacity-80"
+            >
+              <Text className="text-white text-base font-bold">Done</Text>
             </Pressable>
           </View>
         </View>

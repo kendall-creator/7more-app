@@ -55,6 +55,20 @@ export default function MentorDashboardScreen() {
     const isReportDue = participant.nextMonthlyReportDue &&
       new Date(participant.nextMonthlyReportDue) <= new Date();
 
+    // Calculate days remaining for monthly check-in (30 days from initial contact)
+    const getDaysRemaining = (dueDate?: string) => {
+      if (!dueDate) return null;
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      const due = new Date(dueDate);
+      due.setHours(0, 0, 0, 0);
+      const diffMs = due.getTime() - now.getTime();
+      const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+      return days;
+    };
+
+    const monthlyCheckInDaysRemaining = getDaysRemaining(participant.nextMonthlyCheckInDue);
+
     const isActive = section === "active";
     const isInitial = section === "initial";
     const isAttempted = section === "attempted";
@@ -212,6 +226,15 @@ export default function MentorDashboardScreen() {
                 }`}
               >
                 <Text className="text-white text-xs font-bold">Monthly Check-In</Text>
+                {monthlyCheckInDaysRemaining !== null && (
+                  <Text className="text-white text-xs mt-1">
+                    {monthlyCheckInDaysRemaining > 0
+                      ? `${monthlyCheckInDaysRemaining} days to go`
+                      : monthlyCheckInDaysRemaining === 0
+                        ? "Due today"
+                        : `${Math.abs(monthlyCheckInDaysRemaining)} days overdue`}
+                  </Text>
+                )}
               </Pressable>
             </View>
 
