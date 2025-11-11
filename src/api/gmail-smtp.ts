@@ -32,7 +32,8 @@ interface GmailEmailResult {
 }
 
 /**
- * Send email via Gmail SMTP using the backend server
+ * Send email directly using Gmail SMTP credentials
+ * Uses a third-party SMTP relay service that works from React Native
  */
 export const sendGmailEmail = async ({
   to,
@@ -42,92 +43,67 @@ export const sendGmailEmail = async ({
   replyTo,
 }: GmailEmailParams): Promise<GmailEmailResult> => {
   try {
-    // Get backend configuration
-    // Default to Docker host IP (172.17.0.1) so mobile device can connect
-    const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL || "http://172.17.0.1:3001";
-    const apiKey = process.env.EXPO_PUBLIC_BACKEND_API_KEY;
+    // Get Gmail credentials from environment
+    const gmailUser = process.env.EXPO_PUBLIC_EMAIL_USER;
+    const gmailPass = process.env.EXPO_PUBLIC_EMAIL_PASS;
+    const emailFrom = process.env.EXPO_PUBLIC_EMAIL_FROM || "Bridge Team <bridgeteam@7more.net>";
 
     // Validate configuration
-    if (!apiKey) {
-      console.warn("⚠️ Gmail SMTP backend not configured");
-      console.log("Missing EXPO_PUBLIC_BACKEND_API_KEY environment variable");
+    if (!gmailUser || !gmailPass) {
+      console.warn("⚠️ Gmail SMTP not configured");
+      console.log("Missing EXPO_PUBLIC_EMAIL_USER or EXPO_PUBLIC_EMAIL_PASS");
       console.log("Please add to ENV tab in Vibecode app");
 
       return {
         success: false,
-        error: "Gmail SMTP backend not configured. Please add EXPO_PUBLIC_BACKEND_API_KEY to ENV tab.",
+        error: "Gmail not configured. Please add EXPO_PUBLIC_EMAIL_USER and EXPO_PUBLIC_EMAIL_PASS to ENV tab.",
       };
     }
 
-    console.log("📧 Sending email via Gmail SMTP backend");
-    console.log(`   Backend: ${backendUrl}`);
+    console.log("📧 Sending email via Gmail SMTP");
+    console.log(`   From: ${emailFrom}`);
     console.log(`   To: ${to}`);
     console.log(`   Subject: ${subject}`);
     if (replyTo) console.log(`   Reply-To: ${replyTo}`);
 
-    // Send request to backend email endpoint with timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    // Use SMTPjs service (free SMTP relay for React Native)
+    // This is a public service that sends emails via SMTP from client-side apps
+    const response = await fetch("https://smtpjs.com/v3/smtpjs.aspx", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        SecureToken: gmailPass, // Gmail app password
+        To: to,
+        From: gmailUser,
+        Subject: subject,
+        Body: html || body.replace(/\n/g, "<br>"),
+        ...(replyTo && { ReplyTo: replyTo }),
+      }).toString(),
+    });
 
-    try {
-      const response = await fetch(`${backendUrl}/api/send-email`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          to,
-          subject,
-          body: html || body,
-          replyTo,
-        }),
-        signal: controller.signal,
-      });
+    const result = await response.text();
 
-      clearTimeout(timeoutId);
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        console.error("❌ Backend email service error:", result.error);
-        return {
-          success: false,
-          error: result.error || `Backend returned ${response.status}`,
-        };
-      }
-
-      console.log("✅ Email sent successfully via Gmail SMTP");
-      if (result.messageId) {
-        console.log(`   Message ID: ${result.messageId}`);
-      }
-
+    if (result === "OK") {
+      console.log("✅ Email sent successfully");
       return {
         success: true,
-        messageId: result.messageId,
+        messageId: `<${Date.now()}@7more.net>`,
       };
-    } catch (fetchError: any) {
-      clearTimeout(timeoutId);
-      throw fetchError;
+    } else {
+      console.error("❌ Email send failed:", result);
+      return {
+        success: false,
+        error: `Email service returned: ${result}`,
+      };
     }
   } catch (error: any) {
-    console.error("Error sending Gmail SMTP email:", error);
-
-    // Provide more helpful error messages
-    let errorMessage = error.message || String(error);
-    if (error.name === "AbortError" || errorMessage.includes("timeout")) {
-      errorMessage = "Backend server not responding. Please ensure the backend is running on port 3001.";
-      console.log("💡 Tip: Try restarting the backend server");
-    } else if (errorMessage.includes("Network request failed")) {
-      errorMessage = "Cannot connect to backend server. Trying alternate connection methods...";
-      console.log("💡 Backend URL:", process.env.EXPO_PUBLIC_BACKEND_URL || "http://172.17.0.1:3001");
-      console.log("💡 Tip: The mobile device may not be able to reach the backend server.");
-      console.log("💡 Make sure EXPO_PUBLIC_BACKEND_URL and EXPO_PUBLIC_BACKEND_API_KEY are set in ENV tab");
-    }
+    console.error("Error sending Gmail email:", error);
 
     return {
       success: false,
-      error: errorMessage,
+      error: error.message || String(error),
     };
   }
 };

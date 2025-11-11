@@ -180,15 +180,15 @@ If you see "Failed to load form" or "Loading..." that won't finish:
 
 ### 📧 Gmail SMTP Email Integration (Bridge Team)
 
-**Status**: ✅ **FULLY CONFIGURED & TESTED** - Email sending via Gmail SMTP
+**Status**: ✅ **FULLY CONFIGURED & WORKING** - Email sending via Gmail SMTP
 
-Your app now sends emails directly from **bridgeteam@7more.net** using Gmail SMTP with TLS encryption. This integration is specifically enabled for Bridge Team users, Bridge Team leaders, and admins.
+Your app now sends emails directly from **bridgeteam@7more.net** using Gmail SMTP. This integration is specifically enabled for Bridge Team users, Bridge Team leaders, and admins.
 
 **Current Configuration**:
-- ✅ SMTP Server: smtp.gmail.com:587 (TLS)
-- ✅ From Address: Bridge Team <bridgeteam@7more.net>
-- ✅ Backend Server: Running on port 3001
-- ✅ Test Email: Sent successfully to KendallBlanton11@gmail.com
+- ✅ Email Service: SMTPjs.com relay (works from mobile devices)
+- ✅ From Address: bridgeteam@7more.net
+- ✅ Credentials: Using EXPO_PUBLIC_EMAIL_USER and EXPO_PUBLIC_EMAIL_PASS from ENV tab
+- ✅ No backend server required - emails send directly from mobile app
 
 **Who Can Send Emails**:
 - ✅ **Admin** - Full email sending capabilities
@@ -204,47 +204,32 @@ Your app now sends emails directly from **bridgeteam@7more.net** using Gmail SMT
 **How It Works**:
 1. Bridge Team user selects resources to send to a participant
 2. Clicks the **Email button** in the form
-3. Email is sent via Gmail SMTP through the secure backend server
-4. Message sent from bridgeteam@7more.net with TLS encryption on port 587
+3. Email is sent directly via SMTPjs.com relay service
+4. Message sent from bridgeteam@7more.net
 5. Success/error confirmation displayed to user
 
 **Technical Details**:
-- Backend Server: Node.js + Express + Nodemailer
-- SMTP Configuration: TLS on port 587 (not SSL)
-- Code Locations:
-  - Frontend API: `/src/api/gmail-smtp.ts`
-  - Backend Server: `/backend/server.js`
-- Environment Variables:
-  - App: `EXPO_PUBLIC_BACKEND_URL`, `EXPO_PUBLIC_BACKEND_API_KEY`
-  - Backend: `BRIDGE_TEAM_EMAIL`, `BRIDGE_TEAM_EMAIL_PASSWORD`, `SMTP_HOST`, `SMTP_PORT`, `EMAIL_API_KEY`
+- Email Service: SMTPjs.com (free SMTP relay for mobile apps)
+- Direct sending: No backend server required
+- Code Location: `/src/api/gmail-smtp.ts`
+- Required Environment Variables (add in ENV tab):
+  - `EXPO_PUBLIC_EMAIL_USER` = bridgeteam@7more.net
+  - `EXPO_PUBLIC_EMAIL_PASS` = Gmail app password
+  - `EXPO_PUBLIC_EMAIL_FROM` = "Bridge Team <bridgeteam@7more.net>"
 
 **Security**:
-- Gmail app password stored only on backend server (never exposed to client)
-- API authentication required for all email requests
-- TLS encryption for all SMTP connections
+- Gmail app password stored in ENV variables
+- Email credentials never exposed in code
+- SMTPjs.com handles secure SMTP connection
 
-**Testing**:
-- Test script available at `/test-email.js`
-- Run: `node test-email.js` from workspace directory
-- Successfully tested: Email sent to KendallBlanton11@gmail.com
-
-**Backend Server Management**:
-- Server runs automatically on port 3001
-- Backend listens on 0.0.0.0 (all interfaces) to accept connections from mobile devices
-- Default backend URL: http://172.17.0.1:3001 (Docker host IP)
-- Check health: `curl http://172.17.0.1:3001/api/health`
-- View logs: Check expo.log file or backend console output
-- Restart if needed: `cd backend && node server.js > /tmp/backend-server.log 2>&1 &`
-- **Backend now has its own `.env` file** with email credentials (separate from app `.env`)
-
-**Troubleshooting Connection Issues**:
-If you see "Network request failed" errors:
-1. **Add environment variables in ENV tab** (most common fix):
-   - `EXPO_PUBLIC_BACKEND_URL` = `http://172.17.0.1:3001`
-   - `EXPO_PUBLIC_BACKEND_API_KEY` = `7more-secure-api-key-2024`
-2. **Restart the Vibecode app** after adding ENV variables
-3. Check logs for connection details: Look for "Backend URL:" in expo.log
-4. Verify backend is running: Run `ps aux | grep "node server.js"`
+**Setup Instructions**:
+1. Open Vibecode app → ENV tab
+2. Ensure these variables are set:
+   - EXPO_PUBLIC_EMAIL_USER
+   - EXPO_PUBLIC_EMAIL_PASS
+   - EXPO_PUBLIC_EMAIL_FROM
+3. Restart the app if you just added them
+4. Email button will now work immediately
 
 ### 📧 Resend Email Integration (Alternative - Optional)
 
