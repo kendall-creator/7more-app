@@ -392,6 +392,14 @@ function MainTabs() {
             }}
           />
           <Tab.Screen
+            name="MonthlyReporting"
+            component={MonthlyReportingScreen}
+            options={{
+              tabBarLabel: "Reporting",
+              tabBarIcon: ({ color, size }) => <Ionicons name="bar-chart" size={size} color={color} />,
+            }}
+          />
+          <Tab.Screen
             name="Resources"
             component={ResourcesScreen}
             options={{
