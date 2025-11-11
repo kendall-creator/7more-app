@@ -16,7 +16,25 @@ export type ReportingCategory =
   | "donors"                // Donor Data
   | "financials"            // Financial Data
   | "social_media"          // Social Media Metrics
-  | "wins_concerns";        // Wins & Concerns
+  | "wins_concerns"         // Wins & Concerns
+  | "bridge_team"           // Bridge Team Metrics
+  | "demographics";         // Demographics Report
+
+// Reporting permissions with view/edit access
+export interface ReportingPermissions {
+  monthlyReporting?: {
+    canView: boolean;
+    canEdit: boolean;
+  };
+  bridgeTeamReporting?: {
+    canView: boolean;
+    canEdit: boolean;
+  };
+  demographicsReporting?: {
+    canView: boolean;
+    canEdit: boolean;
+  };
+}
 
 // User type for authentication
 export interface User {
@@ -28,7 +46,8 @@ export interface User {
   roles?: UserRole[]; // Optional: multiple roles
   requiresPasswordChange?: boolean;
   hasReportingAccess?: boolean; // Optional: grant specific users access to reporting (admin assigns)
-  reportingCategories?: ReportingCategory[]; // Optional: specific categories user can view (if empty, can view all)
+  reportingCategories?: ReportingCategory[]; // Optional: specific categories user can view (if empty, can view all) - DEPRECATED
+  reportingPermissions?: ReportingPermissions; // New granular permissions structure
 }
 
 // Helper to get all roles for a user
@@ -556,6 +575,53 @@ export interface WinConcernEntry {
   body: string;
 }
 
+// Bridge Team Metrics (Auto-calculated + Manual Override)
+export interface BridgeTeamMetrics {
+  // Participants Received
+  participantsReceived: {
+    autoCalculated: number;
+    manualOverride: number | null;
+  };
+
+  // Status Activity Counts (flow-based, not point-in-time)
+  statusCounts: {
+    pendingBridge: {
+      autoCalculated: number;
+      manualOverride: number | null;
+    };
+    attemptedToContact: {
+      autoCalculated: number;
+      manualOverride: number | null;
+    };
+    contacted: {
+      autoCalculated: number;
+      manualOverride: number | null;
+    };
+    unableToContact: {
+      autoCalculated: number;
+      manualOverride: number | null;
+    };
+  };
+
+  // Average Days to First Outreach
+  averageDaysToFirstOutreach: {
+    autoCalculated: number;
+    manualOverride: number | null;
+  };
+
+  // Forms by Day of Week
+  formsByDayOfWeek: {
+    monday: number;
+    tuesday: number;
+    wednesday: number;
+    thursday: number;
+    friday: number;
+    saturday: number;
+    sunday: number;
+    topDay: string; // e.g., "Monday"
+  };
+}
+
 export interface MonthlyReport {
   id: string;
   month: number; // 1-12
@@ -582,6 +648,9 @@ export interface MonthlyReport {
   // 7. Wins & Concerns (Admin Notes) - up to 5 each
   wins: WinConcernEntry[]; // Max 5 entries
   concerns: WinConcernEntry[]; // Max 5 entries
+
+  // 8. Bridge Team Metrics (Auto-calculated + Manual Override)
+  bridgeTeamMetrics?: BridgeTeamMetrics;
 
   // Admin posting control
   isPosted: boolean; // True when admin publishes for board viewing
