@@ -13,8 +13,10 @@
  * - EMAIL_API_KEY: Secret key for backend authentication
  *
  * Environment Variables Required (App .env):
- * - EXPO_PUBLIC_BACKEND_URL: Backend server URL (default: http://172.17.0.2:3001)
- * - EXPO_PUBLIC_BACKEND_API_KEY: API key for backend authentication
+ * - EXPO_PUBLIC_BACKEND_URL: Backend server URL (http://172.17.0.1:3001)
+ * - EXPO_PUBLIC_BACKEND_API_KEY: API key for backend authentication (must match EMAIL_API_KEY on backend)
+ *
+ * The backend server is automatically started and runs on port 3001.
  */
 
 interface GmailEmailParams {
@@ -32,8 +34,8 @@ interface GmailEmailResult {
 }
 
 /**
- * Send email directly using Gmail SMTP credentials
- * Uses a third-party SMTP relay service that works from React Native
+ * Send email using backend server Gmail SMTP
+ * This uses your backend server to securely send emails via Gmail
  */
 export const sendGmailEmail = async ({
   to,
@@ -43,63 +45,60 @@ export const sendGmailEmail = async ({
   replyTo,
 }: GmailEmailParams): Promise<GmailEmailResult> => {
   try {
-    // Get Gmail credentials from environment
-    const gmailUser = process.env.EXPO_PUBLIC_EMAIL_USER;
-    const gmailPass = process.env.EXPO_PUBLIC_EMAIL_PASS;
-    const emailFrom = process.env.EXPO_PUBLIC_EMAIL_FROM || "Bridge Team <bridgeteam@7more.net>";
+    // Get backend configuration
+    const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
+    const backendApiKey = process.env.EXPO_PUBLIC_BACKEND_API_KEY;
 
     // Validate configuration
-    if (!gmailUser || !gmailPass) {
-      console.warn("⚠️ Gmail SMTP not configured");
-      console.log("Missing EXPO_PUBLIC_EMAIL_USER or EXPO_PUBLIC_EMAIL_PASS");
+    if (!backendUrl || !backendApiKey) {
+      console.warn("⚠️ Backend not configured");
+      console.log("Missing EXPO_PUBLIC_BACKEND_URL or EXPO_PUBLIC_BACKEND_API_KEY");
       console.log("Please add to ENV tab in Vibecode app");
 
       return {
         success: false,
-        error: "Gmail not configured. Please add EXPO_PUBLIC_EMAIL_USER and EXPO_PUBLIC_EMAIL_PASS to ENV tab.",
+        error: "Backend not configured. Please add EXPO_PUBLIC_BACKEND_URL and EXPO_PUBLIC_BACKEND_API_KEY to ENV tab.",
       };
     }
 
-    console.log("📧 Sending email via Gmail SMTP");
-    console.log(`   From: ${emailFrom}`);
+    console.log("📧 Sending email via backend server");
+    console.log(`   Backend: ${backendUrl}`);
     console.log(`   To: ${to}`);
     console.log(`   Subject: ${subject}`);
     if (replyTo) console.log(`   Reply-To: ${replyTo}`);
 
-    // Use SMTPjs service (free SMTP relay for React Native)
-    // This is a public service that sends emails via SMTP from client-side apps
-    const response = await fetch("https://smtpjs.com/v3/smtpjs.aspx", {
+    // Send email via backend API
+    const response = await fetch(`${backendUrl}/api/send-email`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${backendApiKey}`,
       },
-      body: new URLSearchParams({
-        SecureToken: gmailPass, // Gmail app password
-        To: to,
-        From: gmailUser,
-        Subject: subject,
-        Body: html || body.replace(/\n/g, "<br>"),
-        ...(replyTo && { ReplyTo: replyTo }),
-      }).toString(),
+      body: JSON.stringify({
+        to,
+        subject,
+        body: html || body,
+        replyTo,
+      }),
     });
 
-    const result = await response.text();
+    const result = await response.json();
 
-    if (result === "OK") {
-      console.log("✅ Email sent successfully");
+    if (response.ok && result.success) {
+      console.log("✅ Email sent successfully via backend");
       return {
         success: true,
-        messageId: `<${Date.now()}@7more.net>`,
+        messageId: result.messageId,
       };
     } else {
-      console.error("❌ Email send failed:", result);
+      console.error("❌ Email send failed:", result.error);
       return {
         success: false,
-        error: `Email service returned: ${result}`,
+        error: result.error || "Failed to send email via backend",
       };
     }
   } catch (error: any) {
-    console.error("Error sending Gmail email:", error);
+    console.error("Error sending email via backend:", error);
 
     return {
       success: false,

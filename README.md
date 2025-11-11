@@ -17,11 +17,11 @@ A comprehensive mobile application built with Expo and React Native to help nonp
 3. Or reference `.env.example` and re-add your values from the ENV tab in Vibecode app
 
 **Backend Email Service:**
-- Backend server automatically starts with email credentials
-- Server runs on port 3001 with Gmail SMTP configured
-- Auto-start script available: `./backend/auto-start.sh`
+- Backend server runs on port 3001 with Gmail SMTP configured for Bridge Team emails
+- Server must be running for email functionality to work
 - Backend `.env` contains: BRIDGE_TEAM_EMAIL, BRIDGE_TEAM_EMAIL_PASSWORD, EMAIL_API_KEY
-- Frontend `.env` contains: EXPO_PUBLIC_BACKEND_URL, EXPO_PUBLIC_BACKEND_API_KEY
+- Frontend `.env` contains: EXPO_PUBLIC_BACKEND_URL (http://172.17.0.1:3001), EXPO_PUBLIC_BACKEND_API_KEY
+- Email button on Bridge Team follow-up form now works via backend server
 
 ## IMPORTANT: Firebase Setup Required
 
