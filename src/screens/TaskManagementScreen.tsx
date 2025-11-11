@@ -30,12 +30,11 @@ export default function TaskManagementScreen() {
     } else if (activeTab === "assigned") {
       tasks = allTasks.filter((t) => t.assignedByUserId === currentUser?.id);
     } else {
-      // For "all" tab, Bridge Team Leaders only see tasks assigned to Bridge Team members
+      // For "all" tab, Bridge Team Leaders only see tasks assigned to them or tasks they assigned
       if (userRole === "bridge_team_leader") {
-        const bridgeTeamUserIds = allUsers
-          .filter((u) => u.role === "bridge_team" || u.role === "bridge_team_leader")
-          .map((u) => u.id);
-        tasks = allTasks.filter((t) => bridgeTeamUserIds.includes(t.assignedToUserId));
+        tasks = allTasks.filter(
+          (t) => t.assignedToUserId === currentUser?.id || t.assignedByUserId === currentUser?.id
+        );
       } else {
         tasks = allTasks;
       }

@@ -30,6 +30,7 @@ export default function EditUserScreen({ navigation, route }: any) {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [selectedRole, setSelectedRole] = useState<UserRole>("bridge_team");
+  const [hasReportingAccess, setHasReportingAccess] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -42,6 +43,7 @@ export default function EditUserScreen({ navigation, route }: any) {
       setEmail(user.email);
       setPhone(user.phone || "");
       setSelectedRole(user.role);
+      setHasReportingAccess(user.hasReportingAccess || false);
     }
   }, [user]);
 
@@ -119,6 +121,7 @@ export default function EditUserScreen({ navigation, route }: any) {
         name: name.trim(),
         email: email.trim(),
         role: selectedRole,
+        hasReportingAccess: hasReportingAccess,
       };
 
       // Use null to remove fields, undefined to skip updating them
@@ -264,7 +267,7 @@ export default function EditUserScreen({ navigation, route }: any) {
           </View>
 
           {/* Role Selection */}
-          <View className="mb-8">
+          <View className="mb-6">
             <Text className="text-sm font-semibold text-gray-700 mb-3">
               User Role <Text className="text-red-500">*</Text>
             </Text>
@@ -298,6 +301,38 @@ export default function EditUserScreen({ navigation, route }: any) {
               ))}
             </View>
           </View>
+
+          {/* Reporting Access Toggle - Only show for non-admin roles */}
+          {currentUser?.role === "admin" && selectedRole !== "admin" && (
+            <View className="mb-8">
+              <Pressable
+                onPress={() => setHasReportingAccess(!hasReportingAccess)}
+                className={`border-2 rounded-xl px-4 py-4 ${
+                  hasReportingAccess
+                    ? "bg-indigo-50 border-indigo-600"
+                    : "bg-white border-gray-200"
+                }`}
+              >
+                <View className="flex-row items-center justify-between mb-1">
+                  <View className="flex-1">
+                    <Text
+                      className={`text-base font-semibold ${
+                        hasReportingAccess ? "text-indigo-600" : "text-gray-900"
+                      }`}
+                    >
+                      Grant Reporting Access
+                    </Text>
+                    <Text className="text-xs text-gray-500 mt-1">
+                      Allow this user to view monthly reporting data
+                    </Text>
+                  </View>
+                  <View className={`w-12 h-6 rounded-full ${hasReportingAccess ? "bg-indigo-600" : "bg-gray-300"}`}>
+                    <View className={`w-5 h-5 rounded-full bg-white mt-0.5 ${hasReportingAccess ? "ml-6" : "ml-0.5"}`} />
+                  </View>
+                </View>
+              </Pressable>
+            </View>
+          )}
 
           {/* Submit Button */}
           <Pressable

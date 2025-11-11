@@ -184,31 +184,35 @@ export default function AdminHomepageScreen() {
               <Text className="text-white text-sm font-semibold mt-2">Create Task</Text>
             </Pressable>
           </View>
-          <View className="flex-row gap-3 mb-3">
-            <Pressable
-              onPress={() => navigation.navigate("EmbeddableForm")}
-              className="flex-1 bg-indigo-600 rounded-2xl p-4 active:opacity-80"
-            >
-              <Ionicons name="code-slash" size={24} color="white" />
-              <Text className="text-white text-sm font-semibold mt-2">Web Form Code</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => navigation.navigate("TestEmail")}
-              className="flex-1 bg-blue-500 rounded-2xl p-4 active:opacity-80"
-            >
-              <Ionicons name="mail" size={24} color="white" />
-              <Text className="text-white text-sm font-semibold mt-2">Test Email</Text>
-            </Pressable>
-          </View>
-          <View className="flex-row gap-3">
-            <Pressable
-              onPress={() => navigation.navigate("FileManagement")}
-              className="flex-1 bg-emerald-600 rounded-2xl p-4 active:opacity-80"
-            >
-              <Ionicons name="folder-open" size={24} color="white" />
-              <Text className="text-white text-sm font-semibold mt-2">File Management</Text>
-            </Pressable>
-          </View>
+          {userRole !== "bridge_team_leader" && (
+            <>
+              <View className="flex-row gap-3 mb-3">
+                <Pressable
+                  onPress={() => navigation.navigate("EmbeddableForm")}
+                  className="flex-1 bg-indigo-600 rounded-2xl p-4 active:opacity-80"
+                >
+                  <Ionicons name="code-slash" size={24} color="white" />
+                  <Text className="text-white text-sm font-semibold mt-2">Web Form Code</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => navigation.navigate("TestEmail")}
+                  className="flex-1 bg-blue-500 rounded-2xl p-4 active:opacity-80"
+                >
+                  <Ionicons name="mail" size={24} color="white" />
+                  <Text className="text-white text-sm font-semibold mt-2">Test Email</Text>
+                </Pressable>
+              </View>
+              <View className="flex-row gap-3">
+                <Pressable
+                  onPress={() => navigation.navigate("FileManagement")}
+                  className="flex-1 bg-emerald-600 rounded-2xl p-4 active:opacity-80"
+                >
+                  <Ionicons name="folder-open" size={24} color="white" />
+                  <Text className="text-white text-sm font-semibold mt-2">File Management</Text>
+                </Pressable>
+              </View>
+            </>
+          )}
         </View>
 
         {/* Participants Overview */}

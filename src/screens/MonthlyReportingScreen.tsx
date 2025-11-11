@@ -11,13 +11,37 @@ export default function MonthlyReportingScreen() {
 
   const isAdmin = currentUser?.role === "admin";
   const isBoardMember = currentUser?.role === "board_member";
+  const hasReportingAccess = currentUser?.hasReportingAccess || false;
+
+  // Check if user has permission to view reporting
+  const canViewReporting = isAdmin || isBoardMember || hasReportingAccess;
 
   // Auto-navigate board members directly to viewer
   useEffect(() => {
-    if (isBoardMember) {
+    if (isBoardMember && canViewReporting) {
       navigation.navigate("ViewReporting");
     }
-  }, [isBoardMember, navigation]);
+  }, [isBoardMember, canViewReporting, navigation]);
+
+  // If user doesn't have access, show access denied message
+  if (!canViewReporting) {
+    return (
+      <SafeAreaView className="flex-1 bg-gray-50" edges={["top"]}>
+        <View className="bg-white border-b border-gray-200 px-4 py-4">
+          <Text className="text-2xl font-bold text-gray-900">Monthly Reporting</Text>
+        </View>
+        <View className="flex-1 items-center justify-center px-6">
+          <View className="w-20 h-20 bg-gray-100 rounded-full items-center justify-center mb-4">
+            <Ionicons name="lock-closed" size={40} color="#9CA3AF" />
+          </View>
+          <Text className="text-xl font-bold text-gray-900 mb-2">Access Restricted</Text>
+          <Text className="text-center text-gray-600 text-sm">
+            You do not have permission to view reporting. Contact an administrator to request access.
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={["top"]}>

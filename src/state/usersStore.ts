@@ -16,6 +16,7 @@ interface InvitedUser {
   invitedBy: string;
   requiresPasswordChange?: boolean;
   temporaryPassword?: string; // Store temporarily for email sending
+  hasReportingAccess?: boolean; // Optional: grant specific users access to reporting (admin assigns)
 }
 
 interface UsersState {

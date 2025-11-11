@@ -17,6 +17,7 @@ export interface User {
   role: UserRole; // Primary role (for backward compatibility)
   roles?: UserRole[]; // Optional: multiple roles
   requiresPasswordChange?: boolean;
+  hasReportingAccess?: boolean; // Optional: grant specific users access to reporting (admin assigns)
 }
 
 // Helper to get all roles for a user
