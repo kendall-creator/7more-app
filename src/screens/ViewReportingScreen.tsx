@@ -368,26 +368,26 @@ export default function ViewReportingScreen() {
         )}
 
         {/* Bridge Team */}
-        {canViewCategory("bridge_team") && (categoryFilter === "all" || categoryFilter === "bridge_team") && report.bridgeTeamMetrics && (
+        {canViewCategory("bridge_team") && (categoryFilter === "all" || categoryFilter === "bridge_team") && report.bridgeTeamMetrics?.participantsReceived && (
           <View className="bg-white rounded-lg p-4 mb-4 mx-4 border border-gray-200">
             <Text className="text-lg font-bold text-gray-900 mb-3">Bridge Team</Text>
             {renderMetricRow("Participants Received", report.bridgeTeamMetrics.participantsReceived.manualOverride ?? report.bridgeTeamMetrics.participantsReceived.autoCalculated, "bridgeTeamMetrics.participantsReceived.autoCalculated", report)}
 
             <Text className="text-sm font-semibold text-gray-700 mt-3 mb-2">Status Activity:</Text>
             <View className="pl-4">
-              {renderMetricRow("Pending Bridge", report.bridgeTeamMetrics.statusCounts.pendingBridge.manualOverride ?? report.bridgeTeamMetrics.statusCounts.pendingBridge.autoCalculated, "bridgeTeamMetrics.statusCounts.pendingBridge.autoCalculated", report)}
-              {renderMetricRow("Attempted to Contact", report.bridgeTeamMetrics.statusCounts.attemptedToContact.manualOverride ?? report.bridgeTeamMetrics.statusCounts.attemptedToContact.autoCalculated, "bridgeTeamMetrics.statusCounts.attemptedToContact.autoCalculated", report)}
-              {renderMetricRow("Contacted", report.bridgeTeamMetrics.statusCounts.contacted.manualOverride ?? report.bridgeTeamMetrics.statusCounts.contacted.autoCalculated, "bridgeTeamMetrics.statusCounts.contacted.autoCalculated", report)}
-              {renderMetricRow("Unable to Contact", report.bridgeTeamMetrics.statusCounts.unableToContact.manualOverride ?? report.bridgeTeamMetrics.statusCounts.unableToContact.autoCalculated, "bridgeTeamMetrics.statusCounts.unableToContact.autoCalculated", report)}
+              {renderMetricRow("Pending Bridge", report.bridgeTeamMetrics.statusCounts?.pendingBridge?.manualOverride ?? report.bridgeTeamMetrics.statusCounts?.pendingBridge?.autoCalculated ?? 0, "bridgeTeamMetrics.statusCounts.pendingBridge.autoCalculated", report)}
+              {renderMetricRow("Attempted to Contact", report.bridgeTeamMetrics.statusCounts?.attemptedToContact?.manualOverride ?? report.bridgeTeamMetrics.statusCounts?.attemptedToContact?.autoCalculated ?? 0, "bridgeTeamMetrics.statusCounts.attemptedToContact.autoCalculated", report)}
+              {renderMetricRow("Contacted", report.bridgeTeamMetrics.statusCounts?.contacted?.manualOverride ?? report.bridgeTeamMetrics.statusCounts?.contacted?.autoCalculated ?? 0, "bridgeTeamMetrics.statusCounts.contacted.autoCalculated", report)}
+              {renderMetricRow("Unable to Contact", report.bridgeTeamMetrics.statusCounts?.unableToContact?.manualOverride ?? report.bridgeTeamMetrics.statusCounts?.unableToContact?.autoCalculated ?? 0, "bridgeTeamMetrics.statusCounts.unableToContact.autoCalculated", report)}
             </View>
 
             <View className="flex-row justify-between items-center py-2 border-b border-gray-100 mt-2">
               <Text className="text-gray-700 flex-1">Avg Days to First Outreach</Text>
               <View className="flex-row items-center">
                 <Text className="text-gray-900 font-semibold">
-                  {formatNumber(report.bridgeTeamMetrics.averageDaysToFirstOutreach.manualOverride ?? report.bridgeTeamMetrics.averageDaysToFirstOutreach.autoCalculated)} days
+                  {formatNumber(report.bridgeTeamMetrics.averageDaysToFirstOutreach?.manualOverride ?? report.bridgeTeamMetrics.averageDaysToFirstOutreach?.autoCalculated ?? 0)} days
                 </Text>
-                {viewMode === "single" && <ComparisonIndicator value={report.bridgeTeamMetrics.averageDaysToFirstOutreach.manualOverride ?? report.bridgeTeamMetrics.averageDaysToFirstOutreach.autoCalculated} field="bridgeTeamMetrics.averageDaysToFirstOutreach.autoCalculated" report={report} />}
+                {viewMode === "single" && <ComparisonIndicator value={report.bridgeTeamMetrics.averageDaysToFirstOutreach?.manualOverride ?? report.bridgeTeamMetrics.averageDaysToFirstOutreach?.autoCalculated ?? 0} field="bridgeTeamMetrics.averageDaysToFirstOutreach.autoCalculated" report={report} />}
               </View>
             </View>
           </View>
