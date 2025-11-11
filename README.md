@@ -924,9 +924,22 @@ To enable automatic welcome and password reset emails:
 
 #### Monthly Reporting (Board Members & Admins)
 
+**Board Member Auto-View:**
+- Board members automatically navigate to View Reports when accessing the Reporting tab
+- Default view shows the most recent posted month (e.g., if logging in November, defaults to October if posted)
+- Board members only see posted reports - unpublished months are hidden until admin posts them
+- Provides instant access to latest published metrics without extra navigation
+
 **Two Access Modes:**
 - **View Reports** - Available to both board members and admins for analytics
 - **Manage Reports** - Admin-only data entry and editing
+
+**Admin Posting Control:**
+- Admins can edit reports at any time in Manage Reports
+- Must press "Post Report for Board Members" button to publish
+- Posted reports show green "Posted for Board Viewing" badge
+- Board members only see months that have been posted
+- Prevents board members from seeing incomplete or draft reports
 
 **View Reports Features:**
 - **Single Month View**

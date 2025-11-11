@@ -21,7 +21,7 @@ import { formatNumber, formatCurrency, formatPercentage } from "../utils/formatN
 export default function ManageReportingScreen() {
   const navigation = useNavigation<any>();
   const currentUser = useCurrentUser();
-  const { monthlyReports, createMonthlyReport, updateMonthlyReport, calculateMentorshipMetrics, updateReleaseFacilityCounts, updateCallMetrics, updateDonorData, updateFinancialData, updateSocialMediaMetrics, updateWinsAndConcerns } = useReportingStore();
+  const { monthlyReports, createMonthlyReport, updateMonthlyReport, postReport, calculateMentorshipMetrics, updateReleaseFacilityCounts, updateCallMetrics, updateDonorData, updateFinancialData, updateSocialMediaMetrics, updateWinsAndConcerns } = useReportingStore();
   const participants = useParticipantStore((s) => s.participants);
 
   // View mode: "month" or "category"
@@ -81,6 +81,10 @@ export default function ManageReportingScreen() {
   // Wins & Concerns - Array of up to 5 entries each
   const [wins, setWins] = useState<{ title: string; body: string }[]>([]);
   const [concerns, setConcerns] = useState<{ title: string; body: string }[]>([]);
+
+  // Post confirmation modal
+  const [showPostModal, setShowPostModal] = useState(false);
+  const [isPosting, setIsPosting] = useState(false);
 
   const months = [
     "January", "February", "March", "April", "May", "June",
@@ -329,6 +333,23 @@ export default function ManageReportingScreen() {
     Alert.alert("Success", "Mentorship metrics refreshed from app data");
   };
 
+  const handlePostReport = async () => {
+    if (!currentReport || !currentUser) return;
+
+    setIsPosting(true);
+    try {
+      await postReport(currentReport.id, currentUser.id, currentUser.name);
+      setShowPostModal(false);
+      loadReport(); // Reload to show posted status
+      Alert.alert("Success", `Report for ${months[selectedMonth - 1]} ${selectedYear} has been posted for board member viewing.`);
+    } catch (error) {
+      console.error("Error posting report:", error);
+      Alert.alert("Error", "Failed to post report. Please try again.");
+    } finally {
+      setIsPosting(false);
+    }
+  };
+
   // Category view handlers - save data for specific field across all months
   const handleCategoryInputChange = (month: number, field: string, value: string) => {
     const key = `${month}-${field}`;
@@ -504,6 +525,31 @@ export default function ManageReportingScreen() {
               >
                 <Text className="text-white text-center font-semibold">Refresh Auto-Calculated Metrics</Text>
               </Pressable>
+
+              {/* Post Report Button */}
+              {currentReport && (
+                <Pressable
+                  className={`mt-2 px-4 py-3 rounded-lg flex-row items-center justify-center ${currentReport.isPosted ? "bg-green-100 border border-green-600" : "bg-yellow-600"}`}
+                  onPress={() => !currentReport.isPosted && setShowPostModal(true)}
+                  disabled={currentReport.isPosted}
+                >
+                  {currentReport.isPosted ? (
+                    <>
+                      <Ionicons name="checkmark-circle" size={20} color="#16A34A" />
+                      <Text className="text-green-700 font-bold ml-2">
+                        Posted for Board Viewing
+                      </Text>
+                    </>
+                  ) : (
+                    <>
+                      <Ionicons name="cloud-upload-outline" size={20} color="white" />
+                      <Text className="text-white font-bold ml-2">
+                        Post Report for Board Members
+                      </Text>
+                    </>
+                  )}
+                </Pressable>
+              )}
             </>
           ) : (
             <View className="space-y-2">
@@ -1509,6 +1555,48 @@ export default function ManageReportingScreen() {
                     </Text>
                   </Pressable>
                 ))}
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Post Confirmation Modal */}
+        <Modal
+          visible={showPostModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowPostModal(false)}
+        >
+          <View className="flex-1 bg-black/50 justify-center items-center p-4">
+            <View className="bg-white rounded-lg p-6 w-full max-w-md">
+              <View className="items-center mb-4">
+                <View className="w-16 h-16 bg-yellow-100 rounded-full items-center justify-center mb-3">
+                  <Ionicons name="cloud-upload-outline" size={32} color="#F59E0B" />
+                </View>
+                <Text className="text-2xl font-bold text-gray-900 mb-2">Post Report?</Text>
+                <Text className="text-gray-600 text-center">
+                  This will publish the {months[selectedMonth - 1]} {selectedYear} report for board member viewing. Once posted, board members will be able to see this report.
+                </Text>
+              </View>
+
+              <View className="space-y-2">
+                <Pressable
+                  onPress={handlePostReport}
+                  disabled={isPosting}
+                  className="bg-yellow-600 rounded-lg p-4"
+                >
+                  <Text className="text-white text-center font-bold">
+                    {isPosting ? "Posting..." : "Yes, Post Report"}
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={() => setShowPostModal(false)}
+                  disabled={isPosting}
+                  className="bg-gray-200 rounded-lg p-4"
+                >
+                  <Text className="text-gray-700 text-center font-semibold">Cancel</Text>
+                </Pressable>
               </View>
             </View>
           </View>

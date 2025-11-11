@@ -13,7 +13,10 @@ interface ReportingActions {
   initializeFirebaseListener: () => void;
   createMonthlyReport: (month: number, year: number, createdBy: string, createdByName: string) => Promise<MonthlyReport>;
   updateMonthlyReport: (reportId: string, updates: Partial<MonthlyReport>) => Promise<void>;
+  postReport: (reportId: string, postedBy: string, postedByName: string) => Promise<void>;
   getReportForMonth: (month: number, year: number) => MonthlyReport | undefined;
+  getPostedReports: () => MonthlyReport[];
+  getMostRecentPostedReport: () => MonthlyReport | undefined;
   calculateMentorshipMetrics: (month: number, year: number) => MentorshipMetrics;
   updateReleaseFacilityCounts: (reportId: string, counts: ReleaseFacilityCount) => Promise<void>;
   updateCallMetrics: (reportId: string, callMetrics: CallMetrics) => Promise<void>;
@@ -104,6 +107,7 @@ export const useReportingStore = create<ReportingStore>()((set, get) => ({
       },
       wins: [],
       concerns: [],
+      isPosted: false, // New reports default to unpublished
       createdBy,
       createdByName,
       createdAt: new Date().toISOString(),
@@ -222,6 +226,36 @@ export const useReportingStore = create<ReportingStore>()((set, get) => ({
       wins,
       concerns,
     });
+  },
+
+  postReport: async (reportId, postedBy, postedByName) => {
+    if (!database) {
+      throw new Error("Firebase not configured. Please add Firebase credentials in ENV tab.");
+    }
+
+    await get().updateMonthlyReport(reportId, {
+      isPosted: true,
+      postedAt: new Date().toISOString(),
+      postedBy,
+      postedByName,
+    });
+  },
+
+  getPostedReports: () => {
+    return get().monthlyReports.filter((r) => r.isPosted);
+  },
+
+  getMostRecentPostedReport: () => {
+    const postedReports = get().getPostedReports();
+    if (postedReports.length === 0) return undefined;
+
+    // Sort by year and month descending
+    const sorted = [...postedReports].sort((a, b) => {
+      if (b.year !== a.year) return b.year - a.year;
+      return b.month - a.month;
+    });
+
+    return sorted[0];
   },
 }));
 

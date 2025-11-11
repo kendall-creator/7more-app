@@ -9,6 +9,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { useReportingStore } from "../state/reportingStore";
+import { useCurrentUser } from "../state/authStore";
 import { Ionicons } from "@expo/vector-icons";
 import { formatNumber, formatCurrency, formatPercentage } from "../utils/formatNumber";
 
@@ -18,16 +19,44 @@ type CategoryFilter = "all" | "releasees" | "calls" | "mentorship" | "donors" | 
 
 export default function ViewReportingScreen() {
   const navigation = useNavigation<any>();
-  const { monthlyReports } = useReportingStore();
+  const { monthlyReports, getMostRecentPostedReport } = useReportingStore();
+  const currentUser = useCurrentUser();
+
+  const isBoardMember = currentUser?.role === "board_member";
+
+  // Filter reports based on user role - board members only see posted reports
+  const availableReports = useMemo(() => {
+    if (isBoardMember) {
+      return monthlyReports.filter(r => r.isPosted);
+    }
+    return monthlyReports;
+  }, [monthlyReports, isBoardMember]);
 
   // Filter states
   const [viewMode, setViewMode] = useState<ViewMode>("single");
   const [aggregationType, setAggregationType] = useState<AggregationType>("total");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
 
-  // Single month selection
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  // Default to most recent posted month for board members, current month for others
+  const getDefaultMonth = () => {
+    if (isBoardMember) {
+      const mostRecent = getMostRecentPostedReport();
+      return mostRecent ? mostRecent.month : new Date().getMonth() + 1;
+    }
+    return new Date().getMonth() + 1;
+  };
+
+  const getDefaultYear = () => {
+    if (isBoardMember) {
+      const mostRecent = getMostRecentPostedReport();
+      return mostRecent ? mostRecent.year : new Date().getFullYear();
+    }
+    return new Date().getFullYear();
+  };
+
+  // Single month selection - default to most recent posted for board members
+  const [selectedMonth, setSelectedMonth] = useState(getDefaultMonth());
+  const [selectedYear, setSelectedYear] = useState(getDefaultYear());
 
   // Date range selection
   const [startMonth, setStartMonth] = useState(1);
@@ -47,12 +76,12 @@ export default function ViewReportingScreen() {
   // Get reports in date range
   const reportsInRange = useMemo(() => {
     if (viewMode === "single") {
-      return monthlyReports.filter(r => r.month === selectedMonth && r.year === selectedYear);
+      return availableReports.filter(r => r.month === selectedMonth && r.year === selectedYear);
     } else {
       const startDate = new Date(startYear, startMonth - 1);
       const endDate = new Date(endYear, endMonth - 1);
 
-      return monthlyReports
+      return availableReports
         .filter(r => {
           const reportDate = new Date(r.year, r.month - 1);
           return reportDate >= startDate && reportDate <= endDate;
@@ -62,7 +91,7 @@ export default function ViewReportingScreen() {
           return a.month - b.month;
         });
     }
-  }, [viewMode, selectedMonth, selectedYear, startMonth, startYear, endMonth, endYear, monthlyReports]);
+  }, [viewMode, selectedMonth, selectedYear, startMonth, startYear, endMonth, endYear, availableReports]);
 
   // Get previous month report for comparison
   const getPreviousMonthReport = (month: number, year: number) => {
@@ -74,7 +103,7 @@ export default function ViewReportingScreen() {
       prevYear = year - 1;
     }
 
-    return monthlyReports.find(r => r.month === prevMonth && r.year === prevYear);
+    return availableReports.find(r => r.month === prevMonth && r.year === prevYear);
   };
 
   // Calculate aggregated metrics

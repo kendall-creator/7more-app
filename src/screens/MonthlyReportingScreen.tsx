@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
@@ -11,6 +11,13 @@ export default function MonthlyReportingScreen() {
 
   const isAdmin = currentUser?.role === "admin";
   const isBoardMember = currentUser?.role === "board_member";
+
+  // Auto-navigate board members directly to viewer
+  useEffect(() => {
+    if (isBoardMember) {
+      navigation.navigate("ViewReporting");
+    }
+  }, [isBoardMember, navigation]);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={["top"]}>

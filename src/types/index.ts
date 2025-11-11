@@ -558,6 +558,12 @@ export interface MonthlyReport {
   wins: WinConcernEntry[]; // Max 5 entries
   concerns: WinConcernEntry[]; // Max 5 entries
 
+  // Admin posting control
+  isPosted: boolean; // True when admin publishes for board viewing
+  postedAt?: string; // ISO timestamp when posted
+  postedBy?: string; // User ID who posted
+  postedByName?: string; // Name of user who posted
+
   createdBy: string;
   createdByName: string;
   createdAt: string;
