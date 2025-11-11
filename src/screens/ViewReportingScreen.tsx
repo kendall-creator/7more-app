@@ -154,19 +154,19 @@ export default function ViewReportingScreen() {
     const participantsAssignedToMentorship = reportsInRange.reduce((sum, r) =>
       sum + (r.mentorshipMetrics?.participantsAssignedToMentorship || 0), 0) / divisor;
 
-    // Bridge Team
+    // Bridge Team - use manual override if available, otherwise auto-calculated
     const participantsReceived = reportsInRange.reduce((sum, r) =>
-      sum + (r.bridgeTeamMetrics?.participantsReceived?.autoCalculated || 0), 0) / divisor;
+      sum + (r.bridgeTeamMetrics?.participantsReceived?.manualOverride ?? r.bridgeTeamMetrics?.participantsReceived?.autoCalculated ?? 0), 0) / divisor;
     const pendingBridge = reportsInRange.reduce((sum, r) =>
-      sum + (r.bridgeTeamMetrics?.statusCounts?.pendingBridge?.autoCalculated || 0), 0) / divisor;
+      sum + (r.bridgeTeamMetrics?.statusCounts?.pendingBridge?.manualOverride ?? r.bridgeTeamMetrics?.statusCounts?.pendingBridge?.autoCalculated ?? 0), 0) / divisor;
     const attemptedToContact = reportsInRange.reduce((sum, r) =>
-      sum + (r.bridgeTeamMetrics?.statusCounts?.attemptedToContact?.autoCalculated || 0), 0) / divisor;
+      sum + (r.bridgeTeamMetrics?.statusCounts?.attemptedToContact?.manualOverride ?? r.bridgeTeamMetrics?.statusCounts?.attemptedToContact?.autoCalculated ?? 0), 0) / divisor;
     const contacted = reportsInRange.reduce((sum, r) =>
-      sum + (r.bridgeTeamMetrics?.statusCounts?.contacted?.autoCalculated || 0), 0) / divisor;
+      sum + (r.bridgeTeamMetrics?.statusCounts?.contacted?.manualOverride ?? r.bridgeTeamMetrics?.statusCounts?.contacted?.autoCalculated ?? 0), 0) / divisor;
     const unableToContact = reportsInRange.reduce((sum, r) =>
-      sum + (r.bridgeTeamMetrics?.statusCounts?.unableToContact?.autoCalculated || 0), 0) / divisor;
+      sum + (r.bridgeTeamMetrics?.statusCounts?.unableToContact?.manualOverride ?? r.bridgeTeamMetrics?.statusCounts?.unableToContact?.autoCalculated ?? 0), 0) / divisor;
     const averageDaysToFirstOutreach = reportsInRange.reduce((sum, r) =>
-      sum + (r.bridgeTeamMetrics?.averageDaysToFirstOutreach?.autoCalculated || 0), 0) / divisor;
+      sum + (r.bridgeTeamMetrics?.averageDaysToFirstOutreach?.manualOverride ?? r.bridgeTeamMetrics?.averageDaysToFirstOutreach?.autoCalculated ?? 0), 0) / divisor;
 
     // Donors
     const newDonors = reportsInRange.reduce((sum, r) => sum + (r.donorData?.newDonors || 0), 0) / divisor;
@@ -360,10 +360,10 @@ export default function ViewReportingScreen() {
         )}
 
         {/* Bridge Team */}
-        {canViewCategory("bridge_team") && (categoryFilter === "all" || categoryFilter === "bridge_team") && report.bridgeTeamMetrics?.participantsReceived && (
+        {canViewCategory("bridge_team") && (categoryFilter === "all" || categoryFilter === "bridge_team") && report.bridgeTeamMetrics && (
           <View className="bg-white rounded-lg p-4 mb-4 mx-4 border border-gray-200">
             <Text className="text-lg font-bold text-gray-900 mb-3">Bridge Team</Text>
-            {renderMetricRow("Participants Received", report.bridgeTeamMetrics.participantsReceived.manualOverride ?? report.bridgeTeamMetrics.participantsReceived.autoCalculated, "bridgeTeamMetrics.participantsReceived.autoCalculated", report)}
+            {renderMetricRow("Participants Received", report.bridgeTeamMetrics.participantsReceived?.manualOverride ?? report.bridgeTeamMetrics.participantsReceived?.autoCalculated ?? 0, "bridgeTeamMetrics.participantsReceived.autoCalculated", report)}
 
             <Text className="text-sm font-semibold text-gray-700 mt-3 mb-2">Status Activity:</Text>
             <View className="pl-4">
