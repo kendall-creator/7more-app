@@ -810,11 +810,11 @@ export default function ManageReportingScreen() {
               </View>
 
               {/* 3. Bridge Team Metrics (Auto-Calculated) */}
-              {currentReport.bridgeTeamMetrics?.participantsReceived && (
-                <View className="bg-white rounded-lg p-4 mb-4 border border-gray-200">
-                  <Text className="text-lg font-bold text-gray-900 mb-3">3. Bridge Team</Text>
-                  <Text className="text-sm text-gray-500 mb-3">Auto-calculated from app data</Text>
+              <View className="bg-white rounded-lg p-4 mb-4 border border-gray-200">
+                <Text className="text-lg font-bold text-gray-900 mb-3">3. Bridge Team</Text>
+                <Text className="text-sm text-gray-500 mb-3">Auto-calculated from app data</Text>
 
+                {currentReport.bridgeTeamMetrics?.participantsReceived ? (
                   <View className="space-y-2">
                     {/* Participants Received */}
                     <View className="flex-row justify-between py-2 border-b border-gray-100">
@@ -888,8 +888,14 @@ export default function ManageReportingScreen() {
                       </View>
                     )}
                   </View>
-                </View>
-              )}
+                ) : (
+                  <View className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                    <Text className="text-yellow-900 text-center">
+                      Bridge Team metrics not yet calculated. Tap &ldquo;Refresh Auto-Calculated Metrics&rdquo; above to populate this data.
+                    </Text>
+                  </View>
+                )}
+              </View>
 
               {/* 4. Mentorship Metrics (Auto-Calculated) */}
               <View className="bg-white rounded-lg p-4 mb-4 border border-gray-200">
