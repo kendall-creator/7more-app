@@ -14,7 +14,7 @@
  *
  * Environment Variables Required (App .env):
  * - EXPO_PUBLIC_BACKEND_URL: Backend server URL (default: http://172.17.0.2:3001)
- * - EXPO_PUBLIC_EMAIL_API_KEY: API key for backend authentication
+ * - EXPO_PUBLIC_BACKEND_API_KEY: API key for backend authentication
  */
 
 interface GmailEmailParams {
@@ -44,17 +44,17 @@ export const sendGmailEmail = async ({
   try {
     // Get backend configuration
     const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL || "http://172.17.0.2:3001";
-    const apiKey = process.env.EXPO_PUBLIC_EMAIL_API_KEY;
+    const apiKey = process.env.EXPO_PUBLIC_BACKEND_API_KEY; // Changed from EXPO_PUBLIC_EMAIL_API_KEY
 
     // Validate configuration
     if (!apiKey) {
       console.warn("⚠️ Gmail SMTP backend not configured");
-      console.log("Missing EXPO_PUBLIC_EMAIL_API_KEY environment variable");
+      console.log("Missing EXPO_PUBLIC_BACKEND_API_KEY environment variable");
       console.log("Please add to ENV tab in Vibecode app");
 
       return {
         success: false,
-        error: "Gmail SMTP backend not configured. Please add EXPO_PUBLIC_EMAIL_API_KEY to ENV tab.",
+        error: "Gmail SMTP backend not configured. Please add EXPO_PUBLIC_BACKEND_API_KEY to ENV tab.",
       };
     }
 

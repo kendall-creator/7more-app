@@ -12,6 +12,8 @@
  * 5. (Optional) Add EXPO_PUBLIC_EMAIL_FROM for custom sender
  */
 
+import { sendBridgeTeamResourcesEmail } from "../api/gmail-smtp";
+
 interface EmailParams {
   to: string;
   subject: string;
@@ -214,7 +216,8 @@ export const generatePasswordFromName = (fullName: string): string => {
 };
 
 /**
- * Send resources email to participant using Resend
+ * Send resources email to participant
+ * Uses Gmail SMTP (primary) with fallback to Resend
  * Uses bridgeteam@7more.net as reply-to address
  */
 export const sendResourcesEmail = async (
@@ -224,15 +227,33 @@ export const sendResourcesEmail = async (
   organizationName: string = "7more"
 ): Promise<{ success: boolean; error?: string }> => {
   try {
-    const subject = `Resources from ${organizationName}`;
+    console.log("📧 Attempting to send email via Gmail SMTP...");
 
-    // Build the email body with all resources
+    // Try Gmail SMTP first (preferred method)
+    const gmailResult = await sendBridgeTeamResourcesEmail(
+      participantEmail,
+      participantName,
+      resources,
+      "Bridge Team"
+    );
+
+    if (gmailResult.success) {
+      console.log("✅ Email sent successfully via Gmail SMTP");
+      return gmailResult;
+    }
+
+    console.log("⚠️ Gmail SMTP failed, trying Resend fallback...");
+    console.log("   Error:", gmailResult.error);
+
+    // Build email content for fallback
+    const subject = `Resources from Bridge Team - ${organizationName}`;
+
     let resourcesText = "";
     resources.forEach((resource) => {
-      resourcesText += `\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+      resourcesText += "\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
       resourcesText += `${resource.title}\n`;
       resourcesText += `Category: ${resource.category}\n`;
-      resourcesText += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+      resourcesText += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
       resourcesText += `${resource.content}\n`;
     });
 
@@ -245,21 +266,22 @@ ${resourcesText}
 If you have any questions about these resources or need additional assistance, please feel free to reach out to us.
 
 Best regards,
-${organizationName} Team
+Bridge Team
+${organizationName} Organization
 
 ---
-This is an automated message. Please do not reply to this email.
+This email was sent from Bridge Team at bridgeteam@7more.net
     `.trim();
 
-    // Send the email using Resend with bridgeteam@7more.net as reply-to
-    const result = await sendEmail({
+    // Fallback to Resend if Gmail SMTP fails
+    const resendResult = await sendEmail({
       to: participantEmail,
       subject,
       body,
       replyTo: "bridgeteam@7more.net",
     });
 
-    return result;
+    return resendResult;
   } catch (error) {
     console.error("Error sending resources email:", error);
     return {

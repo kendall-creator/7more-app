@@ -194,7 +194,7 @@ Your app now sends emails directly from **bridgeteam@7more.net** using Gmail SMT
   - Frontend API: `/src/api/gmail-smtp.ts`
   - Backend Server: `/backend/server.js`
 - Environment Variables:
-  - App: `EXPO_PUBLIC_BACKEND_URL`, `EXPO_PUBLIC_EMAIL_API_KEY`
+  - App: `EXPO_PUBLIC_BACKEND_URL`, `EXPO_PUBLIC_BACKEND_API_KEY`
   - Backend: `BRIDGE_TEAM_EMAIL`, `BRIDGE_TEAM_EMAIL_PASSWORD`, `SMTP_HOST`, `SMTP_PORT`, `EMAIL_API_KEY`
 
 **Security**:
