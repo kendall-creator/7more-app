@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
@@ -15,6 +15,13 @@ export default function MonthlyReportingScreen() {
 
   // Check if user has permission to view reporting
   const canViewReporting = isAdmin || isBoardMember || hasReportingAccess;
+
+  // Auto-navigate board members directly to View Reports
+  useEffect(() => {
+    if (isBoardMember && canViewReporting) {
+      navigation.navigate("ViewReporting");
+    }
+  }, [isBoardMember, canViewReporting, navigation]);
 
   // If user doesn't have access, show access denied message
   if (!canViewReporting) {

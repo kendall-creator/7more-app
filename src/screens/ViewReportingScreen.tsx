@@ -28,8 +28,8 @@ export default function ViewReportingScreen() {
 
   // Check which categories the user can view
   const canViewCategory = (category: ReportingCategory): boolean => {
-    // Admins can view everything
-    if (isAdmin) return true;
+    // Admins and board members can view everything
+    if (isAdmin || isBoardMember) return true;
 
     // If user doesn't have reporting access, they can't view anything
     if (!currentUser?.hasReportingAccess) return false;
