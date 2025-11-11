@@ -35,8 +35,9 @@ export default function AdminHomepageScreen() {
     const overdue = allTasks.filter((t) => t.status === "overdue").length;
     const inProgress = allTasks.filter((t) => t.status === "in_progress").length;
     const pending = allTasks.filter((t) => t.status === "pending").length;
+    const completed = allTasks.filter((t) => t.status === "completed").length;
 
-    return { totalTasks, overdue, inProgress, pending };
+    return { totalTasks, overdue, inProgress, pending, completed };
   }, [allTasks]);
 
   // Pam Lychner Schedule (Monday-Friday current week)
@@ -252,6 +253,10 @@ export default function AdminHomepageScreen() {
             <View className="flex-1 bg-blue-50 rounded-xl p-3">
               <Text className="text-2xl font-bold text-blue-600">{formatNumber(taskStats.inProgress)}</Text>
               <Text className="text-xs text-[#99896c] mt-1">In Progress</Text>
+            </View>
+            <View className="flex-1 bg-green-50 rounded-xl p-3">
+              <Text className="text-2xl font-bold text-green-600">{formatNumber(taskStats.completed)}</Text>
+              <Text className="text-xs text-[#99896c] mt-1">Completed</Text>
             </View>
           </View>
         </View>

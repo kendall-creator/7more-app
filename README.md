@@ -346,6 +346,7 @@ The app supports seven distinct user roles:
   - Total tasks assigned
   - Overdue tasks count
   - In progress count
+  - Completed tasks count
   - Link to full task management
 - **Team Overview**:
   - Mentor count
