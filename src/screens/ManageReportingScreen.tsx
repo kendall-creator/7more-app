@@ -17,6 +17,7 @@ import { useParticipantStore } from "../state/participantStore";
 import { useCurrentUser } from "../state/authStore";
 import { Ionicons } from "@expo/vector-icons";
 import { formatNumber, formatCurrency, formatPercentage } from "../utils/formatNumber";
+import { BridgeTeamMetrics } from "../types";
 
 export default function ManageReportingScreen() {
   const navigation = useNavigation<any>();
@@ -77,6 +78,14 @@ export default function ManageReportingScreen() {
   const [followers, setFollowers] = useState("");
   const [followersGained, setFollowersGained] = useState("");
   const [followersGainedSign, setFollowersGainedSign] = useState<"plus" | "minus">("plus");
+
+  // Bridge Team Data (Section 3) - Manual overrides
+  const [bridgeParticipantsReceived, setBridgeParticipantsReceived] = useState("");
+  const [bridgePendingBridge, setBridgePendingBridge] = useState("");
+  const [bridgeAttemptedToContact, setBridgeAttemptedToContact] = useState("");
+  const [bridgeContacted, setBridgeContacted] = useState("");
+  const [bridgeUnableToContact, setBridgeUnableToContact] = useState("");
+  const [bridgeAvgDaysToFirstOutreach, setBridgeAvgDaysToFirstOutreach] = useState("");
 
   // Wins & Concerns - Array of up to 5 entries each
   const [wins, setWins] = useState<{ title: string; body: string }[]>([]);
@@ -150,6 +159,39 @@ export default function ManageReportingScreen() {
       setFollowersGained("");
       setFollowersGainedSign("plus");
     }
+
+    // Populate Bridge Team manual override fields
+    const bridgeMetrics = report.bridgeTeamMetrics;
+    setBridgeParticipantsReceived(
+      bridgeMetrics?.participantsReceived?.manualOverride !== null && bridgeMetrics?.participantsReceived?.manualOverride !== undefined
+        ? bridgeMetrics.participantsReceived.manualOverride.toString()
+        : ""
+    );
+    setBridgePendingBridge(
+      bridgeMetrics?.statusCounts?.pendingBridge?.manualOverride !== null && bridgeMetrics?.statusCounts?.pendingBridge?.manualOverride !== undefined
+        ? bridgeMetrics.statusCounts.pendingBridge.manualOverride.toString()
+        : ""
+    );
+    setBridgeAttemptedToContact(
+      bridgeMetrics?.statusCounts?.attemptedToContact?.manualOverride !== null && bridgeMetrics?.statusCounts?.attemptedToContact?.manualOverride !== undefined
+        ? bridgeMetrics.statusCounts.attemptedToContact.manualOverride.toString()
+        : ""
+    );
+    setBridgeContacted(
+      bridgeMetrics?.statusCounts?.contacted?.manualOverride !== null && bridgeMetrics?.statusCounts?.contacted?.manualOverride !== undefined
+        ? bridgeMetrics.statusCounts.contacted.manualOverride.toString()
+        : ""
+    );
+    setBridgeUnableToContact(
+      bridgeMetrics?.statusCounts?.unableToContact?.manualOverride !== null && bridgeMetrics?.statusCounts?.unableToContact?.manualOverride !== undefined
+        ? bridgeMetrics.statusCounts.unableToContact.manualOverride.toString()
+        : ""
+    );
+    setBridgeAvgDaysToFirstOutreach(
+      bridgeMetrics?.averageDaysToFirstOutreach?.manualOverride !== null && bridgeMetrics?.averageDaysToFirstOutreach?.manualOverride !== undefined
+        ? bridgeMetrics.averageDaysToFirstOutreach.manualOverride.toString()
+        : ""
+    );
 
     // Populate wins and concerns arrays
     setWins(report.wins || []);
@@ -311,6 +353,57 @@ export default function ManageReportingScreen() {
     });
 
     Alert.alert("Success", "Social media metrics saved");
+  };
+
+  const handleSaveBridgeTeamMetrics = async () => {
+    if (!currentReport) return;
+
+    // Get existing metrics or create new structure
+    const existingMetrics = currentReport.bridgeTeamMetrics || calculateBridgeTeamMetrics(selectedMonth, selectedYear);
+
+    // Build updated metrics with manual overrides
+    const updatedMetrics: BridgeTeamMetrics = {
+      participantsReceived: {
+        autoCalculated: existingMetrics.participantsReceived?.autoCalculated || 0,
+        manualOverride: bridgeParticipantsReceived === "" ? null : parseInt(bridgeParticipantsReceived) || null,
+      },
+      statusCounts: {
+        pendingBridge: {
+          autoCalculated: existingMetrics.statusCounts?.pendingBridge?.autoCalculated || 0,
+          manualOverride: bridgePendingBridge === "" ? null : parseInt(bridgePendingBridge) || null,
+        },
+        attemptedToContact: {
+          autoCalculated: existingMetrics.statusCounts?.attemptedToContact?.autoCalculated || 0,
+          manualOverride: bridgeAttemptedToContact === "" ? null : parseInt(bridgeAttemptedToContact) || null,
+        },
+        contacted: {
+          autoCalculated: existingMetrics.statusCounts?.contacted?.autoCalculated || 0,
+          manualOverride: bridgeContacted === "" ? null : parseInt(bridgeContacted) || null,
+        },
+        unableToContact: {
+          autoCalculated: existingMetrics.statusCounts?.unableToContact?.autoCalculated || 0,
+          manualOverride: bridgeUnableToContact === "" ? null : parseInt(bridgeUnableToContact) || null,
+        },
+      },
+      averageDaysToFirstOutreach: {
+        autoCalculated: existingMetrics.averageDaysToFirstOutreach?.autoCalculated || 0,
+        manualOverride: bridgeAvgDaysToFirstOutreach === "" ? null : parseFloat(bridgeAvgDaysToFirstOutreach) || null,
+      },
+      formsByDayOfWeek: existingMetrics.formsByDayOfWeek || {
+        monday: 0,
+        tuesday: 0,
+        wednesday: 0,
+        thursday: 0,
+        friday: 0,
+        saturday: 0,
+        sunday: 0,
+        topDay: "N/A",
+      },
+    };
+
+    await updateBridgeTeamMetrics(currentReport.id, updatedMetrics);
+
+    Alert.alert("Success", "Bridge Team metrics saved");
   };
 
   const handleSaveWinsAndConcerns = async () => {
@@ -809,92 +902,173 @@ export default function ManageReportingScreen() {
                 </View>
               </View>
 
-              {/* 3. Bridge Team Metrics (Auto-Calculated) */}
+              {/* 3. Bridge Team Metrics (Auto-Calculated + Manual Override) */}
               <View className="bg-white rounded-lg p-4 mb-4 border border-gray-200">
                 <Text className="text-lg font-bold text-gray-900 mb-3">3. Bridge Team</Text>
-                <Text className="text-sm text-gray-500 mb-3">Auto-calculated from app data</Text>
+                <Text className="text-sm text-gray-500 mb-3">
+                  {currentReport.bridgeTeamMetrics?.participantsReceived
+                    ? "Auto-calculated from app data. Enter values below to override."
+                    : "No data calculated yet. Enter values manually or tap Refresh Auto-Calculated Metrics above."}
+                </Text>
 
-                {currentReport.bridgeTeamMetrics?.participantsReceived ? (
-                  <View className="space-y-2">
-                    {/* Participants Received */}
-                    <View className="flex-row justify-between py-2 border-b border-gray-100">
+                <View className="space-y-3">
+                  {/* Participants Received */}
+                  <View>
+                    <View className="flex-row justify-between items-center mb-1">
                       <Text className="text-gray-700">Participants Received</Text>
-                      <Text className="text-gray-900 font-semibold">
-                        {formatNumber(currentReport.bridgeTeamMetrics.participantsReceived.manualOverride ?? currentReport.bridgeTeamMetrics.participantsReceived.autoCalculated)}
-                      </Text>
+                      {currentReport.bridgeTeamMetrics?.participantsReceived?.autoCalculated !== undefined && (
+                        <Text className="text-xs text-gray-500">
+                          Auto: {formatNumber(currentReport.bridgeTeamMetrics.participantsReceived.autoCalculated)}
+                        </Text>
+                      )}
                     </View>
+                    <TextInput
+                      className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-300"
+                      value={bridgeParticipantsReceived}
+                      onChangeText={setBridgeParticipantsReceived}
+                      keyboardType="number-pad"
+                      placeholder={currentReport.bridgeTeamMetrics?.participantsReceived?.autoCalculated?.toString() || "0"}
+                      editable={canEdit}
+                    />
+                  </View>
 
-                    {/* Status Counts */}
-                    <View className="mt-2">
-                      <Text className="text-sm font-semibold text-gray-700 mb-2">Status Activity:</Text>
+                  {/* Status Activity */}
+                  <View className="space-y-2">
+                    <Text className="text-sm font-semibold text-gray-700 mb-1">Status Activity:</Text>
 
-                      <View className="flex-row justify-between py-1 pl-4">
-                        <Text className="text-gray-600">Pending Bridge</Text>
-                        <Text className="text-gray-900">
-                          {formatNumber(currentReport.bridgeTeamMetrics.statusCounts?.pendingBridge?.manualOverride ?? currentReport.bridgeTeamMetrics.statusCounts?.pendingBridge?.autoCalculated ?? 0)}
-                        </Text>
-                      </View>
-
-                      <View className="flex-row justify-between py-1 pl-4">
-                        <Text className="text-gray-600">Attempted to Contact</Text>
-                        <Text className="text-gray-900">
-                          {formatNumber(currentReport.bridgeTeamMetrics.statusCounts?.attemptedToContact?.manualOverride ?? currentReport.bridgeTeamMetrics.statusCounts?.attemptedToContact?.autoCalculated ?? 0)}
-                        </Text>
-                      </View>
-
-                      <View className="flex-row justify-between py-1 pl-4">
-                        <Text className="text-gray-600">Contacted</Text>
-                        <Text className="text-gray-900">
-                          {formatNumber(currentReport.bridgeTeamMetrics.statusCounts?.contacted?.manualOverride ?? currentReport.bridgeTeamMetrics.statusCounts?.contacted?.autoCalculated ?? 0)}
-                        </Text>
-                      </View>
-
-                      <View className="flex-row justify-between py-1 pl-4">
-                        <Text className="text-gray-600">Unable to Contact</Text>
-                        <Text className="text-gray-900">
-                          {formatNumber(currentReport.bridgeTeamMetrics.statusCounts?.unableToContact?.manualOverride ?? currentReport.bridgeTeamMetrics.statusCounts?.unableToContact?.autoCalculated ?? 0)}
-                        </Text>
-                      </View>
-                    </View>
-
-                    {/* Average Days to First Outreach */}
-                    <View className="flex-row justify-between py-2 border-t border-gray-100 mt-2 pt-2">
-                      <Text className="text-gray-700">Avg Days to First Outreach</Text>
-                      <Text className="text-gray-900 font-semibold">
-                        {formatNumber(currentReport.bridgeTeamMetrics.averageDaysToFirstOutreach?.manualOverride ?? currentReport.bridgeTeamMetrics.averageDaysToFirstOutreach?.autoCalculated ?? 0)} days
-                      </Text>
-                    </View>
-
-                    {/* Forms by Day of Week */}
-                    {currentReport.bridgeTeamMetrics.formsByDayOfWeek && (
-                      <View className="mt-2 pt-2 border-t border-gray-100">
-                        <Text className="text-sm font-semibold text-gray-700 mb-2">Forms Received by Day:</Text>
-                        <View className="flex-row flex-wrap gap-2">
-                          {Object.entries(currentReport.bridgeTeamMetrics.formsByDayOfWeek)
-                            .filter(([key]) => key !== "topDay")
-                            .map(([day, count]) => (
-                              <View key={day} className="bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
-                                <Text className="text-xs text-gray-600 capitalize">{day.substring(0, 3)}</Text>
-                                <Text className="text-sm font-bold text-gray-900">{String(count)}</Text>
-                              </View>
-                            ))}
-                        </View>
-                        <View className="mt-2 bg-indigo-50 px-3 py-2 rounded-lg border border-indigo-200">
-                          <Text className="text-sm text-indigo-900">
-                            <Text className="font-semibold">Top Day: </Text>
-                            {currentReport.bridgeTeamMetrics.formsByDayOfWeek.topDay}
+                    {/* Pending Bridge */}
+                    <View>
+                      <View className="flex-row justify-between items-center mb-1">
+                        <Text className="text-gray-600 pl-2">Pending Bridge</Text>
+                        {currentReport.bridgeTeamMetrics?.statusCounts?.pendingBridge?.autoCalculated !== undefined && (
+                          <Text className="text-xs text-gray-500">
+                            Auto: {formatNumber(currentReport.bridgeTeamMetrics.statusCounts.pendingBridge.autoCalculated)}
                           </Text>
-                        </View>
+                        )}
                       </View>
-                    )}
+                      <TextInput
+                        className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-300"
+                        value={bridgePendingBridge}
+                        onChangeText={setBridgePendingBridge}
+                        keyboardType="number-pad"
+                        placeholder={currentReport.bridgeTeamMetrics?.statusCounts?.pendingBridge?.autoCalculated?.toString() || "0"}
+                        editable={canEdit}
+                      />
+                    </View>
+
+                    {/* Attempted to Contact */}
+                    <View>
+                      <View className="flex-row justify-between items-center mb-1">
+                        <Text className="text-gray-600 pl-2">Attempted to Contact</Text>
+                        {currentReport.bridgeTeamMetrics?.statusCounts?.attemptedToContact?.autoCalculated !== undefined && (
+                          <Text className="text-xs text-gray-500">
+                            Auto: {formatNumber(currentReport.bridgeTeamMetrics.statusCounts.attemptedToContact.autoCalculated)}
+                          </Text>
+                        )}
+                      </View>
+                      <TextInput
+                        className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-300"
+                        value={bridgeAttemptedToContact}
+                        onChangeText={setBridgeAttemptedToContact}
+                        keyboardType="number-pad"
+                        placeholder={currentReport.bridgeTeamMetrics?.statusCounts?.attemptedToContact?.autoCalculated?.toString() || "0"}
+                        editable={canEdit}
+                      />
+                    </View>
+
+                    {/* Contacted */}
+                    <View>
+                      <View className="flex-row justify-between items-center mb-1">
+                        <Text className="text-gray-600 pl-2">Contacted</Text>
+                        {currentReport.bridgeTeamMetrics?.statusCounts?.contacted?.autoCalculated !== undefined && (
+                          <Text className="text-xs text-gray-500">
+                            Auto: {formatNumber(currentReport.bridgeTeamMetrics.statusCounts.contacted.autoCalculated)}
+                          </Text>
+                        )}
+                      </View>
+                      <TextInput
+                        className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-300"
+                        value={bridgeContacted}
+                        onChangeText={setBridgeContacted}
+                        keyboardType="number-pad"
+                        placeholder={currentReport.bridgeTeamMetrics?.statusCounts?.contacted?.autoCalculated?.toString() || "0"}
+                        editable={canEdit}
+                      />
+                    </View>
+
+                    {/* Unable to Contact */}
+                    <View>
+                      <View className="flex-row justify-between items-center mb-1">
+                        <Text className="text-gray-600 pl-2">Unable to Contact</Text>
+                        {currentReport.bridgeTeamMetrics?.statusCounts?.unableToContact?.autoCalculated !== undefined && (
+                          <Text className="text-xs text-gray-500">
+                            Auto: {formatNumber(currentReport.bridgeTeamMetrics.statusCounts.unableToContact.autoCalculated)}
+                          </Text>
+                        )}
+                      </View>
+                      <TextInput
+                        className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-300"
+                        value={bridgeUnableToContact}
+                        onChangeText={setBridgeUnableToContact}
+                        keyboardType="number-pad"
+                        placeholder={currentReport.bridgeTeamMetrics?.statusCounts?.unableToContact?.autoCalculated?.toString() || "0"}
+                        editable={canEdit}
+                      />
+                    </View>
                   </View>
-                ) : (
-                  <View className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                    <Text className="text-yellow-900 text-center">
-                      Bridge Team metrics not yet calculated. Tap &ldquo;Refresh Auto-Calculated Metrics&rdquo; above to populate this data.
-                    </Text>
+
+                  {/* Average Days to First Outreach */}
+                  <View>
+                    <View className="flex-row justify-between items-center mb-1">
+                      <Text className="text-gray-700">Avg Days to First Outreach</Text>
+                      {currentReport.bridgeTeamMetrics?.averageDaysToFirstOutreach?.autoCalculated !== undefined && (
+                        <Text className="text-xs text-gray-500">
+                          Auto: {formatNumber(currentReport.bridgeTeamMetrics.averageDaysToFirstOutreach.autoCalculated)}
+                        </Text>
+                      )}
+                    </View>
+                    <TextInput
+                      className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-300"
+                      value={bridgeAvgDaysToFirstOutreach}
+                      onChangeText={setBridgeAvgDaysToFirstOutreach}
+                      keyboardType="decimal-pad"
+                      placeholder={currentReport.bridgeTeamMetrics?.averageDaysToFirstOutreach?.autoCalculated?.toString() || "0"}
+                      editable={canEdit}
+                    />
                   </View>
-                )}
+
+                  {/* Forms by Day of Week - Display Only */}
+                  {currentReport.bridgeTeamMetrics?.formsByDayOfWeek && (
+                    <View className="mt-2 pt-3 border-t border-gray-100">
+                      <Text className="text-sm font-semibold text-gray-700 mb-2">Forms Received by Day (Auto-calculated):</Text>
+                      <View className="flex-row flex-wrap gap-2">
+                        {Object.entries(currentReport.bridgeTeamMetrics.formsByDayOfWeek)
+                          .filter(([key]) => key !== "topDay")
+                          .map(([day, count]) => (
+                            <View key={day} className="bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
+                              <Text className="text-xs text-gray-600 capitalize">{day.substring(0, 3)}</Text>
+                              <Text className="text-sm font-bold text-gray-900">{String(count)}</Text>
+                            </View>
+                          ))}
+                      </View>
+                      <View className="mt-2 bg-indigo-50 px-3 py-2 rounded-lg border border-indigo-200">
+                        <Text className="text-sm text-indigo-900">
+                          <Text className="font-semibold">Top Day: </Text>
+                          {currentReport.bridgeTeamMetrics.formsByDayOfWeek.topDay}
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+
+                  {canEdit && (
+                    <Pressable
+                      className="bg-indigo-600 px-4 py-3 rounded-lg mt-2"
+                      onPress={handleSaveBridgeTeamMetrics}
+                    >
+                      <Text className="text-white text-center font-semibold">Save Bridge Team Metrics</Text>
+                    </Pressable>
+                  )}
+                </View>
               </View>
 
               {/* 4. Mentorship Metrics (Auto-Calculated) */}
