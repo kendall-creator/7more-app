@@ -55,6 +55,7 @@ import TestEmailScreen from "../screens/TestEmailScreen";
 import MonthlyReportingScreen from "../screens/MonthlyReportingScreen";
 import ManageReportingScreen from "../screens/ManageReportingScreen";
 import ViewReportingScreen from "../screens/ViewReportingScreen";
+import BoardHomeScreen from "../screens/BoardHomeScreen";
 import EmbeddableFormScreen from "../screens/EmbeddableFormScreen";
 import FileManagementScreen from "../screens/FileManagementScreen";
 import ManageFormsScreen from "../screens/ManageFormsScreen";
@@ -250,9 +251,17 @@ function MainTabs() {
         </>
       )}
 
-      {/* Board Members see Scheduler, Tasks, and Monthly Reporting */}
+      {/* Board Members see Board Home, Scheduler, Tasks, and Monthly Reporting */}
       {userRole === "board_member" && (
         <>
+          <Tab.Screen
+            name="BoardHome"
+            component={BoardHomeScreen}
+            options={{
+              tabBarLabel: "Home",
+              tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
+            }}
+          />
           <Tab.Screen
             name="Scheduler"
             component={SchedulerScreen}

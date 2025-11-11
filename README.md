@@ -289,11 +289,12 @@ The app features a role-based tab navigation system:
 2. **My Tasks** - Assigned tasks
 3. **Resources** - Resource library
 
-**For Board Members (4 tabs):**
-1. **Scheduler** - View volunteer shifts (same as admin view)
-2. **My Tasks** - Tasks assigned to them (can also assign tasks to others)
-3. **Reporting** - Monthly reporting with read-only access to all data
-4. **Resources** - Resource library
+**For Board Members (5 tabs):**
+1. **Home** - Dashboard with notifications, schedule/tasks, and current numbers (live Bridge Team and Mentorship metrics)
+2. **Scheduler** - View volunteer shifts (same as admin view)
+3. **My Tasks** - Tasks assigned to them (can also assign tasks to others)
+4. **Reporting** - Monthly reporting with read-only access to posted reports
+5. **Resources** - Resource library
 
 ## Features
 
@@ -925,11 +926,15 @@ To enable automatic welcome and password reset emails:
 
 #### Monthly Reporting (Board Members & Admins)
 
-**Board Member Auto-View:**
-- Board members automatically navigate to View Reports when accessing the Reporting tab
-- Default view shows the most recent posted month (e.g., if logging in November, defaults to October if posted)
-- Board members only see posted reports - unpublished months are hidden until admin posts them
-- Provides instant access to latest published metrics without extra navigation
+**Board Member Home Dashboard:**
+- Board members now have a dedicated Home screen as their default view
+- Shows notifications for new posted reports (e.g., "New Report Available - 10/2024 monthly report is ready to view")
+- Displays upcoming meetings and pending tasks assigned to them
+- Live "Current Numbers" dashboard showing:
+  - **Bridge Team Metrics**: Total participants, Pending Bridge, Attempted to Contact, Contacted, Unable to Contact
+  - **Mentorship Metrics**: Participants assigned to mentorship, Active participants
+- Tapping on report notification or Reporting tab navigates to reporting interface
+- No longer auto-navigates to reports - board members can view when ready
 
 **Two Access Modes:**
 - **View Reports** - Available to both board members and admins for analytics
@@ -1002,7 +1007,7 @@ To enable automatic welcome and password reset emails:
      - Missed call due to users not answering (%)
    - Validation: Warns if subcategories don't equal Missed Calls %
 
-3. **Bridge Team (Auto-Calculated)**
+3. **Bridge Team (Auto-Calculated + Manual Override)**
    - Participants Received - total participants received by Bridge Team during the month
    - Status Activity:
      - Pending Bridge - participants in pending status
@@ -1010,9 +1015,13 @@ To enable automatic welcome and password reset emails:
      - Contacted - successful contacts
      - Unable to Contact - participants unable to reach
    - Average Days to First Outreach - average time from submission to first contact
-   - Forms by Day of Week - distribution of intake form submissions by day
-   - All metrics automatically calculated from app data
-   - Refresh button to update from current data
+   - Forms by Day of Week - distribution of intake form submissions by day (auto-calculated only)
+   - **All metrics auto-calculated from app data** with option to manually override
+   - **Manual entry available** for historical data (pre-app implementation)
+   - Shows both auto-calculated value (as hint) and manual entry field for each metric
+   - Leave fields empty to use auto-calculated values
+   - Enter values to override for months before app data existed
+   - Refresh button to recalculate from current app data
 
 4. **Mentorship (Auto-Calculated)**
    - Participants Assigned to Mentorship - automatically pulled from app data
