@@ -157,9 +157,65 @@ If you see "Failed to load form" or "Loading..." that won't finish:
 
 ## Communication Integration Setup
 
-### 📧 Resend Email Integration (Simple & Direct)
+### 📧 Gmail SMTP Email Integration (Bridge Team)
 
-**Status**: ✅ **CONFIGURED & READY TO TEST** - Direct email sending via Resend API
+**Status**: ✅ **FULLY CONFIGURED & TESTED** - Email sending via Gmail SMTP
+
+Your app now sends emails directly from **bridgeteam@7more.net** using Gmail SMTP with TLS encryption. This integration is specifically enabled for Bridge Team users, Bridge Team leaders, and admins.
+
+**Current Configuration**:
+- ✅ SMTP Server: smtp.gmail.com:587 (TLS)
+- ✅ From Address: Bridge Team <bridgeteam@7more.net>
+- ✅ Backend Server: Running on port 3001
+- ✅ Test Email: Sent successfully to KendallBlanton11@gmail.com
+
+**Who Can Send Emails**:
+- ✅ **Admin** - Full email sending capabilities
+- ✅ **Bridge Team Leader** - Can send emails for Bridge Team operations
+- ✅ **Bridge Team** - Can send emails to participants
+- ❌ Other roles do not have email sending permissions
+
+**Email Sending Locations**:
+- Bridge Team Follow-Up Form → Resources section → Email button
+- Initial Contact Form → Resources section → Email button
+- Email button only appears for authorized roles with participant email addresses
+
+**How It Works**:
+1. Bridge Team user selects resources to send to a participant
+2. Clicks the **Email button** in the form
+3. Email is sent via Gmail SMTP through the secure backend server
+4. Message sent from bridgeteam@7more.net with TLS encryption on port 587
+5. Success/error confirmation displayed to user
+
+**Technical Details**:
+- Backend Server: Node.js + Express + Nodemailer
+- SMTP Configuration: TLS on port 587 (not SSL)
+- Code Locations:
+  - Frontend API: `/src/api/gmail-smtp.ts`
+  - Backend Server: `/backend/server.js`
+- Environment Variables:
+  - App: `EXPO_PUBLIC_BACKEND_URL`, `EXPO_PUBLIC_EMAIL_API_KEY`
+  - Backend: `BRIDGE_TEAM_EMAIL`, `BRIDGE_TEAM_EMAIL_PASSWORD`, `SMTP_HOST`, `SMTP_PORT`, `EMAIL_API_KEY`
+
+**Security**:
+- Gmail app password stored only on backend server (never exposed to client)
+- API authentication required for all email requests
+- TLS encryption for all SMTP connections
+
+**Testing**:
+- Test script available at `/test-email.js`
+- Run: `node test-email.js` from workspace directory
+- Successfully tested: Email sent to KendallBlanton11@gmail.com
+
+**Backend Server Management**:
+- Server runs automatically on port 3001
+- Check health: `curl http://172.17.0.2:3001/api/health`
+- View logs: Check expo.log file or backend console output
+- Restart if needed: `cd backend && node server.js &`
+
+### 📧 Resend Email Integration (Alternative - Optional)
+
+**Status**: ⚠️ **OPTIONAL** - Alternative email service via Resend API
 
 Your app is now configured to send emails directly using **Resend**, a modern email API service.
 
