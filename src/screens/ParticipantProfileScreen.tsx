@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Pressable, TextInput, Modal, Alert, Linking } f
 import { useParticipantStore } from "../state/participantStore";
 import { useCurrentUser, useUserRole } from "../state/authStore";
 import { Ionicons } from "@expo/vector-icons";
-import { HistoryEntry, Note } from "../types";
+import { HistoryEntry, Note, isAdminOrBridgeTeamLeader } from "../types";
 import { makeCallViaAirCall, sendSMSViaAirCall } from "../utils/aircall";
 
 export default function ParticipantProfileScreen({ route, navigation }: any) {
@@ -39,7 +39,7 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
   console.log("Current User:", currentUser.name, currentUser.role);
   console.log("Assigned Mentor:", participant.assignedMentor);
   console.log("Is Assigned Mentor:", isAssignedMentor);
-  console.log("Quick Actions Should Show:", (userRole === "admin" ||
+  console.log("Quick Actions Should Show:", (isAdminOrBridgeTeamLeader(currentUser) ||
     (userRole === "bridge_team" && ["pending_bridge", "bridge_contacted", "bridge_attempted", "bridge_unable"].includes(participant.status)) ||
     (userRole === "mentorship_leader" && ["pending_mentor", "assigned_mentor"].includes(participant.status)) ||
     (isAssignedMentor && ["initial_contact_pending", "bridge_attempted", "bridge_unable", "mentor_attempted", "mentor_unable", "active_mentorship"].includes(participant.status))
@@ -229,7 +229,7 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
 
       <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 20 }}>
         {/* Quick Actions - Show for Admins or relevant role */}
-        {(userRole === "admin" ||
+        {(isAdminOrBridgeTeamLeader(currentUser) ||
           (userRole === "bridge_team" && ["pending_bridge", "bridge_contacted", "bridge_attempted", "bridge_unable"].includes(participant.status)) ||
           (userRole === "mentorship_leader" && ["pending_mentor", "assigned_mentor"].includes(participant.status)) ||
           (isAssignedMentor && ["initial_contact_pending", "bridge_attempted", "bridge_unable", "mentor_attempted", "mentor_unable", "active_mentorship"].includes(participant.status))
@@ -238,7 +238,7 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
             <Text className="text-sm font-bold text-gray-900 mb-4 uppercase">Quick Actions</Text>
 
             {/* Bridge Team Actions */}
-            {(userRole === "admin" || userRole === "bridge_team") &&
+            {(isAdminOrBridgeTeamLeader(currentUser) || userRole === "bridge_team") &&
              ["pending_bridge", "bridge_contacted", "bridge_attempted", "bridge_unable"].includes(participant.status) && (
               <View className="gap-2">
                 <View className="flex-row gap-2">
@@ -328,7 +328,7 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
             )}
 
             {/* Mentorship Leader Actions */}
-            {(userRole === "admin" || userRole === "mentorship_leader") &&
+            {(isAdminOrBridgeTeamLeader(currentUser) || userRole === "mentorship_leader") &&
              participant.status === "pending_mentor" && (
               <Pressable
                 onPress={() => navigation.navigate("AssignMentor", { participantId: participant.id })}
@@ -353,7 +353,7 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
             )}
 
             {/* Mentor Actions */}
-            {(userRole === "admin" || isAssignedMentor) &&
+            {(isAdminOrBridgeTeamLeader(currentUser) || isAssignedMentor) &&
              participant.status === "initial_contact_pending" && (
               <Pressable
                 onPress={() => navigation.navigate("InitialContactForm", { participantId: participant.id })}
@@ -365,7 +365,7 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
             )}
 
             {/* Mentor Actions for attempted/unable statuses */}
-            {(userRole === "admin" || isAssignedMentor) &&
+            {(isAdminOrBridgeTeamLeader(currentUser) || isAssignedMentor) &&
              ["mentor_attempted", "mentor_unable"].includes(participant.status) && (
               <View className="gap-2">
                 <View className="flex-row gap-2">
@@ -418,7 +418,7 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
               </View>
             )}
 
-            {(userRole === "admin" || isAssignedMentor) &&
+            {(isAdminOrBridgeTeamLeader(currentUser) || isAssignedMentor) &&
              participant.status === "active_mentorship" && (
               <View className="space-y-3">
                 {/* Weekly Update Button */}
@@ -505,7 +505,7 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
             )}
 
             {/* Admin Graduation Approval */}
-            {userRole === "admin" &&
+            {isAdminOrBridgeTeamLeader(currentUser) &&
              participant.status === "active_mentorship" &&
              participant.completedGraduationSteps &&
              participant.completedGraduationSteps.length === 10 && (
@@ -521,7 +521,7 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
             )}
 
             {/* Move Back to Bridge Team - Available for mentorship participants */}
-            {(userRole === "admin" || userRole === "mentorship_leader") &&
+            {(isAdminOrBridgeTeamLeader(currentUser) || userRole === "mentorship_leader") &&
              ["pending_mentor", "assigned_mentor", "initial_contact_pending", "active_mentorship"].includes(participant.status) && (
               <Pressable
                 onPress={() => {
@@ -706,7 +706,7 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
         </View>
 
         {/* Admin Actions - Delete & Merge */}
-        {userRole === "admin" && (
+        {isAdminOrBridgeTeamLeader(currentUser) && (
           <View className="px-6 py-5 bg-white border-t border-gray-100">
             <Text className="text-sm font-bold text-gray-900 mb-4 uppercase">Admin Actions</Text>
             <View className="gap-3">

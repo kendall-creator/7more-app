@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import { View, Text, ScrollView, Pressable, TextInput } from "react-native";
 import { useNavigation, CommonActions } from "@react-navigation/native";
 import { useTaskStore } from "../state/taskStore";
-import { useCurrentUser, useIsImpersonating, useOriginalAdmin, useAuthStore } from "../state/authStore";
+import { useCurrentUser, useIsImpersonating, useOriginalAdmin, useAuthStore, useUserRole } from "../state/authStore";
 import { useInvitedUsers } from "../state/usersStore";
 import { Task } from "../types";
 import { Ionicons } from "@expo/vector-icons";
@@ -10,6 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 export default function TaskManagementScreen() {
   const navigation = useNavigation<any>();
   const currentUser = useCurrentUser();
+  const userRole = useUserRole();
   const isImpersonating = useIsImpersonating();
   const originalAdmin = useOriginalAdmin();
   const stopImpersonation = useAuthStore((s) => s.stopImpersonation);
@@ -29,7 +30,15 @@ export default function TaskManagementScreen() {
     } else if (activeTab === "assigned") {
       tasks = allTasks.filter((t) => t.assignedByUserId === currentUser?.id);
     } else {
-      tasks = allTasks;
+      // For "all" tab, Bridge Team Leaders only see tasks assigned to Bridge Team members
+      if (userRole === "bridge_team_leader") {
+        const bridgeTeamUserIds = allUsers
+          .filter((u) => u.role === "bridge_team" || u.role === "bridge_team_leader")
+          .map((u) => u.id);
+        tasks = allTasks.filter((t) => bridgeTeamUserIds.includes(t.assignedToUserId));
+      } else {
+        tasks = allTasks;
+      }
     }
 
     // Apply status filter (only for "My Tasks" tab)
@@ -50,7 +59,7 @@ export default function TaskManagementScreen() {
     }
 
     return tasks;
-  }, [activeTab, statusFilter, allTasks, currentUser, searchQuery]);
+  }, [activeTab, statusFilter, allTasks, currentUser, searchQuery, userRole, allUsers]);
 
   // Group tasks by assignee for "assigned" and "all" tabs
   const groupedTasks = useMemo(() => {

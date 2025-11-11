@@ -152,6 +152,66 @@ function MainTabs() {
         </>
       )}
 
+      {/* Bridge Team Leader sees admin view but only for Bridge Team items */}
+      {userRole === "bridge_team_leader" && (
+        <>
+          <Tab.Screen
+            name="AdminHomepage"
+            component={AdminHomepageScreen}
+            options={{
+              tabBarLabel: "Homepage",
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="home" size={size} color={color} />
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Users"
+            component={ManageUsersScreen}
+            options={{
+              tabBarLabel: "Users",
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="people" size={size} color={color} />
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="TaskList"
+            component={TaskManagementScreen}
+            options={{
+              tabBarLabel: "Tasks",
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="checkbox" size={size} color={color} />
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Scheduler"
+            component={SchedulerScreen}
+            options={{
+              tabBarLabel: "Scheduler",
+              tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />,
+            }}
+          />
+          <Tab.Screen
+            name="MonthlyReporting"
+            component={MonthlyReportingScreen}
+            options={{
+              tabBarLabel: "Reporting",
+              tabBarIcon: ({ color, size }) => <Ionicons name="bar-chart" size={size} color={color} />,
+            }}
+          />
+          <Tab.Screen
+            name="Resources"
+            component={ResourcesScreen}
+            options={{
+              tabBarLabel: "Resources",
+              tabBarIcon: ({ color, size}) => <Ionicons name="document-text" size={size} color={color} />,
+            }}
+          />
+        </>
+      )}
+
       {/* Bridge Team sees their queue */}
       {userRole === "bridge_team" && (
         <>

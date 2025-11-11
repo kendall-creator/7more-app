@@ -1,19 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { View, Text, ScrollView, Pressable, TextInput } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useParticipantStore } from "../state/participantStore";
-import { useCurrentUser } from "../state/authStore";
+import { useCurrentUser, useUserRole } from "../state/authStore";
 import { Participant, ParticipantStatus } from "../types";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function AllParticipantsScreen() {
   const navigation = useNavigation<any>();
   const currentUser = useCurrentUser();
-  const participants = useParticipantStore((s) => s.participants);
+  const userRole = useUserRole();
+  const allParticipants = useParticipantStore((s) => s.participants);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<ParticipantStatus | "all">("all");
 
-  const isAdmin = currentUser?.role === "admin";
+  const isAdmin = currentUser?.role === "admin" || currentUser?.role === "bridge_team_leader";
+
+  // Filter participants based on role - Bridge Team Leaders only see Bridge Team participants
+  const visibleParticipants = useMemo(() => {
+    if (userRole === "bridge_team_leader") {
+      return allParticipants.filter((p) =>
+        ["pending_bridge", "bridge_contacted", "bridge_attempted", "bridge_unable"].includes(p.status)
+      );
+    }
+    return allParticipants;
+  }, [allParticipants, userRole]);
 
   const statusOptions: { value: ParticipantStatus | "all"; label: string; color: string }[] = [
     { value: "all", label: "All", color: "bg-gray-100 text-gray-700" },
@@ -29,7 +40,7 @@ export default function AllParticipantsScreen() {
     { value: "graduated", label: "Graduated", color: "bg-yellow-100 text-gray-700" },
   ];
 
-  const filteredParticipants = participants.filter((p) => {
+  const filteredParticipants = visibleParticipants.filter((p) => {
     const matchesSearch =
       !searchQuery ||
       p.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -113,8 +124,8 @@ export default function AllParticipantsScreen() {
         </Pressable>
         <Text className="text-2xl font-bold text-white mb-1">All Participants</Text>
         <Text className="text-yellow-100 text-sm">
-          {filteredParticipants.length} of {participants.length} participant
-          {participants.length !== 1 ? "s" : ""}
+          {filteredParticipants.length} of {visibleParticipants.length} participant
+          {visibleParticipants.length !== 1 ? "s" : ""}
         </Text>
       </View>
 

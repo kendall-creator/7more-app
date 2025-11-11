@@ -299,15 +299,16 @@ The app features a role-based tab navigation system:
 
 ### Role-Based Access
 
-The app supports seven distinct user roles:
+The app supports eight distinct user roles:
 
 1. **Admin** - Complete overview of the program with metrics, analytics, and full access to all features including shift and mentorship management, form customization
-2. **Bridge Team** - Initial contact and participant intake management
-3. **Mentorship Leader** - Assigns participants to mentors (can assign to themselves) and manages shifts
-4. **Mentor** - Direct participant engagement, progress tracking, and shift volunteering
-5. **Board Member** - View scheduler, can sign up for volunteer shifts, can have tasks assigned and assign tasks to others, read-only access to monthly reporting
-6. **Lead Volunteer** - Can sign up for any available volunteer shift
-7. **Support Volunteer** - Can only sign up for shifts specifically designated for support volunteers
+2. **Bridge Team Leader** - Full admin capabilities but only for Bridge Team operations (can manage Bridge Team members, see only Bridge Team participants, tasks assigned to Bridge Team)
+3. **Bridge Team** - Initial contact and participant intake management
+4. **Mentorship Leader** - Assigns participants to mentors (can assign to themselves) and manages shifts
+5. **Mentor** - Direct participant engagement, progress tracking, and shift volunteering
+6. **Board Member** - View scheduler, can sign up for volunteer shifts, can have tasks assigned and assign tasks to others, read-only access to monthly reporting
+7. **Lead Volunteer** - Can sign up for any available volunteer shift
+8. **Support Volunteer** - Can only sign up for shifts specifically designated for support volunteers
 
 ### Key Functionality
 

@@ -2,7 +2,8 @@
 // volunteer = Lead Volunteer (can see all shifts)
 // volunteer_support = Support Volunteer (can only see support-specific shifts)
 // board_member = Board Member (can view scheduler, assign/receive tasks, view monthly reporting)
-export type UserRole = "admin" | "bridge_team" | "mentorship_leader" | "mentor" | "volunteer" | "volunteer_support" | "board_member";
+// bridge_team_leader = Bridge Team Leader (admin capabilities but only for Bridge Team items)
+export type UserRole = "admin" | "bridge_team" | "bridge_team_leader" | "mentorship_leader" | "mentor" | "volunteer" | "volunteer_support" | "board_member";
 
 // Volunteer categories for shift access
 export type VolunteerCategory = "lead" | "support";
@@ -37,6 +38,18 @@ export const userHasAnyRole = (user: User | undefined, roles: UserRole[]): boole
   if (!user) return false;
   const userRoles = getUserRoles(user);
   return roles.some(role => userRoles.includes(role));
+};
+
+// Helper to check if user has admin or bridge_team_leader role
+export const isAdminOrBridgeTeamLeader = (user: User | undefined): boolean => {
+  if (!user) return false;
+  return userHasAnyRole(user, ["admin", "bridge_team_leader"]);
+};
+
+// Helper to check if user has permissions for bridge team operations
+export const canManageBridgeTeam = (user: User | undefined): boolean => {
+  if (!user) return false;
+  return userHasAnyRole(user, ["admin", "bridge_team_leader", "bridge_team"]);
 };
 
 // Participant status in the system

@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { View, Text, ScrollView, Pressable, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useCurrentUser } from "../state/authStore";
+import { useCurrentUser, useUserRole } from "../state/authStore";
 import { useParticipantStore } from "../state/participantStore";
 import { useTaskStore } from "../state/taskStore";
 import { useSchedulerStore } from "../state/schedulerStore";
@@ -12,33 +12,53 @@ import { formatNumber } from "../utils/formatNumber";
 export default function AdminHomepageScreen() {
   const navigation = useNavigation<any>();
   const currentUser = useCurrentUser();
+  const userRole = useUserRole();
   const allParticipants = useParticipantStore((s) => s.participants);
   const allTasks = useTaskStore((s) => s.tasks);
   const shifts = useSchedulerStore((s) => s.shifts);
   const invitedUsers = useInvitedUsers();
 
+  // Filter participants based on role - Bridge Team Leaders only see Bridge Team participants
+  const visibleParticipants = useMemo(() => {
+    if (userRole === "bridge_team_leader") {
+      return allParticipants.filter((p) =>
+        ["pending_bridge", "bridge_contacted", "bridge_attempted", "bridge_unable"].includes(p.status)
+      );
+    }
+    return allParticipants;
+  }, [allParticipants, userRole]);
+
   // Participant stats
   const stats = useMemo(() => {
-    const total = allParticipants.length;
-    const pendingBridge = allParticipants.filter((p) => p.status === "pending_bridge").length;
-    const contacted = allParticipants.filter((p) => p.status === "bridge_contacted").length;
-    const pendingMentor = allParticipants.filter((p) => p.status === "pending_mentor").length;
-    const activeMentorship = allParticipants.filter((p) => p.status === "active_mentorship").length;
-    const graduated = allParticipants.filter((p) => p.status === "graduated").length;
+    const total = visibleParticipants.length;
+    const pendingBridge = visibleParticipants.filter((p) => p.status === "pending_bridge").length;
+    const contacted = visibleParticipants.filter((p) => p.status === "bridge_contacted").length;
+    const pendingMentor = visibleParticipants.filter((p) => p.status === "pending_mentor").length;
+    const activeMentorship = visibleParticipants.filter((p) => p.status === "active_mentorship").length;
+    const graduated = visibleParticipants.filter((p) => p.status === "graduated").length;
 
     return { total, pendingBridge, contacted, pendingMentor, activeMentorship, graduated };
-  }, [allParticipants]);
+  }, [visibleParticipants]);
 
-  // Task stats
+  // Task stats - Bridge Team Leaders only see tasks assigned to Bridge Team members
   const taskStats = useMemo(() => {
-    const totalTasks = allTasks.length;
-    const overdue = allTasks.filter((t) => t.status === "overdue").length;
-    const inProgress = allTasks.filter((t) => t.status === "in_progress").length;
-    const pending = allTasks.filter((t) => t.status === "pending").length;
-    const completed = allTasks.filter((t) => t.status === "completed").length;
+    let relevantTasks = allTasks;
+
+    if (userRole === "bridge_team_leader") {
+      const bridgeTeamUserIds = invitedUsers
+        .filter((u) => u.role === "bridge_team" || u.role === "bridge_team_leader")
+        .map((u) => u.id);
+      relevantTasks = allTasks.filter((t) => bridgeTeamUserIds.includes(t.assignedToUserId));
+    }
+
+    const totalTasks = relevantTasks.length;
+    const overdue = relevantTasks.filter((t) => t.status === "overdue").length;
+    const inProgress = relevantTasks.filter((t) => t.status === "in_progress").length;
+    const pending = relevantTasks.filter((t) => t.status === "pending").length;
+    const completed = relevantTasks.filter((t) => t.status === "completed").length;
 
     return { totalTasks, overdue, inProgress, pending, completed };
-  }, [allTasks]);
+  }, [allTasks, userRole, invitedUsers]);
 
   // Pam Lychner Schedule (Monday-Friday current week)
   const pamLychnerSchedule = useMemo(() => {
@@ -80,43 +100,50 @@ export default function AdminHomepageScreen() {
     return weekDays;
   }, [shifts]);
 
-  // User stats
+  // User stats - Bridge Team Leaders only see Bridge Team members
   const userStats = useMemo(() => {
-    const mentors = invitedUsers.filter((u) => u.role === "mentor").length;
-    const mentorLeaders = invitedUsers.filter((u) => u.role === "mentorship_leader").length;
-    const bridgeTeam = invitedUsers.filter((u) => u.role === "bridge_team").length;
-    const volunteers = invitedUsers.filter((u) => u.role === "volunteer" || u.role === "volunteer_support").length;
+    let relevantUsers = invitedUsers;
 
-    return { mentors, mentorLeaders, bridgeTeam, volunteers, total: invitedUsers.length };
-  }, [invitedUsers]);
+    if (userRole === "bridge_team_leader") {
+      relevantUsers = invitedUsers.filter((u) => u.role === "bridge_team" || u.role === "bridge_team_leader");
+    }
+
+    const mentors = relevantUsers.filter((u) => u.role === "mentor").length;
+    const mentorLeaders = relevantUsers.filter((u) => u.role === "mentorship_leader").length;
+    const bridgeTeam = relevantUsers.filter((u) => u.role === "bridge_team").length;
+    const bridgeTeamLeaders = relevantUsers.filter((u) => u.role === "bridge_team_leader").length;
+    const volunteers = relevantUsers.filter((u) => u.role === "volunteer" || u.role === "volunteer_support").length;
+
+    return { mentors, mentorLeaders, bridgeTeam, bridgeTeamLeaders, volunteers, total: relevantUsers.length };
+  }, [invitedUsers, userRole]);
 
   // Bridge Team stats
   const bridgeTeamStats = useMemo(() => {
-    const users = invitedUsers.filter((u) => u.role === "bridge_team").length;
-    const totalParticipants = allParticipants.filter(
+    const users = invitedUsers.filter((u) => u.role === "bridge_team" || u.role === "bridge_team_leader").length;
+    const totalParticipants = visibleParticipants.filter(
       (p) => p.status === "pending_bridge" || p.status === "bridge_contacted" ||
              p.status === "bridge_attempted" || p.status === "bridge_unable"
     ).length;
-    const pendingBridge = allParticipants.filter((p) => p.status === "pending_bridge").length;
-    const contacted = allParticipants.filter((p) => p.status === "bridge_contacted").length;
-    const attempted = allParticipants.filter((p) => p.status === "bridge_attempted").length;
-    const unable = allParticipants.filter((p) => p.status === "bridge_unable").length;
+    const pendingBridge = visibleParticipants.filter((p) => p.status === "pending_bridge").length;
+    const contacted = visibleParticipants.filter((p) => p.status === "bridge_contacted").length;
+    const attempted = visibleParticipants.filter((p) => p.status === "bridge_attempted").length;
+    const unable = visibleParticipants.filter((p) => p.status === "bridge_unable").length;
 
     return { users, totalParticipants, pendingBridge, contacted, attempted, unable };
-  }, [invitedUsers, allParticipants]);
+  }, [invitedUsers, visibleParticipants]);
 
-  // Mentor stats
+  // Mentor stats - Bridge Team Leaders won't see this section
   const mentorStats = useMemo(() => {
     const users = invitedUsers.filter((u) => u.role === "mentor" || u.role === "mentorship_leader").length;
-    const totalParticipants = allParticipants.filter(
+    const totalParticipants = visibleParticipants.filter(
       (p) => p.status === "pending_mentor" || p.status === "active_mentorship" || p.status === "graduated"
     ).length;
-    const pendingMentor = allParticipants.filter((p) => p.status === "pending_mentor").length;
-    const activeMentorship = allParticipants.filter((p) => p.status === "active_mentorship").length;
-    const graduated = allParticipants.filter((p) => p.status === "graduated").length;
+    const pendingMentor = visibleParticipants.filter((p) => p.status === "pending_mentor").length;
+    const activeMentorship = visibleParticipants.filter((p) => p.status === "active_mentorship").length;
+    const graduated = visibleParticipants.filter((p) => p.status === "graduated").length;
 
     return { users, totalParticipants, pendingMentor, activeMentorship, graduated };
-  }, [invitedUsers, allParticipants]);
+  }, [invitedUsers, visibleParticipants]);
 
   return (
     <View className="flex-1 bg-[#f8f8f8]">

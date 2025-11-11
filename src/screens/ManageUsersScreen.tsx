@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, ScrollView, Pressable, TextInput, Modal, Alert, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useInvitedUsers, useUsersStore } from "../state/usersStore";
-import { useCurrentUser, useAuthStore } from "../state/authStore";
+import { useCurrentUser, useAuthStore, useUserRole } from "../state/authStore";
 import { UserRole } from "../types";
 import { Ionicons } from "@expo/vector-icons";
 import Clipboard from "@react-native-clipboard/clipboard";
@@ -20,6 +20,7 @@ interface InvitedUserDisplay {
 export default function ManageUsersScreen() {
   const navigation = useNavigation<any>();
   const currentUser = useCurrentUser();
+  const userRole = useUserRole();
   const invitedUsers = useInvitedUsers();
   const removeUser = useUsersStore((s) => s.removeUser);
   const resetPassword = useUsersStore((s) => s.resetPassword);
@@ -59,15 +60,21 @@ export default function ManageUsersScreen() {
     role: u.role,
   }));
 
+  // Filter users based on role - Bridge Team Leaders only see Bridge Team members
+  const visibleUsers = userRole === "bridge_team_leader"
+    ? allUsers.filter((u) => u.role === "bridge_team" || u.role === "bridge_team_leader")
+    : allUsers;
+
   const roleOptions: { value: UserRole | "all"; label: string; color: string }[] = [
     { value: "all", label: "All", color: "bg-gray-100 text-gray-700" },
     { value: "admin", label: "Admin", color: "bg-gray-100 text-yellow-700" },
     { value: "bridge_team", label: "Bridge Team", color: "bg-gray-200 text-gray-900" },
+    { value: "bridge_team_leader", label: "Bridge Team Leader", color: "bg-yellow-100 text-yellow-700" },
     { value: "mentorship_leader", label: "Mentorship Leader", color: "bg-yellow-100 text-gray-700" },
     { value: "mentor", label: "Mentor", color: "bg-yellow-100 text-gray-900" },
   ];
 
-  const filteredUsers = allUsers.filter((user) => {
+  const filteredUsers = visibleUsers.filter((user) => {
     const matchesSearch =
       !searchQuery ||
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
