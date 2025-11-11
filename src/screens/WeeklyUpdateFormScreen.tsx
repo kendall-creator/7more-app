@@ -9,6 +9,7 @@ import {
   SafeAreaView,
 } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 import { useParticipantStore } from "../state/participantStore";
 import { useAuthStore } from "../state/authStore";
 import { WeeklyUpdateFormData } from "../types";
@@ -104,6 +105,13 @@ export default function WeeklyUpdateFormScreen() {
       <View className="flex-1">
         {/* Header */}
         <View className="bg-gray-600 px-4 py-4">
+          <Pressable
+            onPress={() => navigation.goBack()}
+            className="mb-2 flex-row items-center active:opacity-70"
+          >
+            <Ionicons name="arrow-back" size={24} color="white" />
+            <Text className="text-white text-base ml-2">Back</Text>
+          </Pressable>
           <Text className="text-white text-2xl font-bold">Weekly Update</Text>
           <Text className="text-gray-200 text-sm mt-1">
             {participant.firstName} {participant.lastName}

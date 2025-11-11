@@ -800,7 +800,7 @@ To enable automatic welcome and password reset emails:
 
 #### Mentor Dashboard
 - View all assigned participants with improved navigation
-- **Back Button on Monthly Check-In** - Easy navigation back from the monthly check-in form
+- **Back Button on Forms** - Easy navigation back from both monthly check-in and weekly update forms
 - **30-Day Countdown for Monthly Check-Ins** - See exactly how many days remain until the next monthly check-in is due
   - Shows "X days to go" for upcoming check-ins
   - Shows "Due today" when check-in is due
