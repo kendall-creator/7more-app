@@ -12,6 +12,7 @@ import { useReportingStore } from "../state/reportingStore";
 import { useCurrentUser } from "../state/authStore";
 import { Ionicons } from "@expo/vector-icons";
 import { formatNumber, formatCurrency, formatPercentage } from "../utils/formatNumber";
+import { ReportingCategory } from "../types";
 
 type ViewMode = "single" | "range";
 type AggregationType = "total" | "average";
@@ -23,6 +24,24 @@ export default function ViewReportingScreen() {
   const currentUser = useCurrentUser();
 
   const isBoardMember = currentUser?.role === "board_member";
+  const isAdmin = currentUser?.role === "admin";
+
+  // Check which categories the user can view
+  const canViewCategory = (category: ReportingCategory): boolean => {
+    // Admins can view everything
+    if (isAdmin) return true;
+
+    // If user doesn't have reporting access, they can't view anything
+    if (!currentUser?.hasReportingAccess) return false;
+
+    // If user has no specific categories assigned, they can view all
+    if (!currentUser?.reportingCategories || currentUser.reportingCategories.length === 0) {
+      return true;
+    }
+
+    // Otherwise, check if category is in their allowed list
+    return currentUser.reportingCategories.includes(category);
+  };
 
   // Filter reports based on user role - board members only see posted reports
   const availableReports = useMemo(() => {
@@ -295,7 +314,7 @@ export default function ViewReportingScreen() {
     return (
       <ScrollView className="flex-1">
         {/* Releasees Met */}
-        {(categoryFilter === "all" || categoryFilter === "releasees") && report.releaseFacilityCounts && (
+        {canViewCategory("release_facilities") && (categoryFilter === "all" || categoryFilter === "releasees") && report.releaseFacilityCounts && (
           <View className="bg-white rounded-lg p-4 mb-4 mx-4 border border-gray-200">
             <Text className="text-lg font-bold text-gray-900 mb-3">Releasees Met</Text>
             {renderMetricRow("Total", totalReleasees, "releaseFacilityCounts.total", report)}
@@ -309,7 +328,7 @@ export default function ViewReportingScreen() {
         )}
 
         {/* Calls */}
-        {(categoryFilter === "all" || categoryFilter === "calls") && report.callMetrics && (
+        {canViewCategory("calls") && (categoryFilter === "all" || categoryFilter === "calls") && report.callMetrics && (
           <View className="bg-white rounded-lg p-4 mb-4 mx-4 border border-gray-200">
             <Text className="text-lg font-bold text-gray-900 mb-3">Calls</Text>
             {renderMetricRow("Inbound", report.callMetrics.inbound ?? 0, "callMetrics.inbound", report)}
@@ -319,7 +338,7 @@ export default function ViewReportingScreen() {
         )}
 
         {/* Mentorship */}
-        {(categoryFilter === "all" || categoryFilter === "mentorship") && report.mentorshipMetrics && (
+        {canViewCategory("mentorship") && (categoryFilter === "all" || categoryFilter === "mentorship") && report.mentorshipMetrics && (
           <View className="bg-white rounded-lg p-4 mb-4 mx-4 border border-gray-200">
             <Text className="text-lg font-bold text-gray-900 mb-3">Mentorship</Text>
             {renderMetricRow("Participants Assigned", report.mentorshipMetrics.participantsAssignedToMentorship, "mentorshipMetrics.participantsAssignedToMentorship", report)}
@@ -327,7 +346,7 @@ export default function ViewReportingScreen() {
         )}
 
         {/* Donors */}
-        {(categoryFilter === "all" || categoryFilter === "donors") && report.donorData && (
+        {canViewCategory("donors") && (categoryFilter === "all" || categoryFilter === "donors") && report.donorData && (
           <View className="bg-white rounded-lg p-4 mb-4 mx-4 border border-gray-200">
             <Text className="text-lg font-bold text-gray-900 mb-3">Donors</Text>
             {renderMetricRow("New Donors", report.donorData.newDonors ?? 0, "donorData.newDonors", report)}
@@ -338,7 +357,7 @@ export default function ViewReportingScreen() {
         )}
 
         {/* Financials */}
-        {(categoryFilter === "all" || categoryFilter === "financials") && report.financialData && (
+        {canViewCategory("financials") && (categoryFilter === "all" || categoryFilter === "financials") && report.financialData && (
           <View className="bg-white rounded-lg p-4 mb-4 mx-4 border border-gray-200">
             <Text className="text-lg font-bold text-gray-900 mb-3">Financials</Text>
             {renderMetricRow("Beginning Balance", report.financialData.beginningBalance ?? 0, "financialData.beginningBalance", report, true)}
@@ -353,7 +372,7 @@ export default function ViewReportingScreen() {
         )}
 
         {/* Social Media */}
-        {(categoryFilter === "all" || categoryFilter === "social_media") && report.socialMediaMetrics && (
+        {canViewCategory("social_media") && (categoryFilter === "all" || categoryFilter === "social_media") && report.socialMediaMetrics && (
           <View className="bg-white rounded-lg p-4 mb-4 mx-4 border border-gray-200">
             <Text className="text-lg font-bold text-gray-900 mb-3">Social Media</Text>
             {renderMetricRow("Reels/Post Views", report.socialMediaMetrics.reelsPostViews ?? 0, "socialMediaMetrics.reelsPostViews", report)}

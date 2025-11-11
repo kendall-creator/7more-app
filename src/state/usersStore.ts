@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { ref, set as firebaseSet, onValue, update as firebaseUpdate, remove } from "firebase/database";
 import { database } from "../config/firebase";
-import { User, UserRole } from "../types";
+import { User, UserRole, ReportingCategory } from "../types";
 
 interface InvitedUser {
   id: string;
@@ -17,6 +17,7 @@ interface InvitedUser {
   requiresPasswordChange?: boolean;
   temporaryPassword?: string; // Store temporarily for email sending
   hasReportingAccess?: boolean; // Optional: grant specific users access to reporting (admin assigns)
+  reportingCategories?: ReportingCategory[]; // Optional: specific categories user can view (if empty, can view all)
 }
 
 interface UsersState {

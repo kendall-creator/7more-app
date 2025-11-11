@@ -8,6 +8,16 @@ export type UserRole = "admin" | "bridge_team" | "bridge_team_leader" | "mentors
 // Volunteer categories for shift access
 export type VolunteerCategory = "lead" | "support";
 
+// Reporting categories that can be assigned to users
+export type ReportingCategory =
+  | "release_facilities"    // Releasees Met
+  | "calls"                 // Call Metrics
+  | "mentorship"            // Mentorship Metrics
+  | "donors"                // Donor Data
+  | "financials"            // Financial Data
+  | "social_media"          // Social Media Metrics
+  | "wins_concerns";        // Wins & Concerns
+
 // User type for authentication
 export interface User {
   id: string;
@@ -18,6 +28,7 @@ export interface User {
   roles?: UserRole[]; // Optional: multiple roles
   requiresPasswordChange?: boolean;
   hasReportingAccess?: boolean; // Optional: grant specific users access to reporting (admin assigns)
+  reportingCategories?: ReportingCategory[]; // Optional: specific categories user can view (if empty, can view all)
 }
 
 // Helper to get all roles for a user

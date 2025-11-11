@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { useUsersStore } from "../state/usersStore";
 import { useCurrentUser } from "../state/authStore";
-import { UserRole } from "../types";
+import { UserRole, ReportingCategory } from "../types";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function EditUserScreen({ navigation, route }: any) {
@@ -31,6 +31,7 @@ export default function EditUserScreen({ navigation, route }: any) {
   const [phone, setPhone] = useState("");
   const [selectedRole, setSelectedRole] = useState<UserRole>("bridge_team");
   const [hasReportingAccess, setHasReportingAccess] = useState(false);
+  const [reportingCategories, setReportingCategories] = useState<ReportingCategory[]>([]);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -44,6 +45,7 @@ export default function EditUserScreen({ navigation, route }: any) {
       setPhone(user.phone || "");
       setSelectedRole(user.role);
       setHasReportingAccess(user.hasReportingAccess || false);
+      setReportingCategories(user.reportingCategories || []);
     }
   }, [user]);
 
@@ -85,6 +87,54 @@ export default function EditUserScreen({ navigation, route }: any) {
     },
   ];
 
+  const reportingCategoryOptions: { value: ReportingCategory; label: string; description: string }[] = [
+    {
+      value: "release_facilities",
+      label: "Release Facilities",
+      description: "Releasees met by facility",
+    },
+    {
+      value: "calls",
+      label: "Call Metrics",
+      description: "Inbound/outbound calls and statistics",
+    },
+    {
+      value: "mentorship",
+      label: "Mentorship",
+      description: "Participants assigned to mentorship",
+    },
+    {
+      value: "donors",
+      label: "Donors",
+      description: "New donors and donation amounts",
+    },
+    {
+      value: "financials",
+      label: "Financials",
+      description: "Beginning/ending balance and difference",
+    },
+    {
+      value: "social_media",
+      label: "Social Media",
+      description: "Views, followers, and engagement",
+    },
+    {
+      value: "wins_concerns",
+      label: "Wins & Concerns",
+      description: "Monthly wins and concerns notes",
+    },
+  ];
+
+  const toggleReportingCategory = (category: ReportingCategory) => {
+    setReportingCategories((prev) => {
+      if (prev.includes(category)) {
+        return prev.filter((c) => c !== category);
+      } else {
+        return [...prev, category];
+      }
+    });
+  };
+
   const handleCallPhone = () => {
     if (phone) {
       const phoneNumber = phone.replace(/[^0-9]/g, "");
@@ -122,6 +172,7 @@ export default function EditUserScreen({ navigation, route }: any) {
         email: email.trim(),
         role: selectedRole,
         hasReportingAccess: hasReportingAccess,
+        reportingCategories: hasReportingAccess && reportingCategories.length > 0 ? reportingCategories : null,
       };
 
       // Use null to remove fields, undefined to skip updating them
@@ -304,34 +355,89 @@ export default function EditUserScreen({ navigation, route }: any) {
 
           {/* Reporting Access Toggle - Only show for non-admin roles */}
           {currentUser?.role === "admin" && selectedRole !== "admin" && (
-            <View className="mb-8">
-              <Pressable
-                onPress={() => setHasReportingAccess(!hasReportingAccess)}
-                className={`border-2 rounded-xl px-4 py-4 ${
-                  hasReportingAccess
-                    ? "bg-indigo-50 border-indigo-600"
-                    : "bg-white border-gray-200"
-                }`}
-              >
-                <View className="flex-row items-center justify-between mb-1">
-                  <View className="flex-1">
-                    <Text
-                      className={`text-base font-semibold ${
-                        hasReportingAccess ? "text-indigo-600" : "text-gray-900"
-                      }`}
-                    >
-                      Grant Reporting Access
-                    </Text>
-                    <Text className="text-xs text-gray-500 mt-1">
-                      Allow this user to view monthly reporting data
-                    </Text>
+            <>
+              <View className="mb-4">
+                <Pressable
+                  onPress={() => {
+                    const newValue = !hasReportingAccess;
+                    setHasReportingAccess(newValue);
+                    if (!newValue) {
+                      setReportingCategories([]);
+                    }
+                  }}
+                  className={`border-2 rounded-xl px-4 py-4 ${
+                    hasReportingAccess
+                      ? "bg-indigo-50 border-indigo-600"
+                      : "bg-white border-gray-200"
+                  }`}
+                >
+                  <View className="flex-row items-center justify-between mb-1">
+                    <View className="flex-1">
+                      <Text
+                        className={`text-base font-semibold ${
+                          hasReportingAccess ? "text-indigo-600" : "text-gray-900"
+                        }`}
+                      >
+                        Grant Reporting Access
+                      </Text>
+                      <Text className="text-xs text-gray-500 mt-1">
+                        Allow this user to view monthly reporting data
+                      </Text>
+                    </View>
+                    <View className={`w-12 h-6 rounded-full ${hasReportingAccess ? "bg-indigo-600" : "bg-gray-300"}`}>
+                      <View className={`w-5 h-5 rounded-full bg-white mt-0.5 ${hasReportingAccess ? "ml-6" : "ml-0.5"}`} />
+                    </View>
                   </View>
-                  <View className={`w-12 h-6 rounded-full ${hasReportingAccess ? "bg-indigo-600" : "bg-gray-300"}`}>
-                    <View className={`w-5 h-5 rounded-full bg-white mt-0.5 ${hasReportingAccess ? "ml-6" : "ml-0.5"}`} />
+                </Pressable>
+              </View>
+
+              {/* Reporting Categories - Only show if reporting access is enabled */}
+              {hasReportingAccess && (
+                <View className="mb-8">
+                  <Text className="text-sm font-semibold text-gray-700 mb-3">
+                    Reporting Categories (Optional)
+                  </Text>
+                  <Text className="text-xs text-gray-500 mb-3">
+                    Select specific categories to grant access to. If none are selected, user will have access to all categories.
+                  </Text>
+                  <View className="gap-2">
+                    {reportingCategoryOptions.map((category) => (
+                      <Pressable
+                        key={category.value}
+                        onPress={() => toggleReportingCategory(category.value)}
+                        className={`border-2 rounded-xl px-4 py-3 ${
+                          reportingCategories.includes(category.value)
+                            ? "bg-indigo-50 border-indigo-600"
+                            : "bg-white border-gray-200"
+                        }`}
+                      >
+                        <View className="flex-row items-center justify-between">
+                          <View className="flex-1">
+                            <Text
+                              className={`text-sm font-semibold ${
+                                reportingCategories.includes(category.value)
+                                  ? "text-indigo-600"
+                                  : "text-gray-900"
+                              }`}
+                            >
+                              {category.label}
+                            </Text>
+                            <Text className="text-xs text-gray-500 mt-0.5">
+                              {category.description}
+                            </Text>
+                          </View>
+                          {reportingCategories.includes(category.value) && (
+                            <View className="w-5 h-5 bg-indigo-600 rounded-full items-center justify-center ml-2">
+                              <Ionicons name="checkmark" size={14} color="white" />
+                            </View>
+                          )}
+                        </View>
+                      </Pressable>
+                    ))}
                   </View>
                 </View>
-              </Pressable>
-            </View>
+              )}
+            </>
           )}
 
           {/* Submit Button */}
