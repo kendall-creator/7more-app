@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { useUsersStore } from "../state/usersStore";
 import { useCurrentUser } from "../state/authStore";
-import { UserRole, ReportingCategory } from "../types";
+import { UserRole, ReportingPermissions } from "../types";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function EditUserScreen({ navigation, route }: any) {
@@ -30,8 +30,14 @@ export default function EditUserScreen({ navigation, route }: any) {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [selectedRole, setSelectedRole] = useState<UserRole>("bridge_team");
-  const [hasReportingAccess, setHasReportingAccess] = useState(false);
-  const [reportingCategories, setReportingCategories] = useState<ReportingCategory[]>([]);
+
+  // New reporting permissions structure
+  const [reportingPermissions, setReportingPermissions] = useState<ReportingPermissions>({
+    monthlyReporting: { canView: false, canEdit: false },
+    bridgeTeamReporting: { canView: false, canEdit: false },
+    demographicsReporting: { canView: false, canEdit: false },
+  });
+
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -44,8 +50,20 @@ export default function EditUserScreen({ navigation, route }: any) {
       setEmail(user.email);
       setPhone(user.phone || "");
       setSelectedRole(user.role);
-      setHasReportingAccess(user.hasReportingAccess || false);
-      setReportingCategories(user.reportingCategories || []);
+
+      // Initialize reporting permissions (default to false if not set)
+      if (user.reportingPermissions) {
+        setReportingPermissions(user.reportingPermissions);
+      } else {
+        // Auto-grant board members view access
+        if (user.role === "board_member") {
+          setReportingPermissions({
+            monthlyReporting: { canView: true, canEdit: false },
+            bridgeTeamReporting: { canView: true, canEdit: false },
+            demographicsReporting: { canView: true, canEdit: false },
+          });
+        }
+      }
     }
   }, [user]);
 
@@ -87,52 +105,14 @@ export default function EditUserScreen({ navigation, route }: any) {
     },
   ];
 
-  const reportingCategoryOptions: { value: ReportingCategory; label: string; description: string }[] = [
-    {
-      value: "release_facilities",
-      label: "Release Facilities",
-      description: "Releasees met by facility",
-    },
-    {
-      value: "calls",
-      label: "Call Metrics",
-      description: "Inbound/outbound calls and statistics",
-    },
-    {
-      value: "mentorship",
-      label: "Mentorship",
-      description: "Participants assigned to mentorship",
-    },
-    {
-      value: "donors",
-      label: "Donors",
-      description: "New donors and donation amounts",
-    },
-    {
-      value: "financials",
-      label: "Financials",
-      description: "Beginning/ending balance and difference",
-    },
-    {
-      value: "social_media",
-      label: "Social Media",
-      description: "Views, followers, and engagement",
-    },
-    {
-      value: "wins_concerns",
-      label: "Wins & Concerns",
-      description: "Monthly wins and concerns notes",
-    },
-  ];
-
-  const toggleReportingCategory = (category: ReportingCategory) => {
-    setReportingCategories((prev) => {
-      if (prev.includes(category)) {
-        return prev.filter((c) => c !== category);
-      } else {
-        return [...prev, category];
-      }
-    });
+  const togglePermission = (section: keyof ReportingPermissions, type: 'canView' | 'canEdit') => {
+    setReportingPermissions(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [type]: !prev[section]?.[type],
+      },
+    }));
   };
 
   const handleCallPhone = () => {
@@ -171,8 +151,7 @@ export default function EditUserScreen({ navigation, route }: any) {
         name: name.trim(),
         email: email.trim(),
         role: selectedRole,
-        hasReportingAccess: hasReportingAccess,
-        reportingCategories: hasReportingAccess && reportingCategories.length > 0 ? reportingCategories : null,
+        reportingPermissions: reportingPermissions,
       };
 
       // Use null to remove fields, undefined to skip updating them
@@ -353,91 +332,160 @@ export default function EditUserScreen({ navigation, route }: any) {
             </View>
           </View>
 
-          {/* Reporting Access Toggle - Only show for non-admin roles */}
+          {/* Reporting Permissions - Only show for non-admin roles */}
           {currentUser?.role === "admin" && selectedRole !== "admin" && (
-            <>
-              <View className="mb-4">
-                <Pressable
-                  onPress={() => {
-                    const newValue = !hasReportingAccess;
-                    setHasReportingAccess(newValue);
-                    if (!newValue) {
-                      setReportingCategories([]);
-                    }
-                  }}
-                  className={`border-2 rounded-xl px-4 py-4 ${
-                    hasReportingAccess
-                      ? "bg-indigo-50 border-indigo-600"
-                      : "bg-white border-gray-200"
-                  }`}
-                >
-                  <View className="flex-row items-center justify-between mb-1">
-                    <View className="flex-1">
-                      <Text
-                        className={`text-base font-semibold ${
-                          hasReportingAccess ? "text-indigo-600" : "text-gray-900"
-                        }`}
-                      >
-                        Grant Reporting Access
+            <View className="mb-8">
+              <Text className="text-lg font-bold text-gray-900 mb-4">Reporting Permissions</Text>
+              <Text className="text-xs text-gray-500 mb-4">
+                {selectedRole === "board_member"
+                  ? "Board members automatically have view access to all reports. You can grant edit permissions below."
+                  : "Grant view and/or edit access to specific reporting sections."}
+              </Text>
+
+              {/* Monthly Reporting */}
+              <View className="bg-white border-2 border-gray-200 rounded-xl p-4 mb-3">
+                <Text className="text-base font-semibold text-gray-900 mb-2">Monthly Reporting</Text>
+                <Text className="text-xs text-gray-500 mb-3">
+                  Financials, Donors, Volunteers, Social Media, etc.
+                </Text>
+                <View className="flex-row gap-3">
+                  <Pressable
+                    onPress={() => togglePermission('monthlyReporting', 'canView')}
+                    className={`flex-1 border-2 rounded-lg px-3 py-2 ${
+                      reportingPermissions.monthlyReporting?.canView
+                        ? "bg-indigo-50 border-indigo-600"
+                        : "bg-white border-gray-300"
+                    }`}
+                  >
+                    <View className="flex-row items-center justify-between">
+                      <Text className={`text-sm font-semibold ${
+                        reportingPermissions.monthlyReporting?.canView ? "text-indigo-600" : "text-gray-700"
+                      }`}>
+                        View
                       </Text>
-                      <Text className="text-xs text-gray-500 mt-1">
-                        Allow this user to view monthly reporting data
+                      {reportingPermissions.monthlyReporting?.canView && (
+                        <Ionicons name="checkmark-circle" size={18} color="#4F46E5" />
+                      )}
+                    </View>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => togglePermission('monthlyReporting', 'canEdit')}
+                    className={`flex-1 border-2 rounded-lg px-3 py-2 ${
+                      reportingPermissions.monthlyReporting?.canEdit
+                        ? "bg-emerald-50 border-emerald-600"
+                        : "bg-white border-gray-300"
+                    }`}
+                  >
+                    <View className="flex-row items-center justify-between">
+                      <Text className={`text-sm font-semibold ${
+                        reportingPermissions.monthlyReporting?.canEdit ? "text-emerald-600" : "text-gray-700"
+                      }`}>
+                        Edit
                       </Text>
+                      {reportingPermissions.monthlyReporting?.canEdit && (
+                        <Ionicons name="checkmark-circle" size={18} color="#10B981" />
+                      )}
                     </View>
-                    <View className={`w-12 h-6 rounded-full ${hasReportingAccess ? "bg-indigo-600" : "bg-gray-300"}`}>
-                      <View className={`w-5 h-5 rounded-full bg-white mt-0.5 ${hasReportingAccess ? "ml-6" : "ml-0.5"}`} />
-                    </View>
-                  </View>
-                </Pressable>
+                  </Pressable>
+                </View>
               </View>
 
-              {/* Reporting Categories - Only show if reporting access is enabled */}
-              {hasReportingAccess && (
-                <View className="mb-8">
-                  <Text className="text-sm font-semibold text-gray-700 mb-3">
-                    Reporting Categories (Optional)
-                  </Text>
-                  <Text className="text-xs text-gray-500 mb-3">
-                    Select specific categories to grant access to. If none are selected, user will have access to all categories.
-                  </Text>
-                  <View className="gap-2">
-                    {reportingCategoryOptions.map((category) => (
-                      <Pressable
-                        key={category.value}
-                        onPress={() => toggleReportingCategory(category.value)}
-                        className={`border-2 rounded-xl px-4 py-3 ${
-                          reportingCategories.includes(category.value)
-                            ? "bg-indigo-50 border-indigo-600"
-                            : "bg-white border-gray-200"
-                        }`}
-                      >
-                        <View className="flex-row items-center justify-between">
-                          <View className="flex-1">
-                            <Text
-                              className={`text-sm font-semibold ${
-                                reportingCategories.includes(category.value)
-                                  ? "text-indigo-600"
-                                  : "text-gray-900"
-                              }`}
-                            >
-                              {category.label}
-                            </Text>
-                            <Text className="text-xs text-gray-500 mt-0.5">
-                              {category.description}
-                            </Text>
-                          </View>
-                          {reportingCategories.includes(category.value) && (
-                            <View className="w-5 h-5 bg-indigo-600 rounded-full items-center justify-center ml-2">
-                              <Ionicons name="checkmark" size={14} color="white" />
-                            </View>
-                          )}
-                        </View>
-                      </Pressable>
-                    ))}
-                  </View>
+              {/* Bridge Team Reporting */}
+              <View className="bg-white border-2 border-gray-200 rounded-xl p-4 mb-3">
+                <Text className="text-base font-semibold text-gray-900 mb-2">Bridge Team Reporting</Text>
+                <Text className="text-xs text-gray-500 mb-3">
+                  Participants received, status counts, outreach metrics
+                </Text>
+                <View className="flex-row gap-3">
+                  <Pressable
+                    onPress={() => togglePermission('bridgeTeamReporting', 'canView')}
+                    className={`flex-1 border-2 rounded-lg px-3 py-2 ${
+                      reportingPermissions.bridgeTeamReporting?.canView
+                        ? "bg-indigo-50 border-indigo-600"
+                        : "bg-white border-gray-300"
+                    }`}
+                  >
+                    <View className="flex-row items-center justify-between">
+                      <Text className={`text-sm font-semibold ${
+                        reportingPermissions.bridgeTeamReporting?.canView ? "text-indigo-600" : "text-gray-700"
+                      }`}>
+                        View
+                      </Text>
+                      {reportingPermissions.bridgeTeamReporting?.canView && (
+                        <Ionicons name="checkmark-circle" size={18} color="#4F46E5" />
+                      )}
+                    </View>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => togglePermission('bridgeTeamReporting', 'canEdit')}
+                    className={`flex-1 border-2 rounded-lg px-3 py-2 ${
+                      reportingPermissions.bridgeTeamReporting?.canEdit
+                        ? "bg-emerald-50 border-emerald-600"
+                        : "bg-white border-gray-300"
+                    }`}
+                  >
+                    <View className="flex-row items-center justify-between">
+                      <Text className={`text-sm font-semibold ${
+                        reportingPermissions.bridgeTeamReporting?.canEdit ? "text-emerald-600" : "text-gray-700"
+                      }`}>
+                        Edit
+                      </Text>
+                      {reportingPermissions.bridgeTeamReporting?.canEdit && (
+                        <Ionicons name="checkmark-circle" size={18} color="#10B981" />
+                      )}
+                    </View>
+                  </Pressable>
                 </View>
-              )}
-            </>
+              </View>
+
+              {/* Demographics Reporting */}
+              <View className="bg-white border-2 border-gray-200 rounded-xl p-4 mb-3">
+                <Text className="text-base font-semibold text-gray-900 mb-2">Demographics Reporting</Text>
+                <Text className="text-xs text-gray-500 mb-3">
+                  Participant demographics, charts, and export
+                </Text>
+                <View className="flex-row gap-3">
+                  <Pressable
+                    onPress={() => togglePermission('demographicsReporting', 'canView')}
+                    className={`flex-1 border-2 rounded-lg px-3 py-2 ${
+                      reportingPermissions.demographicsReporting?.canView
+                        ? "bg-indigo-50 border-indigo-600"
+                        : "bg-white border-gray-300"
+                    }`}
+                  >
+                    <View className="flex-row items-center justify-between">
+                      <Text className={`text-sm font-semibold ${
+                        reportingPermissions.demographicsReporting?.canView ? "text-indigo-600" : "text-gray-700"
+                      }`}>
+                        View
+                      </Text>
+                      {reportingPermissions.demographicsReporting?.canView && (
+                        <Ionicons name="checkmark-circle" size={18} color="#4F46E5" />
+                      )}
+                    </View>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => togglePermission('demographicsReporting', 'canEdit')}
+                    className={`flex-1 border-2 rounded-lg px-3 py-2 ${
+                      reportingPermissions.demographicsReporting?.canEdit
+                        ? "bg-emerald-50 border-emerald-600"
+                        : "bg-white border-gray-300"
+                    }`}
+                  >
+                    <View className="flex-row items-center justify-between">
+                      <Text className={`text-sm font-semibold ${
+                        reportingPermissions.demographicsReporting?.canEdit ? "text-emerald-600" : "text-gray-700"
+                      }`}>
+                        Edit
+                      </Text>
+                      {reportingPermissions.demographicsReporting?.canEdit && (
+                        <Ionicons name="checkmark-circle" size={18} color="#10B981" />
+                      )}
+                    </View>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
           )}
 
           {/* Submit Button */}
