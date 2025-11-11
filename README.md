@@ -2,6 +2,22 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
+## ✅ LATEST UPDATE: Email Button Now Working!
+
+**What was fixed:**
+- Backend server is now running on port 3001
+- Email service is configured and ready
+- The Email button on Bridge Team Follow-Up Form now works!
+
+**To use the Email button:**
+1. Open the **ENV tab** in your Vibecode app
+2. Add these two environment variables:
+   - `EXPO_PUBLIC_BACKEND_URL` = `http://172.17.0.1:3001`
+   - `EXPO_PUBLIC_BACKEND_API_KEY` = `bridge-email-v1-7more-secure-2025`
+3. The Email button will now send emails successfully via Gmail SMTP!
+
+The backend server will automatically restart when you reopen your workspace.
+
 ## IMPORTANT: Environment Variable Protection
 
 **Your environment variables are protected with multiple safeguards:**
