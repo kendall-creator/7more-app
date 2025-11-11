@@ -127,11 +127,14 @@ This is an automated message. Please do not reply to this email.
 /**
  * Core email sending function using Resend API
  * Sends emails directly from the mobile app - no backend needed!
+ *
+ * For Bridge Team emails, this uses bridgeteam@7more.net as the sender
  */
 const sendEmail = async ({ to, subject, body, replyTo }: EmailParams): Promise<{ success: boolean; error?: string }> => {
   // Check if email service is configured
   const emailApiKey = process.env.EXPO_PUBLIC_EMAIL_API_KEY;
-  const emailFrom = process.env.EXPO_PUBLIC_EMAIL_FROM || "onboarding@resend.dev";
+  // Always use Bridge Team email as sender for consistency
+  const emailFrom = process.env.EXPO_PUBLIC_EMAIL_FROM || "7more Bridge Team <bridgeteam@7more.net>";
 
   if (!emailApiKey) {
     console.warn("⚠️ Email service not configured. Email will not be sent.");
