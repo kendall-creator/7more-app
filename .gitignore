@@ -39,4 +39,8 @@ android/
 
 # Expo log
 expo.log
+
+# Environment variables (NEVER commit these!)
 .env
+.env.local
+.env.backup

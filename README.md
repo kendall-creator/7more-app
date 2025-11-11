@@ -2,6 +2,19 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
+## IMPORTANT: Environment Variable Protection
+
+**Your environment variables are protected with multiple safeguards:**
+- `.env` file is in `.gitignore` - will never be committed to git
+- `.env.backup` file created as recovery backup (also in `.gitignore`)
+- `.env.example` template updated for easy restoration if needed
+- All environment variables are properly secured
+
+**If your `.env` file gets deleted again:**
+1. Check the `.env.backup` file in your workspace directory
+2. Copy contents from `.env.backup` to a new `.env` file
+3. Or reference `.env.example` and re-add your values from the ENV tab in Vibecode app
+
 ## IMPORTANT: Firebase Setup Required
 
 **This app now uses Firebase Realtime Database for multi-device data synchronization.** All users will see the same data in real-time across all devices.
