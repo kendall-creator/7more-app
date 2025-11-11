@@ -16,7 +16,7 @@ import { ReportingCategory } from "../types";
 
 type ViewMode = "single" | "range";
 type AggregationType = "total" | "average";
-type CategoryFilter = "all" | "releasees" | "calls" | "mentorship" | "donors" | "financials" | "social_media";
+type CategoryFilter = "all" | "releasees" | "calls" | "mentorship" | "bridge_team" | "donors" | "financials" | "social_media";
 
 export default function ViewReportingScreen() {
   const navigation = useNavigation<any>();
@@ -154,6 +154,20 @@ export default function ViewReportingScreen() {
     const participantsAssignedToMentorship = reportsInRange.reduce((sum, r) =>
       sum + (r.mentorshipMetrics?.participantsAssignedToMentorship || 0), 0) / divisor;
 
+    // Bridge Team
+    const participantsReceived = reportsInRange.reduce((sum, r) =>
+      sum + (r.bridgeTeamMetrics?.participantsReceived?.autoCalculated || 0), 0) / divisor;
+    const pendingBridge = reportsInRange.reduce((sum, r) =>
+      sum + (r.bridgeTeamMetrics?.statusCounts?.pendingBridge?.autoCalculated || 0), 0) / divisor;
+    const attemptedToContact = reportsInRange.reduce((sum, r) =>
+      sum + (r.bridgeTeamMetrics?.statusCounts?.attemptedToContact?.autoCalculated || 0), 0) / divisor;
+    const contacted = reportsInRange.reduce((sum, r) =>
+      sum + (r.bridgeTeamMetrics?.statusCounts?.contacted?.autoCalculated || 0), 0) / divisor;
+    const unableToContact = reportsInRange.reduce((sum, r) =>
+      sum + (r.bridgeTeamMetrics?.statusCounts?.unableToContact?.autoCalculated || 0), 0) / divisor;
+    const averageDaysToFirstOutreach = reportsInRange.reduce((sum, r) =>
+      sum + (r.bridgeTeamMetrics?.averageDaysToFirstOutreach?.autoCalculated || 0), 0) / divisor;
+
     // Donors
     const newDonors = reportsInRange.reduce((sum, r) => sum + (r.donorData?.newDonors || 0), 0) / divisor;
     const amountFromNewDonors = reportsInRange.reduce((sum, r) => sum + (r.donorData?.amountFromNewDonors || 0), 0) / divisor;
@@ -201,6 +215,14 @@ export default function ViewReportingScreen() {
       },
       mentorship: {
         participantsAssignedToMentorship,
+      },
+      bridgeTeam: {
+        participantsReceived,
+        pendingBridge,
+        attemptedToContact,
+        contacted,
+        unableToContact,
+        averageDaysToFirstOutreach,
       },
       donors: {
         newDonors,
@@ -345,6 +367,32 @@ export default function ViewReportingScreen() {
           </View>
         )}
 
+        {/* Bridge Team */}
+        {canViewCategory("bridge_team") && (categoryFilter === "all" || categoryFilter === "bridge_team") && report.bridgeTeamMetrics && (
+          <View className="bg-white rounded-lg p-4 mb-4 mx-4 border border-gray-200">
+            <Text className="text-lg font-bold text-gray-900 mb-3">Bridge Team</Text>
+            {renderMetricRow("Participants Received", report.bridgeTeamMetrics.participantsReceived.manualOverride ?? report.bridgeTeamMetrics.participantsReceived.autoCalculated, "bridgeTeamMetrics.participantsReceived.autoCalculated", report)}
+
+            <Text className="text-sm font-semibold text-gray-700 mt-3 mb-2">Status Activity:</Text>
+            <View className="pl-4">
+              {renderMetricRow("Pending Bridge", report.bridgeTeamMetrics.statusCounts.pendingBridge.manualOverride ?? report.bridgeTeamMetrics.statusCounts.pendingBridge.autoCalculated, "bridgeTeamMetrics.statusCounts.pendingBridge.autoCalculated", report)}
+              {renderMetricRow("Attempted to Contact", report.bridgeTeamMetrics.statusCounts.attemptedToContact.manualOverride ?? report.bridgeTeamMetrics.statusCounts.attemptedToContact.autoCalculated, "bridgeTeamMetrics.statusCounts.attemptedToContact.autoCalculated", report)}
+              {renderMetricRow("Contacted", report.bridgeTeamMetrics.statusCounts.contacted.manualOverride ?? report.bridgeTeamMetrics.statusCounts.contacted.autoCalculated, "bridgeTeamMetrics.statusCounts.contacted.autoCalculated", report)}
+              {renderMetricRow("Unable to Contact", report.bridgeTeamMetrics.statusCounts.unableToContact.manualOverride ?? report.bridgeTeamMetrics.statusCounts.unableToContact.autoCalculated, "bridgeTeamMetrics.statusCounts.unableToContact.autoCalculated", report)}
+            </View>
+
+            <View className="flex-row justify-between items-center py-2 border-b border-gray-100 mt-2">
+              <Text className="text-gray-700 flex-1">Avg Days to First Outreach</Text>
+              <View className="flex-row items-center">
+                <Text className="text-gray-900 font-semibold">
+                  {formatNumber(report.bridgeTeamMetrics.averageDaysToFirstOutreach.manualOverride ?? report.bridgeTeamMetrics.averageDaysToFirstOutreach.autoCalculated)} days
+                </Text>
+                {viewMode === "single" && <ComparisonIndicator value={report.bridgeTeamMetrics.averageDaysToFirstOutreach.manualOverride ?? report.bridgeTeamMetrics.averageDaysToFirstOutreach.autoCalculated} field="bridgeTeamMetrics.averageDaysToFirstOutreach.autoCalculated" report={report} />}
+              </View>
+            </View>
+          </View>
+        )}
+
         {/* Donors */}
         {canViewCategory("donors") && (categoryFilter === "all" || categoryFilter === "donors") && report.donorData && (
           <View className="bg-white rounded-lg p-4 mb-4 mx-4 border border-gray-200">
@@ -478,6 +526,42 @@ export default function ViewReportingScreen() {
             <View className="flex-row justify-between py-2">
               <Text className="text-gray-700">Participants Assigned</Text>
               <Text className="text-gray-900 font-semibold">{formatNumber(aggregatedMetrics.mentorship.participantsAssignedToMentorship)}</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Bridge Team */}
+        {(categoryFilter === "all" || categoryFilter === "bridge_team") && (
+          <View className="bg-white rounded-lg p-4 mb-4 mx-4 border border-gray-200">
+            <Text className="text-lg font-bold text-gray-900 mb-3">Bridge Team</Text>
+            <View className="flex-row justify-between py-2 border-b border-gray-100">
+              <Text className="text-gray-700">Participants Received</Text>
+              <Text className="text-gray-900 font-semibold">{formatNumber(aggregatedMetrics.bridgeTeam.participantsReceived)}</Text>
+            </View>
+
+            <Text className="text-sm font-semibold text-gray-700 mt-3 mb-2">Status Activity:</Text>
+            <View className="pl-4">
+              <View className="flex-row justify-between py-1 border-b border-gray-100">
+                <Text className="text-gray-600">Pending Bridge</Text>
+                <Text className="text-gray-900">{formatNumber(aggregatedMetrics.bridgeTeam.pendingBridge)}</Text>
+              </View>
+              <View className="flex-row justify-between py-1 border-b border-gray-100">
+                <Text className="text-gray-600">Attempted to Contact</Text>
+                <Text className="text-gray-900">{formatNumber(aggregatedMetrics.bridgeTeam.attemptedToContact)}</Text>
+              </View>
+              <View className="flex-row justify-between py-1 border-b border-gray-100">
+                <Text className="text-gray-600">Contacted</Text>
+                <Text className="text-gray-900">{formatNumber(aggregatedMetrics.bridgeTeam.contacted)}</Text>
+              </View>
+              <View className="flex-row justify-between py-1">
+                <Text className="text-gray-600">Unable to Contact</Text>
+                <Text className="text-gray-900">{formatNumber(aggregatedMetrics.bridgeTeam.unableToContact)}</Text>
+              </View>
+            </View>
+
+            <View className="flex-row justify-between py-2 border-t border-gray-100 mt-2">
+              <Text className="text-gray-700">Avg Days to First Outreach</Text>
+              <Text className="text-gray-900 font-semibold">{formatNumber(aggregatedMetrics.bridgeTeam.averageDaysToFirstOutreach)} days</Text>
             </View>
           </View>
         )}
@@ -642,6 +726,7 @@ export default function ViewReportingScreen() {
             { key: "releasees", label: "Releasees" },
             { key: "calls", label: "Calls" },
             { key: "mentorship", label: "Mentorship" },
+            { key: "bridge_team", label: "Bridge Team" },
             { key: "donors", label: "Donors" },
             { key: "financials", label: "Financials" },
             { key: "social_media", label: "Social Media" },

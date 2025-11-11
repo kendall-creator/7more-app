@@ -21,7 +21,7 @@ import { formatNumber, formatCurrency, formatPercentage } from "../utils/formatN
 export default function ManageReportingScreen() {
   const navigation = useNavigation<any>();
   const currentUser = useCurrentUser();
-  const { monthlyReports, createMonthlyReport, updateMonthlyReport, postReport, calculateMentorshipMetrics, updateReleaseFacilityCounts, updateCallMetrics, updateDonorData, updateFinancialData, updateSocialMediaMetrics, updateWinsAndConcerns } = useReportingStore();
+  const { monthlyReports, createMonthlyReport, updateMonthlyReport, postReport, calculateMentorshipMetrics, calculateBridgeTeamMetrics, updateReleaseFacilityCounts, updateCallMetrics, updateBridgeTeamMetrics, updateDonorData, updateFinancialData, updateSocialMediaMetrics, updateWinsAndConcerns } = useReportingStore();
   const participants = useParticipantStore((s) => s.participants);
 
   // View mode: "month" or "category"
@@ -325,12 +325,14 @@ export default function ManageReportingScreen() {
     if (!currentReport) return;
 
     const mentorshipMetrics = calculateMentorshipMetrics(selectedMonth, selectedYear);
+    const bridgeTeamMetrics = calculateBridgeTeamMetrics(selectedMonth, selectedYear);
 
     await updateMonthlyReport(currentReport.id, {
       mentorshipMetrics,
+      bridgeTeamMetrics,
     });
 
-    Alert.alert("Success", "Mentorship metrics refreshed from app data");
+    Alert.alert("Success", "Auto-calculated metrics refreshed from app data");
   };
 
   const handlePostReport = async () => {
@@ -818,9 +820,89 @@ export default function ManageReportingScreen() {
                 </View>
               </View>
 
-              {/* 4. Donors Section */}
+              {/* 4. Bridge Team Metrics (Auto-Calculated) */}
+              {currentReport.bridgeTeamMetrics && (
+                <View className="bg-white rounded-lg p-4 mb-4 border border-gray-200">
+                  <Text className="text-lg font-bold text-gray-900 mb-3">4. Bridge Team</Text>
+                  <Text className="text-sm text-gray-500 mb-3">Auto-calculated from app data</Text>
+
+                  <View className="space-y-2">
+                    {/* Participants Received */}
+                    <View className="flex-row justify-between py-2 border-b border-gray-100">
+                      <Text className="text-gray-700">Participants Received</Text>
+                      <Text className="text-gray-900 font-semibold">
+                        {formatNumber(currentReport.bridgeTeamMetrics.participantsReceived.manualOverride ?? currentReport.bridgeTeamMetrics.participantsReceived.autoCalculated)}
+                      </Text>
+                    </View>
+
+                    {/* Status Counts */}
+                    <View className="mt-2">
+                      <Text className="text-sm font-semibold text-gray-700 mb-2">Status Activity:</Text>
+
+                      <View className="flex-row justify-between py-1 pl-4">
+                        <Text className="text-gray-600">Pending Bridge</Text>
+                        <Text className="text-gray-900">
+                          {formatNumber(currentReport.bridgeTeamMetrics.statusCounts.pendingBridge.manualOverride ?? currentReport.bridgeTeamMetrics.statusCounts.pendingBridge.autoCalculated)}
+                        </Text>
+                      </View>
+
+                      <View className="flex-row justify-between py-1 pl-4">
+                        <Text className="text-gray-600">Attempted to Contact</Text>
+                        <Text className="text-gray-900">
+                          {formatNumber(currentReport.bridgeTeamMetrics.statusCounts.attemptedToContact.manualOverride ?? currentReport.bridgeTeamMetrics.statusCounts.attemptedToContact.autoCalculated)}
+                        </Text>
+                      </View>
+
+                      <View className="flex-row justify-between py-1 pl-4">
+                        <Text className="text-gray-600">Contacted</Text>
+                        <Text className="text-gray-900">
+                          {formatNumber(currentReport.bridgeTeamMetrics.statusCounts.contacted.manualOverride ?? currentReport.bridgeTeamMetrics.statusCounts.contacted.autoCalculated)}
+                        </Text>
+                      </View>
+
+                      <View className="flex-row justify-between py-1 pl-4">
+                        <Text className="text-gray-600">Unable to Contact</Text>
+                        <Text className="text-gray-900">
+                          {formatNumber(currentReport.bridgeTeamMetrics.statusCounts.unableToContact.manualOverride ?? currentReport.bridgeTeamMetrics.statusCounts.unableToContact.autoCalculated)}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* Average Days to First Outreach */}
+                    <View className="flex-row justify-between py-2 border-t border-gray-100 mt-2 pt-2">
+                      <Text className="text-gray-700">Avg Days to First Outreach</Text>
+                      <Text className="text-gray-900 font-semibold">
+                        {formatNumber(currentReport.bridgeTeamMetrics.averageDaysToFirstOutreach.manualOverride ?? currentReport.bridgeTeamMetrics.averageDaysToFirstOutreach.autoCalculated)} days
+                      </Text>
+                    </View>
+
+                    {/* Forms by Day of Week */}
+                    <View className="mt-2 pt-2 border-t border-gray-100">
+                      <Text className="text-sm font-semibold text-gray-700 mb-2">Forms Received by Day:</Text>
+                      <View className="flex-row flex-wrap gap-2">
+                        {Object.entries(currentReport.bridgeTeamMetrics.formsByDayOfWeek)
+                          .filter(([key]) => key !== "topDay")
+                          .map(([day, count]) => (
+                            <View key={day} className="bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
+                              <Text className="text-xs text-gray-600 capitalize">{day.substring(0, 3)}</Text>
+                              <Text className="text-sm font-bold text-gray-900">{String(count)}</Text>
+                            </View>
+                          ))}
+                      </View>
+                      <View className="mt-2 bg-indigo-50 px-3 py-2 rounded-lg border border-indigo-200">
+                        <Text className="text-sm text-indigo-900">
+                          <Text className="font-semibold">Top Day: </Text>
+                          {currentReport.bridgeTeamMetrics.formsByDayOfWeek.topDay}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+              )}
+
+              {/* 5. Donors Section */}
               <View className="bg-white rounded-lg p-4 mb-4 border border-gray-200">
-                <Text className="text-lg font-bold text-gray-900 mb-3">4. Donors</Text>
+                <Text className="text-lg font-bold text-gray-900 mb-3">5. Donors</Text>
 
                 <View className="space-y-3">
                   <View>
@@ -882,9 +964,9 @@ export default function ManageReportingScreen() {
                 </View>
               </View>
 
-              {/* 5. Financials Section */}
+              {/* 6. Financials Section */}
               <View className="bg-white rounded-lg p-4 mb-4 border border-gray-200">
-                <Text className="text-lg font-bold text-gray-900 mb-3">5. Financials</Text>
+                <Text className="text-lg font-bold text-gray-900 mb-3">6. Financials</Text>
 
                 <View className="space-y-3">
                   <View>
@@ -929,9 +1011,9 @@ export default function ManageReportingScreen() {
                 </View>
               </View>
 
-              {/* 6. Social Media Metrics */}
+              {/* 7. Social Media Metrics */}
               <View className="bg-white rounded-lg p-4 mb-4 border border-gray-200">
-                <Text className="text-lg font-bold text-gray-900 mb-3">6. Social Media Metrics</Text>
+                <Text className="text-lg font-bold text-gray-900 mb-3">7. Social Media Metrics</Text>
 
                 <View className="space-y-3">
                   <View>
@@ -1031,10 +1113,10 @@ export default function ManageReportingScreen() {
                 </View>
               </View>
 
-              {/* 7. Wins & Concerns (Admin Only) */}
+              {/* 8. Wins & Concerns (Admin Only) */}
               {isAdmin && (
                 <View className="bg-white rounded-lg p-4 mb-4 border border-gray-200">
-                  <Text className="text-lg font-bold text-gray-900 mb-3">7. Wins & Concerns</Text>
+                  <Text className="text-lg font-bold text-gray-900 mb-3">8. Wins & Concerns</Text>
 
                   {/* Wins Section */}
                   <View className="mb-6">

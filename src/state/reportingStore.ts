@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { ref, set as firebaseSet, onValue, update as firebaseUpdate, remove } from "firebase/database";
 import { database } from "../config/firebase";
-import { MonthlyReport, ReleaseFacilityCount, CallMetrics, MentorshipMetrics, DonorData, FinancialData, SocialMediaMetrics, WinConcernEntry } from "../types";
+import { MonthlyReport, ReleaseFacilityCount, CallMetrics, MentorshipMetrics, DonorData, FinancialData, SocialMediaMetrics, WinConcernEntry, BridgeTeamMetrics } from "../types";
 import { useParticipantStore } from "./participantStore";
 
 interface ReportingState {
@@ -18,8 +18,10 @@ interface ReportingActions {
   getPostedReports: () => MonthlyReport[];
   getMostRecentPostedReport: () => MonthlyReport | undefined;
   calculateMentorshipMetrics: (month: number, year: number) => MentorshipMetrics;
+  calculateBridgeTeamMetrics: (month: number, year: number) => BridgeTeamMetrics;
   updateReleaseFacilityCounts: (reportId: string, counts: ReleaseFacilityCount) => Promise<void>;
   updateCallMetrics: (reportId: string, callMetrics: CallMetrics) => Promise<void>;
+  updateBridgeTeamMetrics: (reportId: string, bridgeTeamMetrics: BridgeTeamMetrics) => Promise<void>;
   updateDonorData: (reportId: string, donorData: DonorData) => Promise<void>;
   updateFinancialData: (reportId: string, beginningBalance: number | null, endingBalance: number | null) => Promise<void>;
   updateSocialMediaMetrics: (reportId: string, socialMediaMetrics: SocialMediaMetrics) => Promise<void>;
@@ -66,6 +68,7 @@ export const useReportingStore = create<ReportingStore>()((set, get) => ({
 
     // Calculate metrics
     const mentorshipMetrics = get().calculateMentorshipMetrics(month, year);
+    const bridgeTeamMetrics = get().calculateBridgeTeamMetrics(month, year);
 
     const newReport: MonthlyReport = {
       id: `report_${year}_${month}_${Date.now()}`,
@@ -107,6 +110,7 @@ export const useReportingStore = create<ReportingStore>()((set, get) => ({
       },
       wins: [],
       concerns: [],
+      bridgeTeamMetrics,
       isPosted: false, // New reports default to unpublished
       createdBy,
       createdByName,
@@ -161,6 +165,131 @@ export const useReportingStore = create<ReportingStore>()((set, get) => ({
     };
   },
 
+  calculateBridgeTeamMetrics: (month, year) => {
+    const participantStore = useParticipantStore.getState();
+    const participants = participantStore.participants;
+
+    // Calculate date range for the month
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+
+    // Initialize counters
+    let participantsReceived = 0;
+    let pendingBridge = 0;
+    let attemptedToContact = 0;
+    let contacted = 0;
+    let unableToContact = 0;
+    let totalDaysToFirstOutreach = 0;
+    let outreachCount = 0;
+
+    const formsByDayOfWeek = {
+      monday: 0,
+      tuesday: 0,
+      wednesday: 0,
+      thursday: 0,
+      friday: 0,
+      saturday: 0,
+      sunday: 0,
+    };
+
+    participants.forEach((p) => {
+      // Count participants received by Bridge Team during this month
+      if (p.submittedAt) {
+        const submittedDate = new Date(p.submittedAt);
+        if (submittedDate >= startDate && submittedDate <= endDate) {
+          participantsReceived++;
+
+          // Track day of week for form submissions
+          const dayOfWeek = submittedDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+          const dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+          const dayKey = dayNames[dayOfWeek] as keyof typeof formsByDayOfWeek;
+          formsByDayOfWeek[dayKey]++;
+        }
+      }
+
+      // Check history entries for status changes during this month
+      p.history?.forEach((entry) => {
+        const entryDate = new Date(entry.createdAt);
+        if (entryDate >= startDate && entryDate <= endDate) {
+          // Count status changes based on type and metadata
+          if (entry.type === "status_change") {
+            const newStatus = entry.metadata?.newStatus as string;
+
+            // Count pending bridge status
+            if (newStatus === "pending_bridge") {
+              pendingBridge++;
+            }
+
+            // Count attempted to contact
+            if (newStatus === "bridge_attempted") {
+              attemptedToContact++;
+            }
+
+            // Count contacted
+            if (newStatus === "bridge_contacted") {
+              contacted++;
+
+              // Calculate days to first outreach
+              if (p.submittedAt) {
+                const submittedDate = new Date(p.submittedAt);
+                const contactedDate = new Date(entry.createdAt);
+                const daysToOutreach = Math.floor((contactedDate.getTime() - submittedDate.getTime()) / (1000 * 60 * 60 * 24));
+                totalDaysToFirstOutreach += daysToOutreach;
+                outreachCount++;
+              }
+            }
+
+            // Count unable to contact
+            if (newStatus === "bridge_unable") {
+              unableToContact++;
+            }
+          }
+        }
+      });
+    });
+
+    // Calculate average days to first outreach
+    const averageDaysToFirstOutreach = outreachCount > 0 ? Math.round(totalDaysToFirstOutreach / outreachCount) : 0;
+
+    // Find top day
+    const days = Object.entries(formsByDayOfWeek);
+    const topDayEntry = days.reduce((max, day) => day[1] > max[1] ? day : max);
+    const topDay = topDayEntry[0].charAt(0).toUpperCase() + topDayEntry[0].slice(1);
+
+    return {
+      participantsReceived: {
+        autoCalculated: participantsReceived,
+        manualOverride: null,
+      },
+      statusCounts: {
+        pendingBridge: {
+          autoCalculated: pendingBridge,
+          manualOverride: null,
+        },
+        attemptedToContact: {
+          autoCalculated: attemptedToContact,
+          manualOverride: null,
+        },
+        contacted: {
+          autoCalculated: contacted,
+          manualOverride: null,
+        },
+        unableToContact: {
+          autoCalculated: unableToContact,
+          manualOverride: null,
+        },
+      },
+      averageDaysToFirstOutreach: {
+        autoCalculated: averageDaysToFirstOutreach,
+        manualOverride: null,
+      },
+      formsByDayOfWeek: {
+        ...formsByDayOfWeek,
+        topDay,
+      },
+    };
+  },
+
   updateReleaseFacilityCounts: async (reportId, counts) => {
     if (!database) {
       throw new Error("Firebase not configured. Please add Firebase credentials in ENV tab.");
@@ -178,6 +307,16 @@ export const useReportingStore = create<ReportingStore>()((set, get) => ({
 
     await get().updateMonthlyReport(reportId, {
       callMetrics,
+    });
+  },
+
+  updateBridgeTeamMetrics: async (reportId, bridgeTeamMetrics) => {
+    if (!database) {
+      throw new Error("Firebase not configured. Please add Firebase credentials in ENV tab.");
+    }
+
+    await get().updateMonthlyReport(reportId, {
+      bridgeTeamMetrics,
     });
   },
 

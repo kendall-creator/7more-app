@@ -974,14 +974,14 @@ To enable automatic welcome and password reset emails:
   - Save each category independently
 
 - **By Category View:**
-  - Category Selection - Choose from Releasees, Calls, Donors, Financials, or Social Media
+  - Category Selection - Choose from Releasees, Calls, Mentorship, Bridge Team, Donors, Financials, or Social Media
   - Year Selection - Pick any year to view/edit all 12 months
   - Grid layout shows all months for the selected category
   - Enter data for each month in a compact 3-column grid (Jan, Feb, Mar, etc.)
   - Data auto-saves as you type for each field
   - Perfect for bulk data entry when you have annual reports to input
 
-- Seven Reporting Categories with manual data entry:
+- Eight Reporting Categories:
 
 1. **Releasees Met (Manual Input)**
    - Pam Lychner - count of releasees
@@ -1007,24 +1007,36 @@ To enable automatic welcome and password reset emails:
    - Calculated from previous month's assignments
    - Refresh button to update from current data
 
-4. **Donors (Manual Input)**
+4. **Bridge Team (Auto-Calculated)**
+   - Participants Received - total participants received by Bridge Team during the month
+   - Status Activity:
+     - Pending Bridge - participants in pending status
+     - Attempted to Contact - contact attempts made
+     - Contacted - successful contacts
+     - Unable to Contact - participants unable to reach
+   - Average Days to First Outreach - average time from submission to first contact
+   - Forms by Day of Week - distribution of intake form submissions by day
+   - All metrics automatically calculated from app data
+   - Refresh button to update from current data
+
+5. **Donors (Manual Input)**
    - New Donors - count of new donors
    - Amount from New Donors - dollar amount
    - Checks - count of checks received
    - Total from Checks - dollar amount
 
-5. **Financials (Manual Input)**
+6. **Financials (Manual Input)**
    - Beginning Balance (Month Start) - dollar amount
    - Ending Balance (Month End) - dollar amount
    - Difference - auto-calculated (Ending - Beginning) with commas
 
-6. **Social Media Metrics (Manual Input)**
+7. **Social Media Metrics (Manual Input)**
    - Reels/Post Views - combined total of reels and post views
    - Views from Non-Followers (%) - percentage of views from non-followers (0-100)
    - Total Followers - current follower count
    - Followers Gained (+/-) - net change in followers (positive for gains, negative for losses)
 
-7. **Wins & Concerns (Admin Notes Only)**
+8. **Wins & Concerns (Admin Notes Only)**
    - **Wins** - Up to 5 structured entries, each with:
      - Title (e.g., "Record Donations")
      - Body/Description (detailed information)
