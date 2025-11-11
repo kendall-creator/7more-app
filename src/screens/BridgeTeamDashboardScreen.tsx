@@ -196,10 +196,20 @@ export default function BridgeTeamDashboardScreen() {
     <View className="flex-1 bg-gray-50">
       {/* Header */}
       <View className="bg-gray-600 pt-16 pb-6 px-6">
-        <Text className="text-2xl font-bold text-white mb-1">Bridge Team</Text>
-        <Text className="text-yellow-100 text-sm">
-          {participants.length} participant{participants.length !== 1 ? "s" : ""} waiting
-        </Text>
+        <View className="flex-row items-center justify-between mb-2">
+          <View className="flex-1">
+            <Text className="text-2xl font-bold text-white mb-1">Bridge Team</Text>
+            <Text className="text-yellow-100 text-sm">
+              {participants.length} participant{participants.length !== 1 ? "s" : ""} waiting
+            </Text>
+          </View>
+          <Pressable
+            onPress={() => navigation.navigate("ManualIntakeForm")}
+            className="w-12 h-12 bg-yellow-500 rounded-full items-center justify-center active:opacity-70"
+          >
+            <Ionicons name="add" size={28} color="white" />
+          </Pressable>
+        </View>
       </View>
 
       {/* Stats Cards */}

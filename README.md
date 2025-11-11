@@ -483,7 +483,8 @@ To enable automatic welcome and password reset emails:
   - **Requires API setup** - Form includes placeholder API endpoint that needs to be configured
   - Form automatically updates when you change fields in the app
 
-- **Admin-only manual participant entry** - Admins can also manually add participants
+- **Manual participant entry** - Admins and Bridge Team members can manually add participants
+  - **"+" Button on Bridge Team Dashboard** - Bridge Team members can quickly add participants from their queue view
   - **Release location dropdown** - Same predefined facility options as public form
   - **Phone and Email fields** - Optional fields to add contact information during manual entry
 - Captures participant information including ID number, demographics, release details, and contact info
@@ -545,6 +546,7 @@ To enable automatic welcome and password reset emails:
   - All demographics calculated in real-time from current participant data
 
 #### Bridge Team Workflow
+- **Add Participant Button** - "+" button in header allows Bridge Team to manually add participants directly to the queue
 - View all pending participants with time since submission
 - **Days-since tracking** - See "contacted X days ago" for each participant
   - Shows on all bridge team participants (pending, attempted, contacted)
