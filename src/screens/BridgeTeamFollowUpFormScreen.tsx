@@ -110,6 +110,8 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
 
   // Loading state
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [isSendingSMS, setIsSendingSMS] = useState(false);
 
   if (!participant || !currentUser) {
     return null;
@@ -936,61 +938,85 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
                             return;
                           }
 
-                          // Prepare resources to send
-                          const resourcesToSend = allResources
-                            .filter((r) => selectedResources.includes(r.id))
-                            .map((r) => ({
-                              title: r.title,
-                              content: r.content,
-                              category: r.category,
-                            }));
+                          setIsSendingEmail(true);
+                          try {
+                            // Prepare resources to send
+                            const resourcesToSend = allResources
+                              .filter((r) => selectedResources.includes(r.id))
+                              .map((r) => ({
+                                title: r.title,
+                                content: r.content,
+                                category: r.category,
+                              }));
 
-                          // Send email
-                          const result = await sendResourcesEmail(
-                            email,
-                            participant.firstName,
-                            resourcesToSend
-                          );
-
-                          if (result.success) {
-                            Alert.alert("Success", "Resources sent via email successfully!");
-                          } else {
-                            Alert.alert(
-                              "Email Error",
-                              result.error || "Could not send email. Please ensure Gmail is configured in ENV tab."
+                            // Send email
+                            const result = await sendResourcesEmail(
+                              email,
+                              participant.firstName,
+                              resourcesToSend
                             );
+
+                            if (result.success) {
+                              Alert.alert("Success", "Resources sent via email successfully!");
+                            } else {
+                              Alert.alert(
+                                "Email Error",
+                                result.error || "Could not send email. Please ensure Gmail is configured in ENV tab."
+                              );
+                            }
+                          } finally {
+                            setIsSendingEmail(false);
                           }
                         }}
-                        className="flex-1 bg-blue-600 rounded-xl py-3 items-center active:opacity-80"
+                        disabled={isSendingEmail}
+                        className={`flex-1 rounded-xl py-3 items-center active:opacity-80 ${isSendingEmail ? "bg-blue-400" : "bg-blue-600"}`}
                       >
-                        <View className="flex-row items-center">
-                          <Ionicons name="mail" size={18} color="white" />
-                          <Text className="text-white text-sm font-semibold ml-2">Email</Text>
-                        </View>
+                        {isSendingEmail ? (
+                          <View className="flex-row items-center">
+                            <Text className="text-white text-sm font-semibold">Sending...</Text>
+                          </View>
+                        ) : (
+                          <View className="flex-row items-center">
+                            <Ionicons name="mail" size={18} color="white" />
+                            <Text className="text-white text-sm font-semibold ml-2">Email</Text>
+                          </View>
+                        )}
                       </Pressable>
 
                       {phoneNumber && phoneNumber.trim() !== "" && (
                         <Pressable
                           onPress={async () => {
-                            // Send SMS via Aircall API
-                            const text = generateResourceText();
-                            const result = await sendAircallSMS(phoneNumber, text);
+                            setIsSendingSMS(true);
+                            try {
+                              // Send SMS via Aircall API
+                              const text = generateResourceText();
+                              const result = await sendAircallSMS(phoneNumber, text);
 
-                            if (result.success) {
-                              Alert.alert("Success", "Resources sent via SMS successfully!");
-                            } else {
-                              Alert.alert(
-                                "SMS Error",
-                                result.error || "Could not send SMS. Please check your Aircall configuration."
-                              );
+                              if (result.success) {
+                                Alert.alert("Success", "Resources sent via SMS successfully!");
+                              } else {
+                                Alert.alert(
+                                  "SMS Error",
+                                  result.error || "Could not send SMS. Please check your Aircall configuration."
+                                );
+                              }
+                            } finally {
+                              setIsSendingSMS(false);
                             }
                           }}
-                          className="flex-1 bg-green-600 rounded-xl py-3 items-center active:opacity-80"
+                          disabled={isSendingSMS}
+                          className={`flex-1 rounded-xl py-3 items-center active:opacity-80 ${isSendingSMS ? "bg-green-400" : "bg-green-600"}`}
                         >
-                          <View className="flex-row items-center">
-                            <Ionicons name="chatbubble" size={18} color="white" />
-                            <Text className="text-white text-sm font-semibold ml-2">SMS</Text>
-                          </View>
+                          {isSendingSMS ? (
+                            <View className="flex-row items-center">
+                              <Text className="text-white text-sm font-semibold">Sending...</Text>
+                            </View>
+                          ) : (
+                            <View className="flex-row items-center">
+                              <Ionicons name="chatbubble" size={18} color="white" />
+                              <Text className="text-white text-sm font-semibold ml-2">SMS</Text>
+                            </View>
+                          )}
                         </Pressable>
                       )}
 
