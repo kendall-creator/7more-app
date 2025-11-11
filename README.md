@@ -665,6 +665,14 @@ To enable automatic welcome and password reset emails:
   - Mark form fields as required or optional
   - Track task status automatically (pending, in_progress, completed, overdue)
   - View all tasks across organization (admin only)
+  - **Status Filter Tabs** - Filter tasks by status with a single tap
+    - All - View all tasks grouped by status
+    - Overdue - Show only overdue tasks
+    - In Progress - Show only tasks currently being worked on
+    - Pending - Show only pending tasks
+    - Completed - Show only completed tasks
+    - Each tab shows the count of tasks in that status
+    - Color-coded pills for easy identification (red for overdue, blue for in progress, green for completed)
 - **Task Detail View** - Click any task to see full details
   - Complete task information including description and requirements
   - See who assigned the task and when

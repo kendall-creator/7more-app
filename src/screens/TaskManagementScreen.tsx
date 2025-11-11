@@ -17,6 +17,7 @@ export default function TaskManagementScreen() {
   const allUsers = useInvitedUsers();
 
   const [activeTab, setActiveTab] = useState<"my" | "assigned" | "all">("my");
+  const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "in_progress" | "overdue" | "completed">("all");
   const [searchQuery, setSearchQuery] = useState("");
 
   // Filter tasks based on active tab
@@ -29,6 +30,11 @@ export default function TaskManagementScreen() {
       tasks = allTasks.filter((t) => t.assignedByUserId === currentUser?.id);
     } else {
       tasks = allTasks;
+    }
+
+    // Apply status filter (only for "My Tasks" tab)
+    if (activeTab === "my" && statusFilter !== "all") {
+      tasks = tasks.filter((t) => t.status === statusFilter);
     }
 
     // Apply search filter
@@ -44,7 +50,7 @@ export default function TaskManagementScreen() {
     }
 
     return tasks;
-  }, [activeTab, allTasks, currentUser, searchQuery]);
+  }, [activeTab, statusFilter, allTasks, currentUser, searchQuery]);
 
   // Group tasks by assignee for "assigned" and "all" tabs
   const groupedTasks = useMemo(() => {
@@ -88,6 +94,20 @@ export default function TaskManagementScreen() {
 
     return grouped;
   }, [activeTab, filteredTasks]);
+
+  // Calculate counts for status filters (only for My Tasks)
+  const statusCounts = useMemo(() => {
+    if (activeTab !== "my") return null;
+
+    const myTasks = allTasks.filter((t) => t.assignedToUserId === currentUser?.id);
+    return {
+      all: myTasks.length,
+      pending: myTasks.filter((t) => t.status === "pending").length,
+      in_progress: myTasks.filter((t) => t.status === "in_progress").length,
+      overdue: myTasks.filter((t) => t.status === "overdue").length,
+      completed: myTasks.filter((t) => t.status === "completed").length,
+    };
+  }, [activeTab, allTasks, currentUser]);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -317,52 +337,154 @@ export default function TaskManagementScreen() {
         </View>
       </View>
 
+      {/* Status Filter Tabs (only show on My Tasks tab) */}
+      {activeTab === "my" && statusCounts && (
+        <View className="bg-white border-b border-gray-200">
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className="px-6 py-3"
+            contentContainerStyle={{ gap: 8 }}
+          >
+            <Pressable
+              onPress={() => setStatusFilter("all")}
+              className={`px-4 py-2 rounded-full border ${
+                statusFilter === "all" ? "bg-gray-600 border-gray-600" : "bg-white border-gray-300"
+              }`}
+            >
+              <Text
+                className={`text-sm font-semibold ${
+                  statusFilter === "all" ? "text-white" : "text-gray-700"
+                }`}
+              >
+                All ({statusCounts.all})
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setStatusFilter("overdue")}
+              className={`px-4 py-2 rounded-full border ${
+                statusFilter === "overdue" ? "bg-red-600 border-red-600" : "bg-white border-red-300"
+              }`}
+            >
+              <Text
+                className={`text-sm font-semibold ${
+                  statusFilter === "overdue" ? "text-white" : "text-red-700"
+                }`}
+              >
+                Overdue ({statusCounts.overdue})
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setStatusFilter("in_progress")}
+              className={`px-4 py-2 rounded-full border ${
+                statusFilter === "in_progress" ? "bg-blue-600 border-blue-600" : "bg-white border-blue-300"
+              }`}
+            >
+              <Text
+                className={`text-sm font-semibold ${
+                  statusFilter === "in_progress" ? "text-white" : "text-blue-700"
+                }`}
+              >
+                In Progress ({statusCounts.in_progress})
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setStatusFilter("pending")}
+              className={`px-4 py-2 rounded-full border ${
+                statusFilter === "pending" ? "bg-gray-600 border-gray-600" : "bg-white border-gray-300"
+              }`}
+            >
+              <Text
+                className={`text-sm font-semibold ${
+                  statusFilter === "pending" ? "text-white" : "text-gray-700"
+                }`}
+              >
+                Pending ({statusCounts.pending})
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setStatusFilter("completed")}
+              className={`px-4 py-2 rounded-full border ${
+                statusFilter === "completed" ? "bg-green-600 border-green-600" : "bg-white border-green-300"
+              }`}
+            >
+              <Text
+                className={`text-sm font-semibold ${
+                  statusFilter === "completed" ? "text-white" : "text-green-700"
+                }`}
+              >
+                Completed ({statusCounts.completed})
+              </Text>
+            </Pressable>
+          </ScrollView>
+        </View>
+      )}
+
       <ScrollView className="flex-1 px-6 py-4" contentContainerStyle={contentContainerStyle}>
         {/* Render tasks based on active tab */}
         {activeTab === "my" ? (
-          // My Tasks - grouped by status
+          // My Tasks - grouped by status or filtered by status
           <>
-            {(groupedTasks as any).overdue?.length > 0 && (
-              <View className="mb-6">
-                <Text className="text-sm font-bold text-red-700 mb-3 uppercase">
-                  Overdue ({(groupedTasks as any).overdue.length})
-                </Text>
-                {(groupedTasks as any).overdue.map((task: Task) => renderTaskCard(task))}
-              </View>
-            )}
+            {statusFilter === "all" ? (
+              // Show all tasks grouped by status
+              <>
+                {(groupedTasks as any).overdue?.length > 0 && (
+                  <View className="mb-6">
+                    <Text className="text-sm font-bold text-red-700 mb-3 uppercase">
+                      Overdue ({(groupedTasks as any).overdue.length})
+                    </Text>
+                    {(groupedTasks as any).overdue.map((task: Task) => renderTaskCard(task))}
+                  </View>
+                )}
 
-            {(groupedTasks as any).in_progress?.length > 0 && (
-              <View className="mb-6">
-                <Text className="text-sm font-bold text-blue-700 mb-3 uppercase">
-                  In Progress ({(groupedTasks as any).in_progress.length})
-                </Text>
-                {(groupedTasks as any).in_progress.map((task: Task) => renderTaskCard(task))}
-              </View>
-            )}
+                {(groupedTasks as any).in_progress?.length > 0 && (
+                  <View className="mb-6">
+                    <Text className="text-sm font-bold text-blue-700 mb-3 uppercase">
+                      In Progress ({(groupedTasks as any).in_progress.length})
+                    </Text>
+                    {(groupedTasks as any).in_progress.map((task: Task) => renderTaskCard(task))}
+                  </View>
+                )}
 
-            {(groupedTasks as any).pending?.length > 0 && (
-              <View className="mb-6">
-                <Text className="text-sm font-bold text-gray-700 mb-3 uppercase">
-                  Pending ({(groupedTasks as any).pending.length})
-                </Text>
-                {(groupedTasks as any).pending.map((task: Task) => renderTaskCard(task))}
-              </View>
-            )}
+                {(groupedTasks as any).pending?.length > 0 && (
+                  <View className="mb-6">
+                    <Text className="text-sm font-bold text-gray-700 mb-3 uppercase">
+                      Pending ({(groupedTasks as any).pending.length})
+                    </Text>
+                    {(groupedTasks as any).pending.map((task: Task) => renderTaskCard(task))}
+                  </View>
+                )}
 
-            {(groupedTasks as any).completed?.length > 0 && (
-              <View className="mb-6">
-                <Text className="text-sm font-bold text-green-700 mb-3 uppercase">
-                  Completed ({(groupedTasks as any).completed.length})
-                </Text>
-                {(groupedTasks as any).completed.map((task: Task) => renderTaskCard(task))}
-              </View>
-            )}
+                {(groupedTasks as any).completed?.length > 0 && (
+                  <View className="mb-6">
+                    <Text className="text-sm font-bold text-green-700 mb-3 uppercase">
+                      Completed ({(groupedTasks as any).completed.length})
+                    </Text>
+                    {(groupedTasks as any).completed.map((task: Task) => renderTaskCard(task))}
+                  </View>
+                )}
 
-            {filteredTasks.length === 0 && (
-              <View className="items-center justify-center py-12">
-                <Ionicons name="checkbox-outline" size={64} color="#D1D5DB" />
-                <Text className="text-gray-500 text-base mt-4">No tasks assigned to you</Text>
-              </View>
+                {filteredTasks.length === 0 && (
+                  <View className="items-center justify-center py-12">
+                    <Ionicons name="checkbox-outline" size={64} color="#D1D5DB" />
+                    <Text className="text-gray-500 text-base mt-4">No tasks assigned to you</Text>
+                  </View>
+                )}
+              </>
+            ) : (
+              // Show only tasks of the selected status
+              <>
+                {filteredTasks.length > 0 ? (
+                  filteredTasks.map((task: Task) => renderTaskCard(task))
+                ) : (
+                  <View className="items-center justify-center py-12">
+                    <Ionicons name="checkbox-outline" size={64} color="#D1D5DB" />
+                    <Text className="text-gray-500 text-base mt-4">
+                      No {getStatusLabel(statusFilter).toLowerCase()} tasks
+                    </Text>
+                  </View>
+                )}
+              </>
             )}
           </>
         ) : (
