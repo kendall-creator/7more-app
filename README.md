@@ -16,7 +16,7 @@ This is a **Vibecode platform issue**. Environment variables are managed through
 **Quick Fix (2 minutes):**
 1. Open the **ENV tab** in your Vibecode app
 2. Add these minimum required variables for email functionality:
-   - `EXPO_PUBLIC_BACKEND_URL` = `http://172.17.0.1:3001`
+   - `EXPO_PUBLIC_BACKEND_URL` = `http://172.17.0.2:3001`
    - `EXPO_PUBLIC_BACKEND_API_KEY` = `bridge-email-v1-7more-secure-2025`
 3. Add all 8 Firebase variables (see reference document above)
 
@@ -186,18 +186,19 @@ If you see "Failed to load form" or "Loading..." that won't finish:
 
 Your app now sends emails directly from **bridgeteam@7more.net** using Gmail SMTP through the backend server. The email button has been fixed and will now work correctly.
 
-**What Was Fixed (Nov 12, 2025 - 3:23 AM)**:
+**What Was Fixed (Nov 12, 2025 - 3:26 AM)**:
 - ✅ Changed Bridge Team Follow-Up Form to use Gmail SMTP (was using wrong service)
 - ✅ Changed Initial Contact Form to use Gmail SMTP (was using wrong service)
 - ✅ Created backend .env file with Gmail credentials
 - ✅ Backend server running and configured on port 3001 (FIXED: was not running, now started)
 - ✅ Added hardcoded fallback configuration for Vibecode environment
+- ✅ Fixed network timeout - updated backend URL to correct IP (172.17.0.2)
 - ✅ Both email buttons now send from bridgeteam@7more.net
 
 **Current Configuration**:
 - ✅ Email Service: Gmail SMTP via backend server (port 3001)
 - ✅ From Address: bridgeteam@7more.net
-- ✅ Backend URL: http://172.17.0.1:3001 (hardcoded fallback)
+- ✅ Backend URL: http://172.17.0.2:3001 (hardcoded fallback)
 - ✅ Integration: Uses `sendBridgeTeamResourcesEmail` from `/src/api/gmail-smtp.ts`
 - ✅ Both Bridge Team Follow-Up Form and Initial Contact Form use Gmail SMTP
 

@@ -60,7 +60,7 @@ export const sendGmailEmail = async ({
 
     // Hardcoded fallback for Vibecode environment
     if (!backendUrl) {
-      backendUrl = "http://172.17.0.1:3001";
+      backendUrl = "http://172.17.0.2:3001";
       console.log("⚠️ Using hardcoded backend URL:", backendUrl);
     }
     if (!backendApiKey) {
@@ -88,35 +88,47 @@ export const sendGmailEmail = async ({
     console.log(`   Subject: ${subject}`);
     if (replyTo) console.log(`   Reply-To: ${replyTo}`);
 
-    // Send email via backend API
-    const response = await fetch(`${backendUrl}/api/send-email`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${backendApiKey}`,
-      },
-      body: JSON.stringify({
-        to,
-        subject,
-        body: html || body,
-        replyTo,
-      }),
-    });
+    // Create abort controller for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-    const result = await response.json();
+    try {
+      // Send email via backend API
+      const response = await fetch(`${backendUrl}/api/send-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${backendApiKey}`,
+        },
+        body: JSON.stringify({
+          to,
+          subject,
+          body: html || body,
+          replyTo,
+        }),
+        signal: controller.signal,
+      });
 
-    if (response.ok && result.success) {
-      console.log("✅ Email sent successfully via backend");
-      return {
-        success: true,
-        messageId: result.messageId,
-      };
-    } else {
-      console.error("❌ Email send failed:", result.error);
-      return {
-        success: false,
-        error: result.error || "Failed to send email via backend",
-      };
+      clearTimeout(timeoutId);
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        console.log("✅ Email sent successfully via backend");
+        return {
+          success: true,
+          messageId: result.messageId,
+        };
+      } else {
+        console.error("❌ Email send failed:", result.error);
+        return {
+          success: false,
+          error: result.error || "Failed to send email via backend",
+        };
+      }
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId);
+      throw fetchError;
     }
   } catch (error: any) {
     console.error("Error sending email via backend:", error);
