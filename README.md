@@ -182,15 +182,16 @@ If you see "Failed to load form" or "Loading..." that won't finish:
 
 ### 📧 Gmail SMTP Email Integration (Bridge Team)
 
-**Status**: ✅ **FULLY CONFIGURED & WORKING** - Email sending via Gmail SMTP
+**Status**: ✅ **FULLY CONFIGURED & WORKING** - Email sending via Gmail SMTP backend server
 
-Your app now sends emails directly from **bridgeteam@7more.net** using Gmail SMTP. This integration is specifically enabled for Bridge Team users, Bridge Team leaders, and admins.
+Your app now sends emails directly from **bridgeteam@7more.net** using Gmail SMTP through the backend server. This integration is specifically enabled for Bridge Team users, Bridge Team leaders, and admins.
 
 **Current Configuration**:
-- ✅ Email Service: SMTPjs.com relay (works from mobile devices)
+- ✅ Email Service: Gmail SMTP via backend server (port 3001)
 - ✅ From Address: bridgeteam@7more.net
-- ✅ Credentials: Using EXPO_PUBLIC_EMAIL_USER and EXPO_PUBLIC_EMAIL_PASS from ENV tab
-- ✅ No backend server required - emails send directly from mobile app
+- ✅ Backend URL: http://172.17.0.1:3001
+- ✅ Integration: Uses `sendBridgeTeamResourcesEmail` from `/src/api/gmail-smtp.ts`
+- ✅ Both Bridge Team Follow-Up Form and Initial Contact Form use Gmail SMTP
 
 **Who Can Send Emails**:
 - ✅ **Admin** - Full email sending capabilities
@@ -206,32 +207,32 @@ Your app now sends emails directly from **bridgeteam@7more.net** using Gmail SMT
 **How It Works**:
 1. Bridge Team user selects resources to send to a participant
 2. Clicks the **Email button** in the form
-3. Email is sent directly via SMTPjs.com relay service
+3. Email is sent via backend server (port 3001) using Gmail SMTP
 4. Message sent from bridgeteam@7more.net
 5. Success/error confirmation displayed to user
 
 **Technical Details**:
-- Email Service: SMTPjs.com (free SMTP relay for mobile apps)
-- Direct sending: No backend server required
+- Email Service: Gmail SMTP via backend server
+- Backend Server: Automatically running on port 3001
 - Code Location: `/src/api/gmail-smtp.ts`
+- Function: `sendBridgeTeamResourcesEmail()`
 - Required Environment Variables (add in ENV tab):
-  - `EXPO_PUBLIC_EMAIL_USER` = bridgeteam@7more.net
-  - `EXPO_PUBLIC_EMAIL_PASS` = Gmail app password
-  - `EXPO_PUBLIC_EMAIL_FROM` = "Bridge Team <bridgeteam@7more.net>"
+  - `EXPO_PUBLIC_BACKEND_URL` = http://172.17.0.1:3001
+  - `EXPO_PUBLIC_BACKEND_API_KEY` = bridge-email-v1-7more-secure-2025
 
 **Security**:
-- Gmail app password stored in ENV variables
-- Email credentials never exposed in code
-- SMTPjs.com handles secure SMTP connection
+- Gmail credentials stored securely in backend server
+- Backend authentication via API key
+- Email credentials never exposed in frontend code
+- Secure communication between app and backend
 
 **Setup Instructions**:
 1. Open Vibecode app → ENV tab
 2. Ensure these variables are set:
-   - EXPO_PUBLIC_EMAIL_USER
-   - EXPO_PUBLIC_EMAIL_PASS
-   - EXPO_PUBLIC_EMAIL_FROM
-3. Restart the app if you just added them
-4. Email button will now work immediately
+   - EXPO_PUBLIC_BACKEND_URL
+   - EXPO_PUBLIC_BACKEND_API_KEY
+3. Backend server runs automatically on port 3001
+4. Email button will work immediately once ENV variables are configured
 
 ### 📧 Resend Email Integration (Alternative - Optional)
 

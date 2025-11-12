@@ -17,7 +17,7 @@ import { useCurrentUser } from "../state/authStore";
 import { Ionicons } from "@expo/vector-icons";
 import { ContactAttemptType, InitialContactFormData } from "../types";
 import { sendAircallSMS } from "../api/aircall-sms";
-import { sendResourcesEmail } from "../services/emailService";
+import { sendBridgeTeamResourcesEmail } from "../api/gmail-smtp";
 
 export default function InitialContactFormScreen({ route, navigation }: any) {
   const { participantId } = route.params;
@@ -795,10 +795,11 @@ export default function InitialContactFormScreen({ route, navigation }: any) {
                                   category: r.category,
                                 }));
 
-                              const result = await sendResourcesEmail(
+                              const result = await sendBridgeTeamResourcesEmail(
                                 participant.email!,
                                 participant.firstName,
-                                resourcesToSend
+                                resourcesToSend,
+                                currentUser?.name || "Bridge Team"
                               );
 
                               if (result.success) {
