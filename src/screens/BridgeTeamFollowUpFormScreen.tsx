@@ -17,7 +17,7 @@ import { useTransitionalHomeStore } from "../state/transitionalHomeStore";
 import { useCurrentUser } from "../state/authStore";
 import { Ionicons } from "@expo/vector-icons";
 import { BridgeTeamFollowUpFormData, TransitionalHome } from "../types";
-import { sendBridgeTeamResourcesEmail } from "../api/gmail-smtp";
+import { sendResourcesEmail } from "../services/emailService";
 import { sendAircallSMS } from "../api/aircall-sms";
 
 // Constants from intake form
@@ -950,7 +950,7 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
                               }));
 
                             // Send email using Gmail SMTP
-                            const result = await sendBridgeTeamResourcesEmail(
+                            const result = await sendResourcesEmail(
                               email,
                               participant.firstName,
                               resourcesToSend,

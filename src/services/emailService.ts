@@ -217,7 +217,7 @@ export const generatePasswordFromName = (fullName: string): string => {
 
 /**
  * Send resources email to participant
- * Uses Gmail SMTP (primary) with fallback to Resend
+ * Uses Resend API directly (works from React Native without backend)
  * Uses bridgeteam@7more.net as reply-to address
  */
 export const sendResourcesEmail = async (
@@ -227,25 +227,9 @@ export const sendResourcesEmail = async (
   organizationName: string = "7more"
 ): Promise<{ success: boolean; error?: string }> => {
   try {
-    console.log("📧 Attempting to send email via Gmail SMTP...");
+    console.log("📧 Sending email via Resend API (direct from app)...");
 
-    // Try Gmail SMTP first (preferred method)
-    const gmailResult = await sendBridgeTeamResourcesEmail(
-      participantEmail,
-      participantName,
-      resources,
-      "Bridge Team"
-    );
-
-    if (gmailResult.success) {
-      console.log("✅ Email sent successfully via Gmail SMTP");
-      return gmailResult;
-    }
-
-    console.log("⚠️ Gmail SMTP failed, trying Resend fallback...");
-    console.log("   Error:", gmailResult.error);
-
-    // Build email content for fallback
+    // Build email content
     const subject = `Resources from Bridge Team - ${organizationName}`;
 
     let resourcesText = "";
@@ -273,15 +257,15 @@ ${organizationName} Organization
 This email was sent from Bridge Team at bridgeteam@7more.net
     `.trim();
 
-    // Fallback to Resend if Gmail SMTP fails
-    const resendResult = await sendEmail({
+    // Use Resend API directly - works from React Native
+    const result = await sendEmail({
       to: participantEmail,
       subject,
       body,
       replyTo: "bridgeteam@7more.net",
     });
 
-    return resendResult;
+    return result;
   } catch (error) {
     console.error("Error sending resources email:", error);
     return {
