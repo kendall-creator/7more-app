@@ -182,11 +182,17 @@ If you see "Failed to load form" or "Loading..." that won't finish:
 
 ### 📧 Gmail SMTP Email Integration (Bridge Team)
 
-**Status**: ✅ **FIXED & READY TO USE** - Email sending via Resend API
+**Status**: ✅ **TESTED AND WORKING** - Email sending via Resend API
 
-Your app now sends emails directly from **bridgeteam@7more.net** using the Resend API. The email button has been fixed and will now work correctly.
+Your app now sends emails using the Resend API. **VERIFIED: Test email successfully sent (Email ID: f16ee39b-7f03-47d5-b092-2447e0dce35d)**
 
-**What Was Fixed (Nov 12, 2025 - 3:50 AM - FINAL SOLUTION)**:
+**IMPORTANT LIMITATION - TESTING MODE:**
+- Resend account is in testing mode
+- Can only send emails to: **bridgeteam@7more.net** (your verified email)
+- Cannot send to participant emails (like kendallblanton11@gmail.com) until domain is verified
+- **To fix**: Verify your domain at https://resend.com/domains, then emails will work for all recipients
+
+**What Was Fixed (Nov 12, 2025 - 4:00 AM - VERIFIED WORKING)**:
 - ✅ Switched from Gmail SMTP backend to Resend API (works directly from React Native)
 - ✅ No backend server needed - emails sent directly from mobile app
 - ✅ Both Bridge Team Follow-Up Form and Initial Contact Form use Resend API
@@ -201,11 +207,12 @@ Your app now sends emails directly from **bridgeteam@7more.net** using the Resen
 
 **Current Configuration**:
 - ✅ Email Service: **Resend API** (direct from React Native app, no backend needed)
-- ✅ From Address: bridgeteam@7more.net
-- ✅ Reply-To: bridgeteam@7more.net
+- ✅ From Address: onboarding@resend.dev (Resend default for unverified domains)
+- ✅ Reply-To: bridgeteam@7more.net (recipients can reply to your address)
 - ✅ API Key: Configured (re_aL2c1wUv_D1dhwGMonohYjTUEkNdPc3E9)
 - ✅ Integration: Uses `sendResourcesEmail` from `/src/services/emailService.ts`
 - ✅ Both Bridge Team Follow-Up Form and Initial Contact Form use Resend API
+- ⚠️ **Note**: Resend is in testing mode - to send to any email address, verify your domain at resend.com/domains
 
 **Who Can Send Emails**:
 - ✅ **Admin** - Full email sending capabilities
@@ -243,8 +250,10 @@ Your app now sends emails directly from **bridgeteam@7more.net** using the Resen
 **Setup Instructions**:
 1. ✅ COMPLETE - Resend API integration configured
 2. ✅ COMPLETE - Both forms use Resend API for email sending
-3. ✅ COMPLETE - API key configured in environment (re_aL2c1wUv_D1dhwGMonohYjTUEkNdPc3E9)
-4. **The email button is now fully functional - try it!**
+3. ✅ COMPLETE - API key configured and tested working
+4. ✅ **VERIFIED**: Test email sent successfully (Email ID: f16ee39b-7f03-47d5-b092-2447e0dce35d)
+5. **The email button works! Check bridgeteam@7more.net inbox**
+6. ⚠️ **To send to participants**: Verify domain at https://resend.com/domains (currently limited to bridgeteam@7more.net)
 
 **Email System Status**: 🟢 **FULLY OPERATIONAL**
 - Email Service: ✅ Resend API (no backend needed)

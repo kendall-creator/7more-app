@@ -135,8 +135,9 @@ This is an automated message. Please do not reply to this email.
 const sendEmail = async ({ to, subject, body, replyTo }: EmailParams): Promise<{ success: boolean; error?: string }> => {
   // Check if email service is configured
   const emailApiKey = process.env.EXPO_PUBLIC_EMAIL_API_KEY;
-  // Always use Bridge Team email as sender for consistency
-  const emailFrom = process.env.EXPO_PUBLIC_EMAIL_FROM || "7more Bridge Team <bridgeteam@7more.net>";
+  // Use Resend's default sender (required for unverified domains)
+  // Reply-to will be set to bridgeteam@7more.net so recipients can reply there
+  const emailFrom = process.env.EXPO_PUBLIC_EMAIL_FROM || "onboarding@resend.dev";
 
   if (!emailApiKey) {
     console.warn("⚠️ Email service not configured. Email will not be sent.");
