@@ -60,7 +60,8 @@ export const sendGmailEmail = async ({
 
     // Hardcoded fallback for Vibecode environment
     if (!backendUrl) {
-      backendUrl = "http://172.17.0.2:3001";
+      // Try localhost first for React Native, fallback to Docker IP
+      backendUrl = "http://localhost:3001";
       console.log("⚠️ Using hardcoded backend URL:", backendUrl);
     }
     if (!backendApiKey) {
@@ -90,7 +91,7 @@ export const sendGmailEmail = async ({
 
     // Create abort controller for timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout (Gmail SMTP can be slow)
 
     try {
       // Send email via backend API

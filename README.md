@@ -16,7 +16,7 @@ This is a **Vibecode platform issue**. Environment variables are managed through
 **Quick Fix (2 minutes):**
 1. Open the **ENV tab** in your Vibecode app
 2. Add these minimum required variables for email functionality:
-   - `EXPO_PUBLIC_BACKEND_URL` = `http://172.17.0.2:3001`
+   - `EXPO_PUBLIC_BACKEND_URL` = `http://localhost:3001`
    - `EXPO_PUBLIC_BACKEND_API_KEY` = `bridge-email-v1-7more-secure-2025`
 3. Add all 8 Firebase variables (see reference document above)
 
@@ -200,7 +200,7 @@ Your app now sends emails directly from **bridgeteam@7more.net** using Gmail SMT
 **Current Configuration**:
 - ✅ Email Service: Gmail SMTP via backend server (port 3001)
 - ✅ From Address: bridgeteam@7more.net
-- ✅ Backend URL: http://172.17.0.2:3001 (hardcoded fallback)
+- ✅ Backend URL: http://localhost:3001 (React Native compatible)
 - ✅ Integration: Uses `sendBridgeTeamResourcesEmail` from `/src/api/gmail-smtp.ts`
 - ✅ Both Bridge Team Follow-Up Form and Initial Contact Form use Gmail SMTP
 
