@@ -19,6 +19,8 @@
  * The backend server is automatically started and runs on port 3001.
  */
 
+import Constants from "expo-constants";
+
 interface GmailEmailParams {
   to: string;
   subject: string;
@@ -45,16 +47,35 @@ export const sendGmailEmail = async ({
   replyTo,
 }: GmailEmailParams): Promise<GmailEmailResult> => {
   try {
-    // Get backend configuration
-    const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
-    const backendApiKey = process.env.EXPO_PUBLIC_BACKEND_API_KEY;
+    // Get backend configuration - try both methods
+    let backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
+    let backendApiKey = process.env.EXPO_PUBLIC_BACKEND_API_KEY;
+
+    // Fallback to Constants.expoConfig if process.env doesn't work
+    if (!backendUrl || !backendApiKey) {
+      const extra = Constants.expoConfig?.extra;
+      backendUrl = backendUrl || extra?.EXPO_PUBLIC_BACKEND_URL;
+      backendApiKey = backendApiKey || extra?.EXPO_PUBLIC_BACKEND_API_KEY;
+    }
+
+    // Hardcoded fallback for Vibecode environment
+    if (!backendUrl) {
+      backendUrl = "http://172.17.0.1:3001";
+      console.log("⚠️ Using hardcoded backend URL:", backendUrl);
+    }
+    if (!backendApiKey) {
+      backendApiKey = "bridge-email-v1-7more-secure-2025";
+      console.log("⚠️ Using hardcoded backend API key");
+    }
+
+    // Debug logging
+    console.log("🔍 Debug - Email configuration:");
+    console.log("   Backend URL:", backendUrl);
+    console.log("   API Key:", backendApiKey ? "SET" : "NOT SET");
 
     // Validate configuration
     if (!backendUrl || !backendApiKey) {
       console.warn("⚠️ Backend not configured");
-      console.log("Missing EXPO_PUBLIC_BACKEND_URL or EXPO_PUBLIC_BACKEND_API_KEY");
-      console.log("Please add to ENV tab in Vibecode app");
-
       return {
         success: false,
         error: "Backend not configured. Please add EXPO_PUBLIC_BACKEND_URL and EXPO_PUBLIC_BACKEND_API_KEY to ENV tab.",
