@@ -186,21 +186,20 @@ If you see "Failed to load form" or "Loading..." that won't finish:
 
 Your app now sends emails directly from **bridgeteam@7more.net** using Gmail SMTP through the backend server. The email button has been fixed and will now work correctly.
 
-**What Was Fixed (Nov 12, 2025 - 3:36 AM - FINAL FIX)**:
+**What Was Fixed (Nov 12, 2025 - 3:45 AM - NETWORK FIX)**:
 - ✅ Changed Bridge Team Follow-Up Form to use Gmail SMTP (was using wrong service)
 - ✅ Changed Initial Contact Form to use Gmail SMTP (was using wrong service)
 - ✅ Created backend .env file with Gmail credentials
 - ✅ Backend server running and configured on port 3001
 - ✅ Added hardcoded fallback configuration for Vibecode environment
-- ✅ Fixed network timeout - updated backend URL to correct IP (172.17.0.2)
 - ✅ Updated Gmail app password to new valid credentials
-- ✅ **TESTED AND VERIFIED** - Email sending is now working perfectly!
+- ✅ **FIXED NETWORK CONNECTION** - Now using Expo's hostUri to dynamically find backend server
 - ✅ Both email buttons now send from bridgeteam@7more.net
 
 **Current Configuration**:
 - ✅ Email Service: Gmail SMTP via backend server (port 3001)
 - ✅ From Address: bridgeteam@7more.net
-- ✅ Backend URL: http://localhost:3001 (React Native compatible)
+- ✅ Backend URL: Dynamically detected from Expo hostUri (same network as dev server)
 - ✅ Integration: Uses `sendBridgeTeamResourcesEmail` from `/src/api/gmail-smtp.ts`
 - ✅ Both Bridge Team Follow-Up Form and Initial Contact Form use Gmail SMTP
 

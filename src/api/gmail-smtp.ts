@@ -60,9 +60,18 @@ export const sendGmailEmail = async ({
 
     // Hardcoded fallback for Vibecode environment
     if (!backendUrl) {
-      // Try localhost first for React Native, fallback to Docker IP
-      backendUrl = "http://localhost:3001";
-      console.log("⚠️ Using hardcoded backend URL:", backendUrl);
+      // For Expo Go / React Native in Vibecode environment:
+      // The backend server is running on the same host at port 3001
+      // We need to use the Expo bundler's host
+      const expoHost = Constants.expoConfig?.hostUri?.split(':')[0];
+      if (expoHost) {
+        backendUrl = `http://${expoHost}:3001`;
+        console.log("⚠️ Using Expo host for backend URL:", backendUrl);
+      } else {
+        // Fallback to Docker bridge IP
+        backendUrl = "http://172.17.0.2:3001";
+        console.log("⚠️ Using Docker bridge IP for backend URL:", backendUrl);
+      }
     }
     if (!backendApiKey) {
       backendApiKey = "bridge-email-v1-7more-secure-2025";
