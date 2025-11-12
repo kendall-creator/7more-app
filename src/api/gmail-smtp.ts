@@ -121,9 +121,16 @@ export const sendGmailEmail = async ({
         };
       } else {
         console.error("❌ Email send failed:", result.error);
+
+        // Provide helpful error message for Gmail authentication issues
+        let userFriendlyError = result.error || "Failed to send email via backend";
+        if (result.error && result.error.includes("Invalid login")) {
+          userFriendlyError = "Gmail authentication failed. The app password needs to be regenerated. Please contact your administrator to update the Gmail credentials.";
+        }
+
         return {
           success: false,
-          error: result.error || "Failed to send email via backend",
+          error: userFriendlyError,
         };
       }
     } catch (fetchError: any) {
