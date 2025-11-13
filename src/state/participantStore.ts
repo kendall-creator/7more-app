@@ -104,8 +104,16 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
       throw new Error(error);
     }
 
+    // Clean participantData to remove undefined values (Firebase doesn't accept undefined)
+    const cleanedData = Object.entries(participantData).reduce((acc, [key, value]) => {
+      if (value !== undefined) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as any);
+
     const newParticipant: Participant = {
-      ...participantData,
+      ...cleanedData,
       id: `participant_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       notes: [],
       history: [

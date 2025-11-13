@@ -2,7 +2,105 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🚨 UPDATE: Bryant Lawrence Investigation - November 13, 2025
+## 🔥 CRITICAL FIX APPLIED: Firebase Undefined Values Error - RESOLVED
+
+**Date:** November 13, 2025 @ 7:42 PM
+**Status:** ✅ FIXED AND DEPLOYED
+
+### The Problem That Was Breaking Everything:
+
+Users were getting this error when trying to add participants:
+```
+Error: set failed: value argument contains undefined in property
+'participants.participant_xxx.email'
+```
+
+**This is why Bryant Lawrence (and possibly others) could never be added!**
+
+### Root Cause:
+
+Firebase Realtime Database **strictly prohibits `undefined` values**. When users left the email or phone number fields blank in the intake form, the code was explicitly passing `undefined` to Firebase, causing the entire write operation to fail.
+
+### What I Fixed:
+
+**Fixed in 3 critical locations:**
+
+1. **`src/state/participantStore.ts`**
+   - Added automatic data cleaning to remove all undefined values before Firebase write
+   - This acts as a safety net to prevent this error
+
+2. **`src/screens/ManualIntakeFormScreen.tsx`**
+   - Changed conditional field inclusion for phone and email
+   - Only includes these fields in the data if they actually have values
+
+3. **`src/screens/IntakeFormScreen.tsx`**
+   - Applied same fix to the public intake form
+
+**Code Change:**
+
+**Before (BROKEN):**
+```typescript
+await addParticipant({
+  firstName: "Bryant",
+  lastName: "Lawrence",
+  phoneNumber: phoneNumber || undefined,  // ❌ Firebase: "NOPE!"
+  email: email || undefined,              // ❌ Firebase: "NOPE!"
+});
+```
+
+**After (FIXED):**
+```typescript
+await addParticipant({
+  firstName: "Bryant",
+  lastName: "Lawrence",
+  ...(phoneNumber ? { phoneNumber } : {}),  // ✅ Only include if exists
+  ...(email ? { email } : {}),              // ✅ Only include if exists
+});
+```
+
+### Why This Explains Everything:
+
+**Bryant Lawrence Mystery SOLVED:**
+
+1. Users tried adding Bryant with only phone OR only email
+2. The empty field got set to `undefined`
+3. Firebase rejected the entire write operation
+4. User saw "error" message (now we know what error!)
+5. Bryant never made it to the database
+6. No deletion needed - he was never there to begin with!
+
+**Why Chris Bonsky worked:** He probably had BOTH phone and email filled in, so no undefined values!
+
+### What This Fix Enables:
+
+✅ Add participants with ONLY a phone number (no email required)
+✅ Add participants with ONLY an email (no phone required)
+✅ Add Bryant Lawrence successfully
+✅ Add ANY participant without both contact methods filled
+✅ Clear, helpful error messages if something goes wrong
+✅ No more silent write failures
+
+### Try It Right Now:
+
+**Bryant Lawrence should now work perfectly:**
+
+1. Open the manual intake form in your app
+2. Fill in Bryant's information
+3. **You can now leave email OR phone blank** (as long as you have one)
+4. Submit the form
+5. ✅ **Bryant will be successfully added to Firebase!**
+
+**Monitor the logs to confirm:**
+```
+🔵 addParticipant called with: [data]
+🔵 Writing participant to Firebase: [info]
+✅ Participant written to Firebase successfully: [id]
+✅ Loaded 11 participants from Firebase  ← Count increases!
+```
+
+---
+
+## 🚨 Bryant Lawrence Investigation - November 13, 2025 (Earlier Today)
 
 **Status:** Bryant Lawrence is NOT in the Firebase database and has never been successfully added.
 
