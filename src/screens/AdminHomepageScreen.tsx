@@ -152,23 +152,15 @@ export default function AdminHomepageScreen() {
         <View className="flex-row items-center justify-between">
           <View className="flex-1">
             <Text className="text-3xl font-bold text-white mb-1">
-              Welcome back, {currentUser?.name?.split(" ")[0]}!
+              Welcome back, {currentUser?.nickname || currentUser?.name?.split(" ")[0]}!
             </Text>
             <Text className="text-white/90 text-sm">Here is your program overview</Text>
           </View>
-          <View className="flex-row items-center gap-3">
-            <Pressable
-              onPress={() => navigation.navigate("IntakeTypeSelection")}
-              className="w-12 h-12 bg-yellow-500 rounded-full items-center justify-center active:opacity-70"
-            >
-              <Ionicons name="add" size={28} color="white" />
-            </Pressable>
-            <Image
-              source={require("../../assets/7more-logo.jpeg")}
-              style={{ width: 60, height: 60 }}
-              resizeMode="contain"
-            />
-          </View>
+          <Image
+            source={require("../../assets/7more-logo.jpeg")}
+            style={{ width: 60, height: 60 }}
+            resizeMode="contain"
+          />
         </View>
       </View>
 
@@ -182,7 +174,7 @@ export default function AdminHomepageScreen() {
               className="flex-1 bg-[#405b69] rounded-2xl p-4 active:opacity-80"
             >
               <Ionicons name="person-add" size={24} color="white" />
-              <Text className="text-white text-sm font-semibold mt-2">Add Participant</Text>
+              <Text className="text-white text-sm font-semibold mt-2">New Participant Intake</Text>
             </Pressable>
             <Pressable
               onPress={() => navigation.navigate("AdminTaskManagement")}
