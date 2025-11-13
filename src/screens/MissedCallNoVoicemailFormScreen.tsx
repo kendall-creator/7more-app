@@ -65,6 +65,11 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
     try {
       const existingParticipant = duplicateParticipants[0];
 
+      // Validate participant has required fields
+      if (!existingParticipant?.id) {
+        throw new Error("Invalid participant data");
+      }
+
       // Ensure we have user info
       const userId = currentUser?.id || "system";
       const userName = currentUser?.name || currentUser?.email || "System";
@@ -85,8 +90,6 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
 
       setShowSuccessModal(true);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-      console.error("Error connecting missed call to participant:", errorMessage);
       setErrorMessage("Failed to connect missed call. Please try again.");
       setShowErrorModal(true);
     } finally {
@@ -132,8 +135,6 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
 
       setShowSuccessModal(true);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-      console.error("Error adding missed call:", errorMessage);
       setErrorMessage("Failed to add missed call entry. Please try again.");
       setShowErrorModal(true);
     } finally {
