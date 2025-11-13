@@ -96,8 +96,12 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
   },
 
   addParticipant: async (participantData) => {
+    console.log("🔵 addParticipant called with:", participantData);
+
     if (!database) {
-      throw new Error("Firebase not configured. Please add Firebase credentials in ENV tab.");
+      const error = "Firebase not configured. Please add Firebase credentials in ENV tab.";
+      console.error("❌ addParticipant failed:", error);
+      throw new Error(error);
     }
 
     const newParticipant: Participant = {
@@ -117,8 +121,20 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
       completedGraduationSteps: [],
     };
 
-    const participantRef = ref(database, `participants/${newParticipant.id}`);
-    await firebaseSet(participantRef, newParticipant);
+    console.log("🔵 Writing participant to Firebase:", {
+      id: newParticipant.id,
+      name: `${newParticipant.firstName} ${newParticipant.lastName}`,
+      number: newParticipant.participantNumber
+    });
+
+    try {
+      const participantRef = ref(database, `participants/${newParticipant.id}`);
+      await firebaseSet(participantRef, newParticipant);
+      console.log("✅ Participant written to Firebase successfully:", newParticipant.id);
+    } catch (error) {
+      console.error("❌ Firebase write failed:", error);
+      throw error;
+    }
   },
 
   updateParticipantStatus: async (participantId, newStatus, userId, userName, details) => {

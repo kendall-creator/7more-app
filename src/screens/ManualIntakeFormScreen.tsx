@@ -91,7 +91,7 @@ export default function ManualIntakeFormScreen({ navigation }: any) {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Determine final release location value
     const finalReleaseLocation = releasedFrom === "Other" ? otherReleaseLocation : releasedFrom;
 
@@ -135,23 +135,38 @@ export default function ManualIntakeFormScreen({ navigation }: any) {
     const age = calculateAge(dobDate);
     const timeOut = calculateTimeOut(relDate);
 
-    addParticipant({
+    console.log("📝 Manual intake form submitting:", {
       participantNumber,
       firstName,
       lastName,
-      dateOfBirth: dobDate.toISOString(),
       age,
-      gender,
-      phoneNumber: phoneNumber || undefined,
-      email: email || undefined,
-      releaseDate: relDate.toISOString(),
-      timeOut,
-      releasedFrom: finalReleaseLocation,
-      status: "pending_bridge" as ParticipantStatus,
-      completedGraduationSteps: [],
+      gender
     });
 
-    setShowSuccessModal(true);
+    try {
+      await addParticipant({
+        participantNumber,
+        firstName,
+        lastName,
+        dateOfBirth: dobDate.toISOString(),
+        age,
+        gender,
+        phoneNumber: phoneNumber || undefined,
+        email: email || undefined,
+        releaseDate: relDate.toISOString(),
+        timeOut,
+        releasedFrom: finalReleaseLocation,
+        status: "pending_bridge" as ParticipantStatus,
+        completedGraduationSteps: [],
+      });
+
+      console.log("✅ Participant added successfully via form");
+      setShowSuccessModal(true);
+    } catch (error) {
+      console.error("❌ Error adding participant:", error);
+      setErrorMessage(`Failed to add participant: ${error}`);
+      setShowErrorModal(true);
+    }
   };
 
   const handleDateInput = (text: string, setter: (val: string) => void) => {
