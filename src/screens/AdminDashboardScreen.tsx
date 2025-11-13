@@ -124,7 +124,15 @@ export default function AdminDashboardScreen() {
     <View className="flex-1 bg-gray-50">
       {/* Header */}
       <View className="bg-gray-600 pt-16 pb-6 px-6">
-        <Text className="text-2xl font-bold text-white mb-1">Admin Dashboard</Text>
+        <View className="flex-row items-center justify-between mb-1">
+          <Text className="text-2xl font-bold text-white">Admin Dashboard</Text>
+          <Pressable
+            onPress={() => navigation.navigate("IntakeTypeSelection")}
+            className="w-12 h-12 bg-yellow-500 rounded-full items-center justify-center active:opacity-70"
+          >
+            <Ionicons name="add" size={28} color="white" />
+          </Pressable>
+        </View>
         <Text className="text-yellow-100 text-sm">Complete program overview</Text>
       </View>
 

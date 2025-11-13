@@ -916,11 +916,11 @@ To enable automatic welcome and password reset emails:
 #### Bridge Team Workflow
 
 **Entry Type Selection (NEW - November 13, 2025):**
-- When Bridge Team clicks the "+" button to add a participant, they now see an Entry Type Selection screen with four options:
+- When Bridge Team, Bridge Team Leaders, or Admins click the "+" button to add a participant, they see an Entry Type Selection screen with four options:
   1. **Full Form Entry** - Participant completed online form or manual entry of full intake. Participant is added to queue with `pending_bridge` status and requires follow-up call.
   2. **Live Call Intake** - Participant is on the phone now. Complete full intake AND follow-up form in one call. Opens intake form, then automatically chains to Bridge Team Follow-Up Form. On completion, participant is marked as `bridge_contacted` (not moved to mentorship automatically - "To Mentorship" button remains available).
   3. **Missed Call – No Voicemail** - Quick entry for missed calls with no voicemail. Captures phone number (required), name (optional), and notes (optional). Participant added to queue with `pending_bridge` status and `awaiting_contact` status detail. Shows "Start Full Intake" button in Quick Actions when viewed.
-  4. **Missed Call – Voicemail Received** - Quick entry for missed calls with voicemail. Captures phone number (required), name (optional), callback window (optional), and notes (optional). Participant added to queue with `pending_bridge` status and `awaiting_callback` status detail. Shows "Start Full Intake" button in Quick Actions when viewed.
+  4. **Missed Call – Voicemail Received** - Quick entry for missed calls with voicemail. Captures phone number (required), name (optional), callback window (optional), and summary of voicemail (required). Participant added to queue with `pending_bridge` status and `awaiting_callback` status detail. Shows "Start Full Intake" button in Quick Actions when viewed.
 
 **Intake Type Tracking:**
 - Every participant has an `intakeType` field that tracks how they were added

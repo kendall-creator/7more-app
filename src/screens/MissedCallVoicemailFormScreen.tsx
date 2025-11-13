@@ -40,6 +40,11 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
       setShowErrorModal(true);
       return false;
     }
+    if (!notes.trim()) {
+      setErrorMessage("Summary of voicemail is required.");
+      setShowErrorModal(true);
+      return false;
+    }
     return true;
   };
 
@@ -170,14 +175,14 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
               </Text>
             </View>
 
-            {/* Notes - Optional */}
+            {/* Notes - Required */}
             <View className="mb-6">
               <Text className="text-sm font-semibold text-gray-700 mb-2">
-                Notes (Optional)
+                Summary of Voicemail <Text className="text-red-500">*</Text>
               </Text>
               <TextInput
                 className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-900"
-                placeholder="Summary of voicemail content..."
+                placeholder="Key information from voicemail..."
                 value={notes}
                 onChangeText={setNotes}
                 multiline
@@ -185,7 +190,7 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
                 textAlignVertical="top"
               />
               <Text className="text-xs text-gray-500 mt-1">
-                Key information from voicemail (needs, concerns, etc.)
+                Required: Document what the caller said (needs, concerns, etc.)
               </Text>
             </View>
 
