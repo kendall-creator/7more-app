@@ -30,7 +30,8 @@ const RELEASE_LOCATION_OPTIONS = [
   "Other",
 ];
 
-export default function ManualIntakeFormScreen({ navigation }: any) {
+export default function ManualIntakeFormScreen({ navigation, route }: any) {
+  const intakeType = route?.params?.intakeType || "full_form_entry"; // Default to full form entry
   const [participantNumber, setParticipantNumber] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -140,10 +141,13 @@ export default function ManualIntakeFormScreen({ navigation }: any) {
       firstName,
       lastName,
       age,
-      gender
+      gender,
+      intakeType
     });
 
     try {
+      const newParticipantId = `participant_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
       await addParticipant({
         participantNumber,
         firstName,
@@ -158,10 +162,36 @@ export default function ManualIntakeFormScreen({ navigation }: any) {
         releasedFrom: finalReleaseLocation,
         status: "pending_bridge" as ParticipantStatus,
         completedGraduationSteps: [],
+        intakeType: intakeType as any,
       });
 
       console.log("✅ Participant added successfully via form");
-      setShowSuccessModal(true);
+
+      // If this is a Live Call Intake, immediately navigate to the Follow-Up Form
+      if (intakeType === "live_call_intake") {
+        // Need to get the participant ID - we'll navigate after a brief delay to ensure Firebase sync
+        setTimeout(() => {
+          const participants = useParticipantStore.getState().participants;
+          const justAdded = participants.find(
+            p => p.participantNumber === participantNumber &&
+            p.firstName === firstName &&
+            p.lastName === lastName
+          );
+
+          if (justAdded) {
+            navigation.replace("BridgeTeamFollowUpForm", {
+              participantId: justAdded.id,
+              fromLiveCallIntake: true
+            });
+          } else {
+            // Fallback - show success and go back
+            setShowSuccessModal(true);
+          }
+        }, 500);
+      } else {
+        // For full form entry, just show success
+        setShowSuccessModal(true);
+      }
     } catch (error) {
       console.error("❌ Error adding participant:", error);
       setErrorMessage(`Failed to add participant: ${error}`);

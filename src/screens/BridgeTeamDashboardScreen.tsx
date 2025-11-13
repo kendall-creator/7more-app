@@ -204,7 +204,7 @@ export default function BridgeTeamDashboardScreen() {
             </Text>
           </View>
           <Pressable
-            onPress={() => navigation.navigate("ManualIntakeForm")}
+            onPress={() => navigation.navigate("IntakeTypeSelection")}
             className="w-12 h-12 bg-yellow-500 rounded-full items-center justify-center active:opacity-70"
           >
             <Ionicons name="add" size={28} color="white" />

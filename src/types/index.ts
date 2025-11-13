@@ -102,6 +102,18 @@ export type ParticipantStatus =
 // Contact attempt type
 export type ContactAttemptType = "left_voicemail" | "unable_to_leave_voicemail" | "no_answer";
 
+// Intake type for tracking how participant was added
+export type IntakeType =
+  | "full_form_entry"           // Online form or manual entry of full form
+  | "live_call_intake"          // Completed full intake + follow-up during first call
+  | "missed_call_no_voicemail"  // Missed call with no voicemail left
+  | "missed_call_voicemail";    // Missed call with voicemail received
+
+// Status detail for additional context
+export type StatusDetail =
+  | "awaiting_contact"   // For missed calls without voicemail
+  | "awaiting_callback"; // For missed calls with voicemail
+
 // Participant data structure
 export interface Participant {
   id: string;
@@ -117,6 +129,11 @@ export interface Participant {
   releaseDate: string; // ISO date string
   timeOut: number; // Days calculated from release date
   releasedFrom: string; // Facility name
+
+  // Intake tracking
+  intakeType?: IntakeType; // How the participant was added
+  statusDetail?: StatusDetail; // Additional context for status
+  callbackWindow?: string; // For voicemail entries - preferred callback time
 
   // Status tracking
   status: ParticipantStatus;

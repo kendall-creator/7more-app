@@ -914,6 +914,30 @@ To enable automatic welcome and password reset emails:
   - All demographics calculated in real-time from current participant data
 
 #### Bridge Team Workflow
+
+**Entry Type Selection (NEW - November 13, 2025):**
+- When Bridge Team clicks the "+" button to add a participant, they now see an Entry Type Selection screen with four options:
+  1. **Full Form Entry** - Participant completed online form or manual entry of full intake. Participant is added to queue with `pending_bridge` status and requires follow-up call.
+  2. **Live Call Intake** - Participant is on the phone now. Complete full intake AND follow-up form in one call. Opens intake form, then automatically chains to Bridge Team Follow-Up Form. On completion, participant is marked as `bridge_contacted` (not moved to mentorship automatically - "To Mentorship" button remains available).
+  3. **Missed Call – No Voicemail** - Quick entry for missed calls with no voicemail. Captures phone number (required), name (optional), and notes (optional). Participant added to queue with `pending_bridge` status and `awaiting_contact` status detail. Shows "Start Full Intake" button in Quick Actions when viewed.
+  4. **Missed Call – Voicemail Received** - Quick entry for missed calls with voicemail. Captures phone number (required), name (optional), callback window (optional), and notes (optional). Participant added to queue with `pending_bridge` status and `awaiting_callback` status detail. Shows "Start Full Intake" button in Quick Actions when viewed.
+
+**Intake Type Tracking:**
+- Every participant has an `intakeType` field that tracks how they were added
+- Displayed as a colored badge on participant profiles:
+  - Full Form Entry (blue)
+  - Live Call Intake (green)
+  - Missed Call – No Voicemail (amber)
+  - Missed Call – Voicemail Received (purple)
+- For missed call entries, callback window and status detail are also displayed
+- Logged in history timeline for full audit trail
+
+**"Start Full Intake" Workflow:**
+- For participants added via missed call entries, a "Start Full Intake" button appears in Quick Actions
+- Opens the full Manual Intake Form pre-populated with phone number and basic info
+- Bridge Team completes full intake during callback
+- After submission, participant ready for "Contacted" button to open follow-up form
+
 - **Add Participant Button** - "+" button in header allows Bridge Team to manually add participants directly to the queue
 - View all pending participants with time since submission
 - **Days-since tracking** - See "contacted X days ago" for each participant

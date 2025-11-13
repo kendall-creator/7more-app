@@ -61,6 +61,9 @@ import FileManagementScreen from "../screens/FileManagementScreen";
 import ManageFormsScreen from "../screens/ManageFormsScreen";
 import EditFormQuestionsScreen from "../screens/EditFormQuestionsScreen";
 import TaskManagementScreen from "../screens/TaskManagementScreen";
+import IntakeTypeSelectionScreen from "../screens/IntakeTypeSelectionScreen";
+import MissedCallNoVoicemailFormScreen from "../screens/MissedCallNoVoicemailFormScreen";
+import MissedCallVoicemailFormScreen from "../screens/MissedCallVoicemailFormScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -446,7 +449,10 @@ export default function RootNavigator() {
           <Stack.Screen name="AllParticipants" component={AllParticipantsScreen} />
           <Stack.Screen name="FilteredParticipants" component={FilteredParticipantsScreen} />
           <Stack.Screen name="AdminMentorshipAssignment" component={AdminMentorshipAssignmentScreen} />
+          <Stack.Screen name="IntakeTypeSelection" component={IntakeTypeSelectionScreen} />
           <Stack.Screen name="ManualIntakeForm" component={ManualIntakeFormScreen} />
+          <Stack.Screen name="MissedCallNoVoicemailForm" component={MissedCallNoVoicemailFormScreen} />
+          <Stack.Screen name="MissedCallVoicemailForm" component={MissedCallVoicemailFormScreen} />
           <Stack.Screen name="ManageUsers" component={ManageUsersScreen} />
           <Stack.Screen name="AddUser" component={AddUserScreen} />
           <Stack.Screen name="EditUser" component={EditUserScreen} />

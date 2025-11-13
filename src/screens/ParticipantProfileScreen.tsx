@@ -241,6 +241,26 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
             {(isAdminOrBridgeTeamLeader(currentUser) || userRole === "bridge_team") &&
              ["pending_bridge", "bridge_contacted", "bridge_attempted", "bridge_unable"].includes(participant.status) && (
               <View className="gap-2">
+                {/* Special button for missed call participants */}
+                {(participant.intakeType === "missed_call_no_voicemail" ||
+                  participant.intakeType === "missed_call_voicemail") &&
+                  participant.status === "pending_bridge" && (
+                  <Pressable
+                    onPress={() => navigation.navigate("ManualIntakeForm", {
+                      participantId: participant.id,
+                      intakeType: "full_form_entry"
+                    })}
+                    className="bg-blue-50 border border-blue-200 rounded-xl py-3 items-center active:opacity-70"
+                  >
+                    <View className="flex-row items-center">
+                      <Ionicons name="document-text" size={20} color="#3B82F6" />
+                      <Text className="text-blue-700 text-sm font-semibold ml-2">
+                        Start Full Intake
+                      </Text>
+                    </View>
+                  </Pressable>
+                )}
+
                 <View className="flex-row gap-2">
                   <Pressable
                     onPress={() => navigation.navigate("BridgeTeamFollowUpForm", {
@@ -646,6 +666,57 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
                 {formatDate(participant.submittedAt)}
               </Text>
             </View>
+            {/* Intake Type Badge */}
+            {participant.intakeType && (
+              <View className="flex-row">
+                <Text className="text-sm text-gray-600 w-32">Intake Type:</Text>
+                <View className="flex-1">
+                  <View
+                    className={`self-start px-3 py-1 rounded-full ${
+                      participant.intakeType === "full_form_entry"
+                        ? "bg-blue-100"
+                        : participant.intakeType === "live_call_intake"
+                        ? "bg-green-100"
+                        : participant.intakeType === "missed_call_no_voicemail"
+                        ? "bg-amber-100"
+                        : "bg-purple-100"
+                    }`}
+                  >
+                    <Text
+                      className={`text-xs font-semibold ${
+                        participant.intakeType === "full_form_entry"
+                          ? "text-blue-700"
+                          : participant.intakeType === "live_call_intake"
+                          ? "text-green-700"
+                          : participant.intakeType === "missed_call_no_voicemail"
+                          ? "text-amber-700"
+                          : "text-purple-700"
+                      }`}
+                    >
+                      {participant.intakeType === "full_form_entry"
+                        ? "Full Form Entry"
+                        : participant.intakeType === "live_call_intake"
+                        ? "Live Call Intake"
+                        : participant.intakeType === "missed_call_no_voicemail"
+                        ? "Missed Call – No Voicemail"
+                        : "Missed Call – Voicemail"}
+                    </Text>
+                  </View>
+                  {participant.statusDetail && (
+                    <Text className="text-xs text-gray-500 mt-1">
+                      ({participant.statusDetail === "awaiting_contact"
+                        ? "Awaiting Contact"
+                        : "Awaiting Callback"})
+                    </Text>
+                  )}
+                  {participant.callbackWindow && (
+                    <Text className="text-xs text-gray-500 mt-1">
+                      Callback: {participant.callbackWindow}
+                    </Text>
+                  )}
+                </View>
+              </View>
+            )}
           </View>
         </View>
 

@@ -32,7 +32,7 @@ const RELEASE_LOCATION_OPTIONS = [
 ];
 
 export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any) {
-  const { participantId } = route.params;
+  const { participantId, fromLiveCallIntake } = route.params;
   const currentUser = useCurrentUser();
   const participant = useParticipantStore((s) => s.getParticipantById(participantId));
   const recordBridgeFollowUp = useParticipantStore((s) => s.recordBridgeFollowUp);
@@ -259,17 +259,32 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
       // Save form data
       await recordBridgeFollowUp(formData, currentUser.id, currentUser.name);
 
-      // Move participant to mentorship queue
+      // For Live Call Intake, mark as contacted (not moved to mentorship automatically)
+      // For regular flow, move to mentorship queue
       const updateParticipantStatus = useParticipantStore.getState().updateParticipantStatus;
-      await updateParticipantStatus(
-        participant.id,
-        "pending_mentor",
-        currentUser.id,
-        currentUser.name,
-        "Bridge Team Follow-Up Form completed - moved to mentorship assignment queue"
-      );
 
-      alert("Bridge Team Follow-Up Form submitted successfully! Participant moved to mentorship queue.");
+      if (fromLiveCallIntake) {
+        // Live Call Intake: Mark as contacted, leave "To Mentorship" button available
+        await updateParticipantStatus(
+          participant.id,
+          "bridge_contacted",
+          currentUser.id,
+          currentUser.name,
+          "Live Call Intake completed - participant contacted and follow-up documented"
+        );
+        alert("Live Call Intake completed successfully! Participant marked as contacted.");
+      } else {
+        // Regular flow: Move directly to mentorship queue
+        await updateParticipantStatus(
+          participant.id,
+          "pending_mentor",
+          currentUser.id,
+          currentUser.name,
+          "Bridge Team Follow-Up Form completed - moved to mentorship assignment queue"
+        );
+        alert("Bridge Team Follow-Up Form submitted successfully! Participant moved to mentorship queue.");
+      }
+
       navigation.goBack();
     } catch (error) {
       console.error("Error submitting form:", error);
