@@ -861,8 +861,23 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
       throw new Error("Firebase not configured. Please add Firebase credentials in ENV tab.");
     }
 
+    // Get participant data before deletion for logging
+    const participant = get().participants.find((p) => p.id === participantId);
+    if (participant) {
+      console.log("⚠️  DELETING PARTICIPANT:");
+      console.log("   ID:", participantId);
+      console.log("   Name:", participant.firstName, participant.lastName);
+      console.log("   Number:", participant.participantNumber);
+      console.log("   Status:", participant.status);
+      console.warn("   ⚠️  This participant will be permanently deleted!");
+    }
+
     const participantRef = ref(database, `participants/${participantId}`);
     await remove(participantRef);
+
+    if (participant) {
+      console.log("❌ PARTICIPANT DELETED:", participant.firstName, participant.lastName);
+    }
   },
 
   mergeParticipants: async (sourceId, targetId, userId, userName) => {
@@ -874,6 +889,12 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
     const target = get().participants.find((p) => p.id === targetId);
 
     if (!source || !target) return;
+
+    console.log("🔀 MERGING PARTICIPANTS:");
+    console.log("   FROM:", source.firstName, source.lastName, `(#${source.participantNumber})`);
+    console.log("   INTO:", target.firstName, target.lastName, `(#${target.participantNumber})`);
+    console.log("   By user:", userName, `(${userId})`);
+    console.warn("   ⚠️  Source participant will be deleted after merge!");
 
     const mergedNotes = [...target.notes, ...source.notes].sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -902,6 +923,8 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
     await firebaseSet(targetRef, updatedTarget);
 
     await get().deleteParticipant(sourceId);
+
+    console.log("✅ MERGE COMPLETE:", source.firstName, source.lastName, "→", target.firstName, target.lastName);
   },
 }));
 

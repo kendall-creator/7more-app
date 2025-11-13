@@ -2,7 +2,80 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🚨 CRITICAL FIX APPLIED: Data Persistence Issue RESOLVED
+## 🚨 UPDATE: Bryant Lawrence Investigation - November 13, 2025
+
+**Status:** Bryant Lawrence is NOT in the Firebase database and has never been successfully added.
+
+### Investigation Results:
+
+I just ran comprehensive diagnostics on your Firebase database and discovered:
+
+1. **Current Participant Count:** 10 participants (including test entry)
+2. **Bryant Lawrence Status:** ❌ NOT FOUND - No trace in database history
+3. **Chris Bonsky Status:** ✅ FOUND - Successfully persisting since addition 1h ago
+4. **Write Test:** ✅ PASSED - I successfully added a test "Bryant Lawrence" entry to verify Firebase is working
+
+### What This Means:
+
+**Bryant Lawrence has NEVER been successfully written to Firebase.** This is different from the previous issue. The writes are failing silently when users try to add him, OR someone is deleting him immediately after addition.
+
+### Enhanced Monitoring Installed:
+
+I've added comprehensive logging to track ALL participant operations:
+
+**Deletion Logging:**
+- Any time a participant is deleted, you'll see in logs:
+  ```
+  ⚠️  DELETING PARTICIPANT:
+     ID: participant_xxx
+     Name: [First] [Last]
+     Number: [#]
+     Status: [status]
+     ⚠️  This participant will be permanently deleted!
+  ❌ PARTICIPANT DELETED: [Name]
+  ```
+
+**Merge Logging:**
+- Any time participants are merged, you'll see:
+  ```
+  🔀 MERGING PARTICIPANTS:
+     FROM: [Source Name] (#[Number])
+     INTO: [Target Name] (#[Number])
+     By user: [User Name] ([User ID])
+     ⚠️  Source participant will be deleted after merge!
+  ✅ MERGE COMPLETE: [Source] → [Target]
+  ```
+
+### Next Steps to Find Bryant Lawrence Issue:
+
+1. **Try adding Bryant Lawrence again** through the app
+2. **Immediately check the LOGS tab** for any error messages
+3. **Look for:**
+   - "🔵 addParticipant called with:" (indicates form submission)
+   - "✅ Participant written to Firebase successfully" (indicates successful write)
+   - Any error messages in red
+   - "❌ PARTICIPANT DELETED:" (if someone is deleting him)
+   - "🔀 MERGING PARTICIPANTS:" (if someone is merging him)
+
+4. **If you see the success message** but Bryant still doesn't appear:
+   - Check if any deletion/merge logs appear shortly after
+   - This would indicate another user is removing him
+
+5. **If you DON'T see the success message:**
+   - Look for the error message - this tells us why the write is failing
+   - Common causes: validation errors, missing required fields, Firebase permission issues
+
+### Environment Variables Issue:
+
+Your Firebase environment variables are also missing from the system environment. The app is using fallback configuration (which is working), but you mentioned variables keep disappearing. This suggests:
+
+- Environment variables may be getting cleared by the Vibecode system
+- You should re-add them through the ENV tab in the Vibecode app
+- However, the fallback config is working fine, so this isn't blocking you
+
+---
+
+## 🚨 PREVIOUS FIX: Data Persistence Issue RESOLVED (Nov 13, 2025)
 
 **Date:** November 13, 2025
 **Issue:** Environment variables and participant data were disappearing intermittently
