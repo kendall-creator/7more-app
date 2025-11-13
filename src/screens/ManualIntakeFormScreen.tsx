@@ -33,6 +33,7 @@ const RELEASE_LOCATION_OPTIONS = [
 export default function ManualIntakeFormScreen({ navigation, route }: any) {
   const intakeType = route?.params?.intakeType || "full_form_entry"; // Default to full form entry
   const [participantNumber, setParticipantNumber] = useState("");
+  const [tdcjNotAvailable, setTdcjNotAvailable] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
@@ -96,8 +97,11 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
     // Determine final release location value
     const finalReleaseLocation = releasedFrom === "Other" ? otherReleaseLocation : releasedFrom;
 
+    // Use "Not Available" if TDCJ toggle is enabled
+    const finalParticipantNumber = tdcjNotAvailable ? "Not Available" : participantNumber;
+
     // Validation
-    if (!participantNumber || !firstName || !lastName || !gender || !releasedFrom || !dateOfBirth || !releaseDate) {
+    if ((!tdcjNotAvailable && !participantNumber) || !firstName || !lastName || !gender || !releasedFrom || !dateOfBirth || !releaseDate) {
       setErrorMessage("Please fill in all required fields.");
       setShowErrorModal(true);
       return;
@@ -137,7 +141,7 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
     const timeOut = calculateTimeOut(relDate);
 
     console.log("📝 Manual intake form submitting:", {
-      participantNumber,
+      participantNumber: finalParticipantNumber,
       firstName,
       lastName,
       age,
@@ -149,7 +153,7 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
       const newParticipantId = `participant_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
       await addParticipant({
-        participantNumber,
+        participantNumber: finalParticipantNumber,
         firstName,
         lastName,
         dateOfBirth: dobDate.toISOString(),
@@ -267,12 +271,41 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
             <Text className="text-sm font-semibold text-gray-700 mb-2">
               TDCJ Number <Text className="text-red-500">*</Text>
             </Text>
-            <TextInput
-              className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base"
-              placeholder="Enter TDCJ number"
-              value={participantNumber}
-              onChangeText={setParticipantNumber}
-            />
+            {!tdcjNotAvailable ? (
+              <>
+                <TextInput
+                  className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base"
+                  placeholder="Enter TDCJ number"
+                  value={participantNumber}
+                  onChangeText={setParticipantNumber}
+                />
+                <Pressable
+                  onPress={() => {
+                    setTdcjNotAvailable(true);
+                    setParticipantNumber("");
+                  }}
+                  className="mt-2 bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 active:opacity-70"
+                >
+                  <Text className="text-gray-700 text-sm font-medium text-center">
+                    Not Available at This Time
+                  </Text>
+                </Pressable>
+              </>
+            ) : (
+              <View className="bg-amber-50 border border-amber-300 rounded-xl px-4 py-3">
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-amber-800 text-sm font-medium">
+                    TDCJ Number: Not Available
+                  </Text>
+                  <Pressable
+                    onPress={() => setTdcjNotAvailable(false)}
+                    className="active:opacity-70"
+                  >
+                    <Ionicons name="close-circle" size={24} color="#92400e" />
+                  </Pressable>
+                </View>
+              </View>
+            )}
           </View>
 
           {/* Phone Number */}

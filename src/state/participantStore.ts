@@ -47,6 +47,8 @@ interface ParticipantActions {
   getParticipantsForMentorLeader: () => Participant[];
   getParticipantsForMentor: (mentorId: string) => Participant[];
   getParticipantsWithOverdueUpdates: (mentorId?: string) => Participant[];
+  findDuplicatesByPhone: (phoneNumber: string) => Participant[];
+  findDuplicatesByEmail: (email: string) => Participant[];
   deleteParticipant: (participantId: string) => Promise<void>;
   mergeParticipants: (sourceId: string, targetId: string, userId: string, userName: string) => Promise<void>;
   initializeFirebaseListener: () => void;
@@ -862,6 +864,22 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
     });
 
     return allParticipants;
+  },
+
+  findDuplicatesByPhone: (phoneNumber) => {
+    if (!phoneNumber || !phoneNumber.trim()) return [];
+    const normalized = phoneNumber.trim().toLowerCase();
+    return get().participants.filter(
+      (p) => p.phoneNumber && p.phoneNumber.trim().toLowerCase() === normalized
+    );
+  },
+
+  findDuplicatesByEmail: (email) => {
+    if (!email || !email.trim()) return [];
+    const normalized = email.trim().toLowerCase();
+    return get().participants.filter(
+      (p) => p.email && p.email.trim().toLowerCase() === normalized
+    );
   },
 
   deleteParticipant: async (participantId) => {
