@@ -68,7 +68,10 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
 
       // Validate participant has required fields
       if (!existingParticipant?.id) {
-        throw new Error("Invalid participant data");
+        setErrorMessage("Invalid participant data");
+        setShowErrorModal(true);
+        setIsSubmitting(false);
+        return;
       }
 
       // Ensure we have user info
@@ -92,7 +95,7 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
 
       setSuccessMessage(`Missed call note added to ${existingParticipant.firstName} ${existingParticipant.lastName}'s profile`);
       setShowSuccessModal(true);
-    } catch (error) {
+    } catch (err) {
       setErrorMessage("Failed to connect missed call. Please try again.");
       setShowErrorModal(true);
     } finally {
@@ -138,7 +141,7 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
 
       setSuccessMessage("Missed call entry added to Bridge Team callback queue");
       setShowSuccessModal(true);
-    } catch (error) {
+    } catch (err) {
       setErrorMessage("Failed to add missed call entry. Please try again.");
       setShowErrorModal(true);
     } finally {
