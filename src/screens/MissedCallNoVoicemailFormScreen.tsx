@@ -85,7 +85,8 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
 
       setShowSuccessModal(true);
     } catch (error) {
-      console.error("Error connecting missed call to participant:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      console.error("Error connecting missed call to participant:", errorMessage);
       setErrorMessage("Failed to connect missed call. Please try again.");
       setShowErrorModal(true);
     } finally {
@@ -131,7 +132,8 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
 
       setShowSuccessModal(true);
     } catch (error) {
-      console.error("Error adding missed call:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      console.error("Error adding missed call:", errorMessage);
       setErrorMessage("Failed to add missed call entry. Please try again.");
       setShowErrorModal(true);
     } finally {
