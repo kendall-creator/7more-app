@@ -210,8 +210,13 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
       history: [...(participant.history || []), newHistoryEntry],
     };
 
-    const participantRef = ref(database, `participants/${participantId}`);
-    await firebaseSet(participantRef, updatedParticipant);
+    try {
+      const participantRef = ref(database, `participants/${participantId}`);
+      await firebaseSet(participantRef, updatedParticipant);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Firebase write failed";
+      throw new Error(`Failed to save note: ${errorMessage}`);
+    }
   },
 
   addHistoryEntry: async (participantId, entry) => {

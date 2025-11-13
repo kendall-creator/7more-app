@@ -86,15 +86,22 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
       if (notes.trim()) noteContent += `\nNotes:\n${notes}`;
 
       // Add note to existing participant (this adds to history automatically)
-      await addNote(
-        existingParticipant.id,
-        noteContent,
-        userId,
-        userName
-      );
+      try {
+        await addNote(
+          existingParticipant.id,
+          noteContent,
+          userId,
+          userName
+        );
 
-      setSuccessMessage(`Missed call note added to ${existingParticipant.firstName} ${existingParticipant.lastName}'s profile`);
-      setShowSuccessModal(true);
+        setSuccessMessage(`Missed call note added to ${existingParticipant.firstName} ${existingParticipant.lastName}'s profile`);
+        setShowSuccessModal(true);
+      } catch (noteError) {
+        // If addNote fails, show specific error
+        const errorMsg = noteError instanceof Error ? noteError.message : "Failed to add note";
+        setErrorMessage(`Could not add note: ${errorMsg}`);
+        setShowErrorModal(true);
+      }
     } catch (err) {
       setErrorMessage("Failed to connect missed call. Please try again.");
       setShowErrorModal(true);
