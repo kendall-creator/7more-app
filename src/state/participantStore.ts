@@ -182,7 +182,9 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
     }
 
     const participant = get().participants.find((p) => p.id === participantId);
-    if (!participant) return;
+    if (!participant) {
+      throw new Error("Participant not found");
+    }
 
     const newNote: Note = {
       id: `note_${Date.now()}`,
@@ -204,8 +206,8 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
 
     const updatedParticipant = {
       ...participant,
-      notes: [...participant.notes, newNote],
-      history: [...participant.history, newHistoryEntry],
+      notes: [...(participant.notes || []), newNote],
+      history: [...(participant.history || []), newHistoryEntry],
     };
 
     const participantRef = ref(database, `participants/${participantId}`);

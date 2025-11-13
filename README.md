@@ -4,7 +4,7 @@ A comprehensive mobile application built with Expo and React Native to help nonp
 
 ## 🔥 LATEST FIX: Missed Call Forms Error Handling - November 13, 2025
 
-**Date:** November 13, 2025 @ 8:15 PM
+**Date:** November 13, 2025 @ 8:30 PM
 **Status:** ✅ FIXED
 
 ### The Problem:
@@ -13,22 +13,31 @@ When connecting missed calls (both with and without voicemail) to existing parti
 Error connecting missed call to participant: TypeError: Cannot convert undefined value to object
 ```
 
-### Root Cause:
-The error handling in catch blocks was using a variable name `error` which conflicts with React Native's error serialization, causing issues when the error object was being processed.
+### Root Causes:
+1. The error handling in catch blocks was using a variable name `error` which conflicts with React Native's error serialization
+2. The `addNote` function was silently returning instead of throwing an error when participant wasn't found
+3. Old participants in Firebase might not have `notes` or `history` arrays initialized, causing spread operator failures
 
 ### What Was Fixed:
 
-**Fixed in 2 files:**
+**Fixed in 3 files:**
+
 1. **`src/screens/MissedCallNoVoicemailFormScreen.tsx`**
    - Renamed error variable from `error` to `err` in all catch blocks
    - Added early return with proper error handling for invalid participant data
    - Removed console.error calls that were causing serialization issues
    - Added dynamic success messages that show participant names
+   - Added timestamps to notes for better tracking
 
 2. **`src/screens/MissedCallVoicemailFormScreen.tsx`**
    - Applied same fixes as above
    - Improved validation before calling addNote function
-   - Added timestamps to notes for better tracking
+
+3. **`src/state/participantStore.ts` - addNote function**
+   - Changed from silent `return` to `throw new Error` when participant not found
+   - Added defensive spreads: `...(participant.notes || [])` and `...(participant.history || [])`
+   - Ensures compatibility with old participants that might not have these arrays initialized
+   - Errors now properly bubble up to catch blocks for user-friendly error messages
 
 ### How It Works Now:
 
