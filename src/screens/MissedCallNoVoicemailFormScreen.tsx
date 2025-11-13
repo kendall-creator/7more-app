@@ -23,6 +23,7 @@ interface Props {
 export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const addParticipant = useParticipantStore((s) => s.addParticipant);
+  const findDuplicatesByPhone = useParticipantStore((s) => s.findDuplicatesByPhone);
   const currentUser = useCurrentUser();
 
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -40,6 +41,16 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
       return false;
     }
     return true;
+  };
+
+  const handlePhoneBlur = () => {
+    if (phoneNumber && phoneNumber.trim()) {
+      const duplicates = findDuplicatesByPhone(phoneNumber);
+      if (duplicates.length > 0) {
+        setErrorMessage(`This phone number is already registered to: ${duplicates.map(p => `${p.firstName} ${p.lastName}`).join(", ")}`);
+        setShowErrorModal(true);
+      }
+    }
   };
 
   const handleSubmit = async () => {
@@ -138,6 +149,7 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
                 placeholder="(555) 123-4567"
                 value={phoneNumber}
                 onChangeText={setPhoneNumber}
+                onBlur={handlePhoneBlur}
                 keyboardType="phone-pad"
                 autoCapitalize="none"
               />
