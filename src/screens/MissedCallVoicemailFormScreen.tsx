@@ -71,6 +71,10 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
     try {
       const existingParticipant = duplicateParticipants[0];
 
+      // Ensure we have user info
+      const userId = currentUser?.id || "system";
+      const userName = currentUser?.name || currentUser?.email || "System";
+
       // Create note content
       let noteContent = "📞 Missed Call - Voicemail Received\n\n";
       noteContent += `Phone: ${phoneNumber}\n`;
@@ -82,8 +86,8 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
       await addNote(
         existingParticipant.id,
         noteContent,
-        currentUser?.id || "system",
-        currentUser?.name || "System"
+        userId,
+        userName
       );
 
       setShowSuccessModal(true);
