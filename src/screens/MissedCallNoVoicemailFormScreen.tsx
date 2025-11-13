@@ -24,6 +24,7 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const addParticipant = useParticipantStore((s) => s.addParticipant);
   const findDuplicatesByPhone = useParticipantStore((s) => s.findDuplicatesByPhone);
+  const addNote = useParticipantStore((s) => s.addNote);
   const currentUser = useCurrentUser();
 
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -52,6 +53,39 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
         setDuplicateParticipants(duplicates);
         setShowDuplicateModal(true);
       }
+    }
+  };
+
+  const handleConnectToExisting = async () => {
+    if (duplicateParticipants.length === 0) return;
+
+    setShowDuplicateModal(false);
+    setIsSubmitting(true);
+
+    try {
+      const existingParticipant = duplicateParticipants[0];
+
+      // Create note content
+      let noteContent = "📞 Missed Call - No Voicemail\n\n";
+      noteContent += `Phone: ${phoneNumber}\n`;
+      if (name) noteContent += `Name from caller ID: ${name}\n`;
+      if (notes.trim()) noteContent += `\nNotes:\n${notes}`;
+
+      // Add note to existing participant
+      await addNote(
+        existingParticipant.id,
+        noteContent,
+        currentUser?.id || "system",
+        currentUser?.name || "System"
+      );
+
+      setShowSuccessModal(true);
+    } catch (error) {
+      console.error("Error connecting missed call to participant:", error);
+      setErrorMessage("Failed to connect missed call. Please try again.");
+      setShowErrorModal(true);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -292,23 +326,16 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
                 </View>
                 <View className="gap-3">
                   <Pressable
-                    onPress={() => {
-                      setShowDuplicateModal(false);
-                      if (duplicateParticipants.length > 0) {
-                        navigation.navigate("ParticipantProfile", {
-                          participantId: duplicateParticipants[0].id
-                        });
-                      }
-                    }}
+                    onPress={handleConnectToExisting}
                     className="bg-amber-600 rounded-lg py-3 items-center active:opacity-70"
                   >
-                    <Text className="text-white text-base font-semibold">View Existing Participant</Text>
+                    <Text className="text-white text-base font-semibold">Connect to Existing Participant</Text>
                   </Pressable>
                   <Pressable
                     onPress={() => setShowDuplicateModal(false)}
                     className="bg-gray-200 rounded-lg py-3 items-center active:opacity-70"
                   >
-                    <Text className="text-gray-700 text-base font-semibold">Continue Anyway</Text>
+                    <Text className="text-gray-700 text-base font-semibold">Create New Entry</Text>
                   </Pressable>
                 </View>
               </View>

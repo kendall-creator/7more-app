@@ -56,6 +56,7 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
   const addParticipant = useParticipantStore((s) => s.addParticipant);
   const findDuplicatesByPhone = useParticipantStore((s) => s.findDuplicatesByPhone);
   const findDuplicatesByEmail = useParticipantStore((s) => s.findDuplicatesByEmail);
+  const addNote = useParticipantStore((s) => s.addNote);
 
   const parseDate = (dateStr: string): Date | null => {
     // Try to parse MM/DD/YYYY format
@@ -117,6 +118,51 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
         setDuplicateType("email");
         setShowDuplicateModal(true);
       }
+    }
+  };
+
+  const handleConnectToExisting = async () => {
+    if (duplicateParticipants.length === 0) return;
+
+    setShowDuplicateModal(false);
+
+    try {
+      const existingParticipant = duplicateParticipants[0];
+
+      // Create note content with the new information provided
+      let noteContent = "📝 Additional Contact Information Submitted\n\n";
+      if (firstName || lastName) {
+        noteContent += `Name provided: ${firstName} ${lastName}\n`;
+      }
+      if (participantNumber && !tdcjNotAvailable) {
+        noteContent += `TDCJ Number: ${participantNumber}\n`;
+      }
+      if (phoneNumber) noteContent += `Phone: ${phoneNumber}\n`;
+      if (email) noteContent += `Email: ${email}\n`;
+      if (dateOfBirth) noteContent += `DOB: ${dateOfBirth}\n`;
+      if (gender) noteContent += `Gender: ${gender}\n`;
+      if (releaseDate) noteContent += `Release Date: ${releaseDate}\n`;
+      if (releasedFrom) {
+        const finalLocation = releasedFrom === "Other" ? otherReleaseLocation : releasedFrom;
+        noteContent += `Released From: ${finalLocation}\n`;
+      }
+      if (legalStatus.length > 0) {
+        noteContent += `\nLegal Status:\n${legalStatus.map(s => `- ${s}`).join("\n")}`;
+      }
+
+      // Add note to existing participant
+      await addNote(
+        existingParticipant.id,
+        noteContent,
+        "system",
+        "Manual Entry"
+      );
+
+      setShowSuccessModal(true);
+    } catch (error) {
+      console.error("Error connecting entry to participant:", error);
+      setErrorMessage("Failed to connect entry. Please try again.");
+      setShowErrorModal(true);
     }
   };
 
@@ -721,24 +767,16 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
             </View>
             <View className="gap-3">
               <Pressable
-                onPress={() => {
-                  setShowDuplicateModal(false);
-                  // Navigate to existing participant profile
-                  if (duplicateParticipants.length > 0) {
-                    navigation.navigate("ParticipantProfile", {
-                      participantId: duplicateParticipants[0].id
-                    });
-                  }
-                }}
+                onPress={handleConnectToExisting}
                 className="bg-amber-600 rounded-xl py-3 items-center active:opacity-80"
               >
-                <Text className="text-white font-semibold">View Existing Participant</Text>
+                <Text className="text-white font-semibold">Connect to Existing Participant</Text>
               </Pressable>
               <Pressable
                 onPress={() => setShowDuplicateModal(false)}
                 className="bg-gray-200 rounded-xl py-3 items-center active:opacity-80"
               >
-                <Text className="text-gray-700 font-semibold">Continue Anyway</Text>
+                <Text className="text-gray-700 font-semibold">Create New Entry</Text>
               </Pressable>
             </View>
           </View>
