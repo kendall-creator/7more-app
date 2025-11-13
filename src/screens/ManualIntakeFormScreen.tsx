@@ -49,8 +49,9 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [showDuplicatePhoneWarning, setShowDuplicatePhoneWarning] = useState(false);
-  const [showDuplicateEmailWarning, setShowDuplicateEmailWarning] = useState(false);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [duplicateParticipants, setDuplicateParticipants] = useState<any[]>([]);
+  const [duplicateType, setDuplicateType] = useState<"phone" | "email" | null>(null);
 
   const addParticipant = useParticipantStore((s) => s.addParticipant);
   const findDuplicatesByPhone = useParticipantStore((s) => s.findDuplicatesByPhone);
@@ -101,9 +102,9 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
     if (phoneNumber && phoneNumber.trim()) {
       const duplicates = findDuplicatesByPhone(phoneNumber);
       if (duplicates.length > 0) {
-        setShowDuplicatePhoneWarning(true);
-        setErrorMessage(`This phone number is already registered to: ${duplicates.map(p => `${p.firstName} ${p.lastName}`).join(", ")}`);
-        setShowErrorModal(true);
+        setDuplicateParticipants(duplicates);
+        setDuplicateType("phone");
+        setShowDuplicateModal(true);
       }
     }
   };
@@ -112,9 +113,9 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
     if (email && email.trim()) {
       const duplicates = findDuplicatesByEmail(email);
       if (duplicates.length > 0) {
-        setShowDuplicateEmailWarning(true);
-        setErrorMessage(`This email is already registered to: ${duplicates.map(p => `${p.firstName} ${p.lastName}`).join(", ")}`);
-        setShowErrorModal(true);
+        setDuplicateParticipants(duplicates);
+        setDuplicateType("email");
+        setShowDuplicateModal(true);
       }
     }
   };
@@ -343,10 +344,7 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
               className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base"
               placeholder="(555) 123-4567"
               value={phoneNumber}
-              onChangeText={(text) => {
-                setPhoneNumber(text);
-                setShowDuplicatePhoneWarning(false);
-              }}
+              onChangeText={setPhoneNumber}
               onBlur={handlePhoneBlur}
               keyboardType="phone-pad"
             />
@@ -361,10 +359,7 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
               className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base"
               placeholder="email@example.com"
               value={email}
-              onChangeText={(text) => {
-                setEmail(text);
-                setShowDuplicateEmailWarning(false);
-              }}
+              onChangeText={setEmail}
               onBlur={handleEmailBlur}
               keyboardType="email-address"
               autoCapitalize="none"
@@ -689,6 +684,63 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
             >
               <Text className="text-white font-semibold">OK</Text>
             </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Duplicate Contact Modal */}
+      <Modal
+        visible={showDuplicateModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDuplicateModal(false)}
+      >
+        <View className="flex-1 bg-black/50 justify-center items-center px-6">
+          <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
+            <View className="items-center mb-4">
+              <View className="w-16 h-16 bg-amber-100 rounded-full items-center justify-center mb-3">
+                <Ionicons name="warning" size={40} color="#D97706" />
+              </View>
+              <Text className="text-xl font-bold text-gray-900 mb-2">Duplicate {duplicateType === "phone" ? "Phone Number" : "Email"}</Text>
+              <Text className="text-center text-gray-600 mb-3">
+                This {duplicateType === "phone" ? "phone number" : "email"} is already registered to:
+              </Text>
+              {duplicateParticipants.map((p, index) => (
+                <View key={index} className="bg-gray-50 rounded-lg p-3 mb-2 w-full">
+                  <Text className="text-gray-900 font-semibold text-center">
+                    {p.firstName} {p.lastName}
+                  </Text>
+                  <Text className="text-gray-600 text-sm text-center">
+                    TDCJ: {p.participantNumber}
+                  </Text>
+                </View>
+              ))}
+              <Text className="text-center text-gray-600 text-sm mt-2">
+                Do you want to tag this entry to the existing participant?
+              </Text>
+            </View>
+            <View className="gap-3">
+              <Pressable
+                onPress={() => {
+                  setShowDuplicateModal(false);
+                  // Navigate to existing participant profile
+                  if (duplicateParticipants.length > 0) {
+                    navigation.navigate("ParticipantProfile", {
+                      participantId: duplicateParticipants[0].id
+                    });
+                  }
+                }}
+                className="bg-amber-600 rounded-xl py-3 items-center active:opacity-80"
+              >
+                <Text className="text-white font-semibold">View Existing Participant</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setShowDuplicateModal(false)}
+                className="bg-gray-200 rounded-xl py-3 items-center active:opacity-80"
+              >
+                <Text className="text-gray-700 font-semibold">Continue Anyway</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
       </Modal>

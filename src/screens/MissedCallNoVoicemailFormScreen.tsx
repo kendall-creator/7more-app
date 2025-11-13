@@ -33,6 +33,8 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [duplicateParticipants, setDuplicateParticipants] = useState<any[]>([]);
 
   const validateForm = () => {
     if (!phoneNumber.trim()) {
@@ -47,8 +49,8 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
     if (phoneNumber && phoneNumber.trim()) {
       const duplicates = findDuplicatesByPhone(phoneNumber);
       if (duplicates.length > 0) {
-        setErrorMessage(`This phone number is already registered to: ${duplicates.map(p => `${p.firstName} ${p.lastName}`).join(", ")}`);
-        setShowErrorModal(true);
+        setDuplicateParticipants(duplicates);
+        setShowDuplicateModal(true);
       }
     }
   };
@@ -253,6 +255,62 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
                 >
                   <Text className="text-white text-base font-semibold">Close</Text>
                 </Pressable>
+              </View>
+            </View>
+          </Modal>
+
+          {/* Duplicate Contact Modal */}
+          <Modal
+            visible={showDuplicateModal}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setShowDuplicateModal(false)}
+          >
+            <View className="flex-1 bg-black/50 justify-center items-center px-6">
+              <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
+                <View className="items-center mb-4">
+                  <View className="bg-amber-100 rounded-full p-3 mb-3">
+                    <Ionicons name="warning" size={48} color="#D97706" />
+                  </View>
+                  <Text className="text-xl font-bold text-gray-900 mb-2">Duplicate Phone Number</Text>
+                  <Text className="text-center text-gray-600 mb-3">
+                    This phone number is already registered to:
+                  </Text>
+                  {duplicateParticipants.map((p, index) => (
+                    <View key={index} className="bg-gray-50 rounded-lg p-3 mb-2 w-full">
+                      <Text className="text-gray-900 font-semibold text-center">
+                        {p.firstName} {p.lastName}
+                      </Text>
+                      <Text className="text-gray-600 text-sm text-center">
+                        TDCJ: {p.participantNumber}
+                      </Text>
+                    </View>
+                  ))}
+                  <Text className="text-center text-gray-600 text-sm mt-2">
+                    Do you want to view the existing participant?
+                  </Text>
+                </View>
+                <View className="gap-3">
+                  <Pressable
+                    onPress={() => {
+                      setShowDuplicateModal(false);
+                      if (duplicateParticipants.length > 0) {
+                        navigation.navigate("ParticipantProfile", {
+                          participantId: duplicateParticipants[0].id
+                        });
+                      }
+                    }}
+                    className="bg-amber-600 rounded-lg py-3 items-center active:opacity-70"
+                  >
+                    <Text className="text-white text-base font-semibold">View Existing Participant</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => setShowDuplicateModal(false)}
+                    className="bg-gray-200 rounded-lg py-3 items-center active:opacity-70"
+                  >
+                    <Text className="text-gray-700 text-base font-semibold">Continue Anyway</Text>
+                  </Pressable>
+                </View>
               </View>
             </View>
           </Modal>
