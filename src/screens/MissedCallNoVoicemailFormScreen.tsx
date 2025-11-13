@@ -36,6 +36,7 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
   const [errorMessage, setErrorMessage] = useState("");
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [duplicateParticipants, setDuplicateParticipants] = useState<any[]>([]);
+  const [successMessage, setSuccessMessage] = useState("Missed call entry added to Bridge Team callback queue");
 
   const validateForm = () => {
     if (!phoneNumber.trim()) {
@@ -74,13 +75,14 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
       const userId = currentUser?.id || "system";
       const userName = currentUser?.name || currentUser?.email || "System";
 
-      // Create note content
-      let noteContent = "📞 Missed Call - No Voicemail\n\n";
+      // Create note content with timestamp
+      const now = new Date().toLocaleString();
+      let noteContent = `📞 Missed Call - No Voicemail (${now})\n\n`;
       noteContent += `Phone: ${phoneNumber}\n`;
       if (name) noteContent += `Name from caller ID: ${name}\n`;
       if (notes.trim()) noteContent += `\nNotes:\n${notes}`;
 
-      // Add note to existing participant
+      // Add note to existing participant (this adds to history automatically)
       await addNote(
         existingParticipant.id,
         noteContent,
@@ -88,6 +90,7 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
         userName
       );
 
+      setSuccessMessage(`Missed call note added to ${existingParticipant.firstName} ${existingParticipant.lastName}'s profile`);
       setShowSuccessModal(true);
     } catch (error) {
       setErrorMessage("Failed to connect missed call. Please try again.");
@@ -133,6 +136,7 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
         // Note will be added through the history that addParticipant creates
       }
 
+      setSuccessMessage("Missed call entry added to Bridge Team callback queue");
       setShowSuccessModal(true);
     } catch (error) {
       setErrorMessage("Failed to add missed call entry. Please try again.");
@@ -261,7 +265,7 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
                     Added to Queue
                   </Text>
                   <Text className="text-center text-gray-600">
-                    Missed call entry added to Bridge Team callback queue
+                    {successMessage}
                   </Text>
                 </View>
                 <Pressable
