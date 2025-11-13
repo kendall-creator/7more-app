@@ -38,6 +38,8 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [duplicateParticipants, setDuplicateParticipants] = useState<any[]>([]);
   const [successMessage, setSuccessMessage] = useState("Voicemail entry added to Bridge Team callback queue");
+  const [showActionModal, setShowActionModal] = useState(false);
+  const [selectedParticipant, setSelectedParticipant] = useState<any>(null);
 
   const validateForm = () => {
     if (!phoneNumber.trim()) {
@@ -66,25 +68,47 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
   const handleConnectToExisting = async () => {
     if (duplicateParticipants.length === 0) return;
 
+    const existingParticipant = duplicateParticipants[0];
+
+    // Store the selected participant and show action modal
+    setSelectedParticipant(existingParticipant);
     setShowDuplicateModal(false);
+    setShowActionModal(true);
+  };
+
+  const getParticipantStatusDisplay = (status: string) => {
+    const statusMap: Record<string, string> = {
+      pending_bridge: "Bridge Team Queue (Pending Contact)",
+      bridge_attempted: "Bridge Team (Attempted Contact)",
+      bridge_contacted: "Bridge Team (Contacted)",
+      bridge_unable: "Bridge Team (Unable to Contact)",
+      pending_mentor: "Awaiting Mentor Assignment",
+      assigned_mentor: "Assigned to Mentor (Pending Initial Contact)",
+      initial_contact_pending: "Mentorship (Initial Contact Pending)",
+      mentor_attempted: "Mentorship (Attempted Contact)",
+      mentor_unable: "Mentorship (Unable to Contact)",
+      active_mentorship: "Active Mentorship",
+      graduated: "Graduated",
+      ceased_contact: "Ceased Contact"
+    };
+    return statusMap[status] || status;
+  };
+
+  const handleAddInformation = async () => {
+    setShowActionModal(false);
     setIsSubmitting(true);
 
     try {
-      const existingParticipant = duplicateParticipants[0];
-
-      // Validate participant has required fields
-      if (!existingParticipant?.id) {
+      if (!selectedParticipant?.id) {
         setErrorMessage("Invalid participant data");
         setShowErrorModal(true);
         setIsSubmitting(false);
         return;
       }
 
-      // Ensure we have user info
       const userId = currentUser?.id || "system";
       const userName = currentUser?.name || currentUser?.email || "System";
 
-      // Create note content with timestamp
       const now = new Date().toLocaleString();
       let noteContent = `📞 Missed Call - Voicemail Received (${now})\n\n`;
       noteContent += `Phone: ${phoneNumber}\n`;
@@ -92,29 +116,70 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
       if (callbackWindow) noteContent += `Callback window: ${callbackWindow}\n`;
       noteContent += `\nVoicemail summary:\n${notes}`;
 
-      // Add note to existing participant (this adds to history automatically)
       await addNote(
-        existingParticipant.id,
+        selectedParticipant.id,
         noteContent,
         userId,
         userName
       );
 
-      // Set states in correct order to ensure modal shows
       setIsSubmitting(false);
-      setSuccessMessage(`Voicemail note added to ${existingParticipant.firstName} ${existingParticipant.lastName}'s profile`);
+      setSuccessMessage(`Voicemail note added to ${selectedParticipant.firstName} ${selectedParticipant.lastName}'s profile. Status remains: ${getParticipantStatusDisplay(selectedParticipant.status)}`);
 
-      // Use setTimeout to ensure state updates complete before showing modal
       setTimeout(() => {
         setShowSuccessModal(true);
       }, 100);
 
     } catch (err) {
       setIsSubmitting(false);
-      const errorMsg = err instanceof Error ? err.message : "Failed to connect";
+      const errorMsg = err instanceof Error ? err.message : "Failed to add information";
       setErrorMessage(errorMsg);
       setShowErrorModal(true);
     }
+  };
+
+  const handleMoveParticipant = () => {
+    setShowActionModal(false);
+    navigation.navigate("ParticipantProfile", { participantId: selectedParticipant.id });
+  };
+
+  const handleCreateSeparateEntry = async () => {
+    setShowActionModal(false);
+    setIsSubmitting(true);
+
+    try {
+      const participantData = {
+        participantNumber: `TEMP-${Date.now()}`,
+        firstName: name || "Unknown",
+        lastName: "(Voicemail)",
+        phoneNumber: phoneNumber,
+        dateOfBirth: "1990-01-01",
+        gender: "Unknown",
+        releaseDate: new Date().toISOString().split("T")[0],
+        age: 0,
+        timeOut: 0,
+        releasedFrom: "Unknown",
+        status: "pending_bridge" as const,
+        statusDetail: "awaiting_callback" as const,
+        intakeType: "missed_call_voicemail" as const,
+        completedGraduationSteps: [],
+      };
+
+      await addParticipant(participantData);
+
+      setSuccessMessage("New voicemail entry created separately in Bridge Team callback queue");
+      setShowSuccessModal(true);
+    } catch (err) {
+      setErrorMessage("Failed to create separate entry. Please try again.");
+      setShowErrorModal(true);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleAssignToUser = () => {
+    setShowActionModal(false);
+    navigation.navigate("ParticipantProfile", { participantId: selectedParticipant.id });
   };
 
   const handleSubmit = async () => {
@@ -376,7 +441,7 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
                     }`}
                   >
                     <Text className="text-white text-base font-semibold">
-                      {isSubmitting ? "Connecting..." : "Connect to Existing Participant"}
+                      {isSubmitting ? "Loading..." : "View Options"}
                     </Text>
                   </Pressable>
                   <Pressable
@@ -385,6 +450,109 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
                     className="bg-gray-200 rounded-lg py-3 items-center active:opacity-70"
                   >
                     <Text className="text-gray-700 text-base font-semibold">Create New Entry</Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          </Modal>
+
+          {/* Action Selection Modal */}
+          <Modal
+            visible={showActionModal}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setShowActionModal(false)}
+          >
+            <View className="flex-1 bg-black/50 justify-center items-center px-6">
+              <View className="bg-white rounded-2xl p-6 w-full max-w-md">
+                <View className="items-center mb-4">
+                  <View className="bg-indigo-100 rounded-full p-3 mb-3">
+                    <Ionicons name="options" size={48} color="#4F46E5" />
+                  </View>
+                  <Text className="text-xl font-bold text-gray-900 mb-2">Select Action</Text>
+                  {selectedParticipant && (
+                    <View className="bg-gray-50 rounded-lg p-3 mb-3 w-full">
+                      <Text className="text-gray-900 font-semibold text-center">
+                        {selectedParticipant.firstName} {selectedParticipant.lastName}
+                      </Text>
+                      <Text className="text-gray-600 text-sm text-center mt-1">
+                        Currently: {getParticipantStatusDisplay(selectedParticipant.status)}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+                <View className="gap-3">
+                  <Pressable
+                    onPress={handleAddInformation}
+                    disabled={isSubmitting}
+                    className={`rounded-lg py-3 px-4 ${
+                      isSubmitting ? "bg-gray-400" : "bg-indigo-600 active:opacity-70"
+                    }`}
+                  >
+                    <View className="flex-row items-center justify-center">
+                      <Ionicons name="add-circle-outline" size={20} color="white" />
+                      <Text className="text-white text-base font-semibold ml-2">
+                        Add Information (Keep Status)
+                      </Text>
+                    </View>
+                    <Text className="text-white text-xs text-center mt-1 opacity-80">
+                      Add note without changing participant status
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={handleMoveParticipant}
+                    disabled={isSubmitting}
+                    className="bg-blue-600 rounded-lg py-3 px-4 active:opacity-70"
+                  >
+                    <View className="flex-row items-center justify-center">
+                      <Ionicons name="swap-horizontal" size={20} color="white" />
+                      <Text className="text-white text-base font-semibold ml-2">
+                        Move/Change Status
+                      </Text>
+                    </View>
+                    <Text className="text-white text-xs text-center mt-1 opacity-80">
+                      Navigate to profile to update status
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={handleCreateSeparateEntry}
+                    disabled={isSubmitting}
+                    className="bg-green-600 rounded-lg py-3 px-4 active:opacity-70"
+                  >
+                    <View className="flex-row items-center justify-center">
+                      <Ionicons name="person-add" size={20} color="white" />
+                      <Text className="text-white text-base font-semibold ml-2">
+                        Create Separate Entry
+                      </Text>
+                    </View>
+                    <Text className="text-white text-xs text-center mt-1 opacity-80">
+                      Create new participant entry in Bridge Team queue
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={handleAssignToUser}
+                    disabled={isSubmitting}
+                    className="bg-purple-600 rounded-lg py-3 px-4 active:opacity-70"
+                  >
+                    <View className="flex-row items-center justify-center">
+                      <Ionicons name="person-circle-outline" size={20} color="white" />
+                      <Text className="text-white text-base font-semibold ml-2">
+                        Assign to Specific User
+                      </Text>
+                    </View>
+                    <Text className="text-white text-xs text-center mt-1 opacity-80">
+                      Navigate to profile to assign mentor/team member
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={() => setShowActionModal(false)}
+                    className="bg-gray-200 rounded-lg py-3 items-center active:opacity-70"
+                  >
+                    <Text className="text-gray-700 text-base font-semibold">Cancel</Text>
                   </Pressable>
                 </View>
               </View>
