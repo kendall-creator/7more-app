@@ -49,8 +49,12 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [showDuplicatePhoneWarning, setShowDuplicatePhoneWarning] = useState(false);
+  const [showDuplicateEmailWarning, setShowDuplicateEmailWarning] = useState(false);
 
   const addParticipant = useParticipantStore((s) => s.addParticipant);
+  const findDuplicatesByPhone = useParticipantStore((s) => s.findDuplicatesByPhone);
+  const findDuplicatesByEmail = useParticipantStore((s) => s.findDuplicatesByEmail);
 
   const parseDate = (dateStr: string): Date | null => {
     // Try to parse MM/DD/YYYY format
@@ -90,6 +94,28 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
       setLegalStatus(legalStatus.filter((item) => item !== option));
     } else {
       setLegalStatus([...legalStatus, option]);
+    }
+  };
+
+  const handlePhoneBlur = () => {
+    if (phoneNumber && phoneNumber.trim()) {
+      const duplicates = findDuplicatesByPhone(phoneNumber);
+      if (duplicates.length > 0) {
+        setShowDuplicatePhoneWarning(true);
+        setErrorMessage(`This phone number is already registered to: ${duplicates.map(p => `${p.firstName} ${p.lastName}`).join(", ")}`);
+        setShowErrorModal(true);
+      }
+    }
+  };
+
+  const handleEmailBlur = () => {
+    if (email && email.trim()) {
+      const duplicates = findDuplicatesByEmail(email);
+      if (duplicates.length > 0) {
+        setShowDuplicateEmailWarning(true);
+        setErrorMessage(`This email is already registered to: ${duplicates.map(p => `${p.firstName} ${p.lastName}`).join(", ")}`);
+        setShowErrorModal(true);
+      }
     }
   };
 
@@ -317,7 +343,11 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
               className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base"
               placeholder="(555) 123-4567"
               value={phoneNumber}
-              onChangeText={setPhoneNumber}
+              onChangeText={(text) => {
+                setPhoneNumber(text);
+                setShowDuplicatePhoneWarning(false);
+              }}
+              onBlur={handlePhoneBlur}
               keyboardType="phone-pad"
             />
           </View>
@@ -331,7 +361,11 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
               className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base"
               placeholder="email@example.com"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => {
+                setEmail(text);
+                setShowDuplicateEmailWarning(false);
+              }}
+              onBlur={handleEmailBlur}
               keyboardType="email-address"
               autoCapitalize="none"
             />
