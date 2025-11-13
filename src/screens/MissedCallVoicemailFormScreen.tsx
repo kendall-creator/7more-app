@@ -93,27 +93,27 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
       noteContent += `\nVoicemail summary:\n${notes}`;
 
       // Add note to existing participant (this adds to history automatically)
-      try {
-        await addNote(
-          existingParticipant.id,
-          noteContent,
-          userId,
-          userName
-        );
+      await addNote(
+        existingParticipant.id,
+        noteContent,
+        userId,
+        userName
+      );
 
-        setSuccessMessage(`Voicemail note added to ${existingParticipant.firstName} ${existingParticipant.lastName}'s profile`);
-        setShowSuccessModal(true);
-      } catch (noteError) {
-        // If addNote fails, show specific error
-        const errorMsg = noteError instanceof Error ? noteError.message : "Failed to add note";
-        setErrorMessage(`Could not add note: ${errorMsg}`);
-        setShowErrorModal(true);
-      }
-    } catch (err) {
-      setErrorMessage("Failed to connect voicemail. Please try again.");
-      setShowErrorModal(true);
-    } finally {
+      // Set states in correct order to ensure modal shows
       setIsSubmitting(false);
+      setSuccessMessage(`Voicemail note added to ${existingParticipant.firstName} ${existingParticipant.lastName}'s profile`);
+
+      // Use setTimeout to ensure state updates complete before showing modal
+      setTimeout(() => {
+        setShowSuccessModal(true);
+      }, 100);
+
+    } catch (err) {
+      setIsSubmitting(false);
+      const errorMsg = err instanceof Error ? err.message : "Failed to connect";
+      setErrorMessage(errorMsg);
+      setShowErrorModal(true);
     }
   };
 
