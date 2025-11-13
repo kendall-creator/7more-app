@@ -30,17 +30,28 @@ interface ReportingActions {
 
 type ReportingStore = ReportingState & ReportingActions;
 
+let isListenerInitialized = false;
+
 export const useReportingStore = create<ReportingStore>()((set, get) => ({
   monthlyReports: [],
   isLoading: false,
 
   // Initialize Firebase real-time listener
   initializeFirebaseListener: () => {
+    // Prevent multiple listener initializations
+    if (isListenerInitialized) {
+      console.log("⚠️ [Reporting] listener already initialized, skipping...");
+      return;
+    }
+
     if (!database) {
       console.warn("Firebase not configured. Using local state only.");
       set({ isLoading: false });
       return;
     }
+
+    console.log("🔥 Initializing reporting Firebase listener...");
+    isListenerInitialized = true;
 
     const reportsRef = ref(database, "monthlyReports");
 
@@ -48,10 +59,14 @@ export const useReportingStore = create<ReportingStore>()((set, get) => ({
       const data = snapshot.val();
       if (data) {
         const reportsArray = Object.values(data) as MonthlyReport[];
+        console.log(`✅ Loaded ${reportsArray.length} monthly reports from Firebase`);
         set({ monthlyReports: reportsArray, isLoading: false });
       } else {
         set({ monthlyReports: [], isLoading: false });
       }
+    }, (error) => {
+      console.error("❌ Error in reporting listener:", error);
+      set({ isLoading: false });
     });
   },
 

@@ -54,17 +54,28 @@ interface ParticipantActions {
 
 type ParticipantStore = ParticipantState & ParticipantActions;
 
+let isListenerInitialized = false;
+
 export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
   participants: [],
   isLoading: false,
 
   // Initialize Firebase real-time listener
   initializeFirebaseListener: () => {
+    // Prevent multiple listener initializations
+    if (isListenerInitialized) {
+      console.log("⚠️ Participant listener already initialized, skipping...");
+      return;
+    }
+
     if (!database) {
       console.warn("Firebase not configured. Using local state only.");
       set({ isLoading: false });
       return;
     }
+
+    console.log("🔥 Initializing participant Firebase listener...");
+    isListenerInitialized = true;
 
     const participantsRef = ref(database, "participants");
 
@@ -72,10 +83,15 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
       const data = snapshot.val();
       if (data) {
         const participantsArray = Object.values(data) as Participant[];
+        console.log(`✅ Loaded ${participantsArray.length} participants from Firebase`);
         set({ participants: participantsArray, isLoading: false });
       } else {
+        console.log("✅ No participants in Firebase, setting empty array");
         set({ participants: [], isLoading: false });
       }
+    }, (error) => {
+      console.error("❌ Error in participant listener:", error);
+      set({ isLoading: false });
     });
   },
 

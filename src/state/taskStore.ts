@@ -22,17 +22,28 @@ interface TaskActions {
 
 type TaskStore = TaskState & TaskActions;
 
+let isListenerInitialized = false;
+
 export const useTaskStore = create<TaskStore>()((set, get) => ({
   tasks: [],
   isLoading: false,
 
   // Initialize Firebase real-time listener
   initializeFirebaseListener: () => {
+    // Prevent multiple listener initializations
+    if (isListenerInitialized) {
+      console.log("⚠️ Tasks listener already initialized, skipping...");
+      return;
+    }
+
     if (!database) {
       console.warn("Firebase not configured. Using local state only.");
       set({ isLoading: false });
       return;
     }
+
+    console.log("🔥 Initializing tasks Firebase listener...");
+    isListenerInitialized = true;
 
     const tasksRef = ref(database, "tasks");
 
@@ -66,10 +77,15 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
           return task;
         });
 
+        console.log(`✅ Loaded ${updatedTasks.length} tasks from Firebase`);
         set({ tasks: updatedTasks, isLoading: false });
       } else {
+        console.log("✅ No tasks in Firebase, setting empty array");
         set({ tasks: [], isLoading: false });
       }
+    }, (error) => {
+      console.error("❌ Error in tasks listener:", error);
+      set({ isLoading: false });
     });
   },
 

@@ -99,6 +99,8 @@ interface SchedulerActions {
 
 type SchedulerStore = SchedulerState & SchedulerActions;
 
+let isListenerInitialized = false;
+
 export const useSchedulerStore = create<SchedulerStore>()((set, get) => ({
   shifts: [],
   meetings: [],
@@ -107,11 +109,20 @@ export const useSchedulerStore = create<SchedulerStore>()((set, get) => ({
 
   // Initialize Firebase real-time listener
   initializeFirebaseListener: () => {
+    // Prevent multiple listener initializations
+    if (isListenerInitialized) {
+      console.log("⚠️ [Scheduler] listener already initialized, skipping...");
+      return;
+    }
+
     if (!database) {
       console.warn("Firebase not configured. Using local state only.");
       set({ isLoading: false });
       return;
     }
+
+    console.log("🔥 Initializing scheduler Firebase listener...");
+    isListenerInitialized = true;
 
     const shiftsRef = ref(database, "shifts");
     const meetingsRef = ref(database, "meetings");
@@ -121,30 +132,40 @@ export const useSchedulerStore = create<SchedulerStore>()((set, get) => ({
       const data = snapshot.val();
       if (data) {
         const shiftsArray = Object.values(data) as Shift[];
+        console.log(`✅ Loaded ${shiftsArray.length} shifts from Firebase`);
         set({ shifts: shiftsArray, isLoading: false });
       } else {
         set({ shifts: [], isLoading: false });
       }
+    }, (error) => {
+      console.error("❌ Error in scheduler shifts listener:", error);
+      set({ isLoading: false });
     });
 
     onValue(meetingsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
         const meetingsArray = Object.values(data) as Meeting[];
+        console.log(`✅ Loaded ${meetingsArray.length} meetings from Firebase`);
         set({ meetings: meetingsArray });
       } else {
         set({ meetings: [] });
       }
+    }, (error) => {
+      console.error("❌ Error in scheduler meetings listener:", error);
     });
 
     onValue(templatesRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
         const templatesArray = Object.values(data) as ShiftTemplate[];
+        console.log(`✅ Loaded ${templatesArray.length} shift templates from Firebase`);
         set({ templates: templatesArray });
       } else {
         set({ templates: [] });
       }
+    }, (error) => {
+      console.error("❌ Error in scheduler templates listener:", error);
     });
   },
 

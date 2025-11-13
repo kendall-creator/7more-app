@@ -50,6 +50,8 @@ export default function App() {
   const initReportingListener = useReportingStore((s) => s.initializeFirebaseListener);
 
   useEffect(() => {
+    console.log("🚀 App.tsx: Initializing all Firebase listeners and stores...");
+
     // Initialize Firebase listeners for all stores
     initUsersListener();
     initParticipantsListener();
@@ -69,19 +71,9 @@ export default function App() {
 
     // Fix admin password flag (one-time fix)
     fixAdminPasswordFlag();
-  }, [
-    initUsersListener,
-    initParticipantsListener,
-    initSchedulerListener,
-    initResourcesListener,
-    initTransitionalHomesListener,
-    initMentorshipListener,
-    initGuidanceListener,
-    initTasksListener,
-    initReportingListener,
-    initializeDefaultAdmin,
-    initDefaultHomes,
-  ]);
+
+    console.log("✅ App.tsx: All initialization complete");
+  }, []); // Empty dependency array - only run once on mount
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

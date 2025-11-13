@@ -42,6 +42,8 @@ interface UsersActions {
 
 type UsersStore = UsersState & UsersActions;
 
+let isListenerInitialized = false;
+
 export const useUsersStore = create<UsersStore>()((set, get) => ({
   invitedUsers: [],
   isInitialized: false,
@@ -49,11 +51,20 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
 
   // Initialize Firebase real-time listener
   initializeFirebaseListener: () => {
+    // Prevent multiple listener initializations
+    if (isListenerInitialized) {
+      console.log("⚠️ Users listener already initialized, skipping...");
+      return;
+    }
+
     if (!database) {
       console.warn("Firebase not configured. Using local state only.");
       set({ isLoading: false });
       return;
     }
+
+    console.log("🔥 Initializing users Firebase listener...");
+    isListenerInitialized = true;
 
     const usersRef = ref(database, "users");
 
@@ -61,10 +72,15 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
       const data = snapshot.val();
       if (data) {
         const usersArray = Object.values(data) as InvitedUser[];
+        console.log(`✅ Loaded ${usersArray.length} users from Firebase`);
         set({ invitedUsers: usersArray, isLoading: false });
       } else {
+        console.log("✅ No users in Firebase, setting empty array");
         set({ invitedUsers: [], isLoading: false });
       }
+    }, (error) => {
+      console.error("❌ Error in users listener:", error);
+      set({ isLoading: false });
     });
   },
 

@@ -50,17 +50,28 @@ interface MentorshipActions {
 
 type MentorshipStore = MentorshipState & MentorshipActions;
 
+let isListenerInitialized = false;
+
 export const useMentorshipStore = create<MentorshipStore>()((set, get) => ({
   assignments: [],
   isLoading: false,
 
   // Initialize Firebase real-time listener
   initializeFirebaseListener: () => {
+    // Prevent multiple listener initializations
+    if (isListenerInitialized) {
+      console.log("⚠️ [Mentorship] listener already initialized, skipping...");
+      return;
+    }
+
     if (!database) {
       console.warn("Firebase not configured. Using local state only.");
       set({ isLoading: false });
       return;
     }
+
+    console.log("🔥 Initializing mentorship Firebase listener...");
+    isListenerInitialized = true;
 
     const assignmentsRef = ref(database, "mentorshipAssignments");
 
@@ -68,10 +79,14 @@ export const useMentorshipStore = create<MentorshipStore>()((set, get) => ({
       const data = snapshot.val();
       if (data) {
         const assignmentsArray = Object.values(data) as MentorshipAssignment[];
+        console.log(`✅ Loaded ${assignmentsArray.length} mentorship assignments from Firebase`);
         set({ assignments: assignmentsArray, isLoading: false });
       } else {
         set({ assignments: [], isLoading: false });
       }
+    }, (error) => {
+      console.error("❌ Error in mentorship listener:", error);
+      set({ isLoading: false });
     });
   },
 

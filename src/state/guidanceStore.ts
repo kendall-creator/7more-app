@@ -54,17 +54,28 @@ interface GuidanceActions {
 
 type GuidanceStore = GuidanceState & GuidanceActions;
 
+let isListenerInitialized = false;
+
 export const useGuidanceStore = create<GuidanceStore>()((set, get) => ({
   guidanceTasks: [],
   isLoading: false,
 
   // Initialize Firebase real-time listener
   initializeFirebaseListener: () => {
+    // Prevent multiple listener initializations
+    if (isListenerInitialized) {
+      console.log("⚠️ [Guidance] listener already initialized, skipping...");
+      return;
+    }
+
     if (!database) {
       console.warn("Firebase not configured. Using local state only.");
       set({ isLoading: false });
       return;
     }
+
+    console.log("🔥 Initializing guidance Firebase listener...");
+    isListenerInitialized = true;
 
     const guidanceRef = ref(database, "guidanceTasks");
 
@@ -72,10 +83,14 @@ export const useGuidanceStore = create<GuidanceStore>()((set, get) => ({
       const data = snapshot.val();
       if (data) {
         const tasksArray = Object.values(data) as GuidanceTask[];
+        console.log(`✅ Loaded ${tasksArray.length} guidance tasks from Firebase`);
         set({ guidanceTasks: tasksArray, isLoading: false });
       } else {
         set({ guidanceTasks: [], isLoading: false });
       }
+    }, (error) => {
+      console.error("❌ Error in guidance listener:", error);
+      set({ isLoading: false });
     });
   },
 

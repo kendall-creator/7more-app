@@ -19,6 +19,8 @@ interface ResourceActions {
 
 type ResourceStore = ResourceState & ResourceActions;
 
+let isListenerInitialized = false;
+
 // Default resources for the nonprofit
 const defaultResources: Resource[] = [
   {
@@ -56,11 +58,20 @@ export const useResourceStore = create<ResourceStore>()((set, get) => ({
 
   // Initialize Firebase real-time listener
   initializeFirebaseListener: () => {
+    // Prevent multiple listener initializations
+    if (isListenerInitialized) {
+      console.log("⚠️ [Resource] listener already initialized, skipping...");
+      return;
+    }
+
     if (!database) {
       console.warn("Firebase not configured. Using local state only.");
       set({ isLoading: false });
       return;
     }
+
+    console.log("🔥 Initializing resource Firebase listener...");
+    isListenerInitialized = true;
 
     const resourcesRef = ref(database, "resources");
 
@@ -68,10 +79,14 @@ export const useResourceStore = create<ResourceStore>()((set, get) => ({
       const data = snapshot.val();
       if (data) {
         const resourcesArray = Object.values(data) as Resource[];
+        console.log(`✅ Loaded ${resourcesArray.length} resources from Firebase`);
         set({ resources: resourcesArray, isLoading: false });
       } else {
         set({ resources: [], isLoading: false });
       }
+    }, (error) => {
+      console.error("❌ Error in resource listener:", error);
+      set({ isLoading: false });
     });
   },
 

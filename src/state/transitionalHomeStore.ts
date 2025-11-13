@@ -19,6 +19,8 @@ interface TransitionalHomeActions {
 
 type TransitionalHomeStore = TransitionalHomeState & TransitionalHomeActions;
 
+let isListenerInitialized = false;
+
 // Default transitional home (Ben Reid / Southeast Texas Transitional Center)
 const defaultHomes: TransitionalHome[] = [
   {
@@ -46,11 +48,20 @@ export const useTransitionalHomeStore = create<TransitionalHomeStore>()((set, ge
 
   // Initialize Firebase real-time listener
   initializeFirebaseListener: () => {
+    // Prevent multiple listener initializations
+    if (isListenerInitialized) {
+      console.log("⚠️ [TransitionalHome] listener already initialized, skipping...");
+      return;
+    }
+
     if (!database) {
       console.warn("Firebase not configured. Using local state only.");
       set({ isLoading: false });
       return;
     }
+
+    console.log("🔥 Initializing transitional home Firebase listener...");
+    isListenerInitialized = true;
 
     const homesRef = ref(database, "transitionalHomes");
 
@@ -58,10 +69,14 @@ export const useTransitionalHomeStore = create<TransitionalHomeStore>()((set, ge
       const data = snapshot.val();
       if (data) {
         const homesArray = Object.values(data) as TransitionalHome[];
+        console.log(`✅ Loaded ${homesArray.length} transitional homes from Firebase`);
         set({ transitionalHomes: homesArray, isLoading: false });
       } else {
         set({ transitionalHomes: [], isLoading: false });
       }
+    }, (error) => {
+      console.error("❌ Error in transitional home listener:", error);
+      set({ isLoading: false });
     });
   },
 
