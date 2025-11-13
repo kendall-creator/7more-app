@@ -204,8 +204,16 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
       createdAt: new Date().toISOString(),
     };
 
+    // Clean the participant object to remove any undefined values before spreading
+    const cleanParticipant = Object.entries(participant).reduce((acc, [key, value]) => {
+      if (value !== undefined) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as any);
+
     const updatedParticipant = {
-      ...participant,
+      ...cleanParticipant,
       notes: [...(participant.notes || []), newNote],
       history: [...(participant.history || []), newHistoryEntry],
     };
@@ -213,7 +221,9 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
     try {
       const participantRef = ref(database, `participants/${participantId}`);
       await firebaseSet(participantRef, updatedParticipant);
+      console.log("✅ Note added successfully to participant:", participantId);
     } catch (error) {
+      console.error("❌ Failed to add note:", error);
       const errorMessage = error instanceof Error ? error.message : "Firebase write failed";
       throw new Error(`Failed to save note: ${errorMessage}`);
     }

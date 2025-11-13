@@ -370,12 +370,18 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
                 <View className="gap-3">
                   <Pressable
                     onPress={handleConnectToExisting}
-                    className="bg-amber-600 rounded-lg py-3 items-center active:opacity-70"
+                    disabled={isSubmitting}
+                    className={`rounded-lg py-3 items-center ${
+                      isSubmitting ? "bg-gray-400" : "bg-amber-600 active:opacity-70"
+                    }`}
                   >
-                    <Text className="text-white text-base font-semibold">Connect to Existing Participant</Text>
+                    <Text className="text-white text-base font-semibold">
+                      {isSubmitting ? "Connecting..." : "Connect to Existing Participant"}
+                    </Text>
                   </Pressable>
                   <Pressable
                     onPress={() => setShowDuplicateModal(false)}
+                    disabled={isSubmitting}
                     className="bg-gray-200 rounded-lg py-3 items-center active:opacity-70"
                   >
                     <Text className="text-gray-700 text-base font-semibold">Create New Entry</Text>
