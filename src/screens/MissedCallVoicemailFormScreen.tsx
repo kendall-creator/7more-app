@@ -37,6 +37,7 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
   const [errorMessage, setErrorMessage] = useState("");
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [duplicateParticipants, setDuplicateParticipants] = useState<any[]>([]);
+  const [successMessage, setSuccessMessage] = useState("Voicemail entry added to Bridge Team callback queue");
 
   const validateForm = () => {
     if (!phoneNumber.trim()) {
@@ -71,18 +72,24 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
     try {
       const existingParticipant = duplicateParticipants[0];
 
+      // Validate participant has required fields
+      if (!existingParticipant?.id) {
+        throw new Error("Invalid participant data");
+      }
+
       // Ensure we have user info
       const userId = currentUser?.id || "system";
       const userName = currentUser?.name || currentUser?.email || "System";
 
-      // Create note content
-      let noteContent = "📞 Missed Call - Voicemail Received\n\n";
+      // Create note content with timestamp
+      const now = new Date().toLocaleString();
+      let noteContent = `📞 Missed Call - Voicemail Received (${now})\n\n`;
       noteContent += `Phone: ${phoneNumber}\n`;
       if (name) noteContent += `Name from voicemail: ${name}\n`;
       if (callbackWindow) noteContent += `Callback window: ${callbackWindow}\n`;
       noteContent += `\nVoicemail summary:\n${notes}`;
 
-      // Add note to existing participant
+      // Add note to existing participant (this adds to history automatically)
       await addNote(
         existingParticipant.id,
         noteContent,
@@ -90,10 +97,10 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
         userName
       );
 
+      setSuccessMessage(`Voicemail note added to ${existingParticipant.firstName} ${existingParticipant.lastName}'s profile`);
       setShowSuccessModal(true);
     } catch (error) {
-      console.error("Error connecting missed call to participant:", error);
-      setErrorMessage("Failed to connect missed call. Please try again.");
+      setErrorMessage("Failed to connect voicemail. Please try again.");
       setShowErrorModal(true);
     } finally {
       setIsSubmitting(false);
@@ -131,9 +138,9 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
 
       await addParticipant(participantData);
 
+      setSuccessMessage("Voicemail entry added to Bridge Team callback queue");
       setShowSuccessModal(true);
     } catch (error) {
-      console.error("Error adding voicemail entry:", error);
       setErrorMessage("Failed to add voicemail entry. Please try again.");
       setShowErrorModal(true);
     } finally {
@@ -280,7 +287,7 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
                     Added to Queue
                   </Text>
                   <Text className="text-center text-gray-600">
-                    Voicemail entry added to Bridge Team callback queue
+                    {successMessage}
                   </Text>
                 </View>
                 <Pressable
