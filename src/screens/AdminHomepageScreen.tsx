@@ -156,11 +156,19 @@ export default function AdminHomepageScreen() {
             </Text>
             <Text className="text-white/90 text-sm">Here is your program overview</Text>
           </View>
-          <Image
-            source={require("../../assets/7more-logo.jpeg")}
-            style={{ width: 60, height: 60 }}
-            resizeMode="contain"
-          />
+          <View className="flex-row items-center gap-3">
+            <Pressable
+              onPress={() => navigation.navigate("IntakeTypeSelection")}
+              className="w-12 h-12 bg-yellow-500 rounded-full items-center justify-center active:opacity-70"
+            >
+              <Ionicons name="add" size={28} color="white" />
+            </Pressable>
+            <Image
+              source={require("../../assets/7more-logo.jpeg")}
+              style={{ width: 60, height: 60 }}
+              resizeMode="contain"
+            />
+          </View>
         </View>
       </View>
 
@@ -170,7 +178,7 @@ export default function AdminHomepageScreen() {
           <Text className="text-base font-bold text-[#3c3832] mb-3">Quick Actions</Text>
           <View className="flex-row gap-3 mb-3">
             <Pressable
-              onPress={() => navigation.navigate("ManualIntakeForm")}
+              onPress={() => navigation.navigate("IntakeTypeSelection")}
               className="flex-1 bg-[#405b69] rounded-2xl p-4 active:opacity-80"
             >
               <Ionicons name="person-add" size={24} color="white" />
