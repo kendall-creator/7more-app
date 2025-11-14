@@ -99,13 +99,33 @@ export default function MentorDashboardScreen() {
         )}
 
         <View className="flex-row justify-between items-start mb-2">
-          <View className="flex-1">
-            <Text className="text-lg font-bold text-gray-900 mb-1">
-              {participant.firstName} {participant.lastName}
-            </Text>
-            <Text className="text-sm text-gray-500">#{participant.participantNumber}</Text>
+          <View className="flex-1 flex-row items-center">
+            <View className="flex-1">
+              <Text className="text-lg font-bold text-gray-900 mb-1">
+                {participant.firstName} {participant.lastName}
+              </Text>
+              <Text className="text-sm text-gray-500">#{participant.participantNumber}</Text>
+            </View>
+            {/* Show voicemail/missed call icon */}
+            {(participant.intakeType === "missed_call_no_voicemail" ||
+              participant.intakeType === "missed_call_voicemail") && (
+              <View className="mr-2">
+                <Ionicons
+                  name={participant.intakeType === "missed_call_voicemail" ? "chatbox-ellipses" : "call"}
+                  size={18}
+                  color="#F59E0B"
+                />
+              </View>
+            )}
           </View>
         </View>
+
+        {/* Show comments if present */}
+        {participant.missedCallComments && (
+          <View className="bg-amber-50 rounded-lg px-2 py-1 mb-2">
+            <Text className="text-xs text-gray-700 italic">{participant.missedCallComments}</Text>
+          </View>
+        )}
 
         <View className="flex-row items-center mb-3">
           <View className="flex-row items-center mr-4">

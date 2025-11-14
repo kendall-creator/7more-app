@@ -299,22 +299,6 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
               Add information from the voicemail. A full intake will be completed when contact is made.
             </Text>
 
-            {/* Phone Number - Required */}
-            <View className="mb-4">
-              <Text className="text-sm font-semibold text-gray-700 mb-2">
-                Phone Number <Text className="text-red-500">*</Text>
-              </Text>
-              <TextInput
-                className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-900"
-                placeholder="(555) 123-4567"
-                value={phoneNumber}
-                onChangeText={setPhoneNumber}
-                onBlur={handlePhoneBlur}
-                keyboardType="phone-pad"
-                autoCapitalize="none"
-              />
-            </View>
-
             {/* Name - Optional */}
             <View className="mb-4">
               <Text className="text-sm font-semibold text-gray-700 mb-2">
@@ -366,7 +350,7 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
             </View>
 
             {/* Comments - Optional */}
-            <View className="mb-6">
+            <View className="mb-4">
               <Text className="text-sm font-semibold text-gray-700 mb-2">
                 Comments (Optional)
               </Text>
@@ -378,6 +362,22 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
                 multiline
                 numberOfLines={3}
                 textAlignVertical="top"
+              />
+            </View>
+
+            {/* Phone Number - Required (moved to end) */}
+            <View className="mb-6">
+              <Text className="text-sm font-semibold text-gray-700 mb-2">
+                Phone Number <Text className="text-red-500">*</Text>
+              </Text>
+              <TextInput
+                className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-900"
+                placeholder="(555) 123-4567"
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+                onBlur={handlePhoneBlur}
+                keyboardType="phone-pad"
+                autoCapitalize="none"
               />
             </View>
 
