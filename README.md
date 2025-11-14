@@ -2,7 +2,45 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST FIX: Missed Call Forms Error Handling - November 13, 2025
+## 🔥 LATEST FIX: Manual Intake Form Freezing Issue - November 14, 2025
+
+**Date:** November 14, 2025
+**Status:** ✅ FIXED
+
+### The Problem:
+When users filled out the Manual Intake Form and selected "Connect to Existing Participant" after detecting a duplicate, the app would freeze. Users could not dismiss modals or navigate away from the screen.
+
+### Root Cause:
+The `handleConnectToExisting` function in ManualIntakeFormScreen was attempting to show a success modal on top of the duplicate selection modal. The success modal expected `firstName` and `lastName` variables which may not match the existing participant's name, and there was no proper navigation flow after connecting to an existing participant.
+
+### What Was Fixed:
+
+**Fixed in `src/screens/ManualIntakeFormScreen.tsx`:**
+1. Removed the success modal display after connecting to existing participant
+2. Added immediate `navigation.goBack()` after successfully connecting the entry
+3. Improved error handling by using `err` variable instead of `error` to avoid React Native serialization issues
+4. Added proper error message extraction: `err instanceof Error ? err.message : "Failed to connect..."`
+5. Moved `setShowDuplicateModal(false)` before the try-catch to prevent modal conflicts
+6. Moved `existingParticipant` constant outside the try block for better scoping
+
+### How It Works Now:
+
+**When connecting to an existing participant:**
+1. User selects "Connect to Existing Participant" from the duplicate modal
+2. The duplicate modal closes immediately
+3. The note is added to the existing participant
+4. The screen navigates back automatically (no success modal)
+5. If an error occurs, the error modal displays with a clear message
+
+**Benefits:**
+✅ No more app freezing after selecting "Connect to Existing Participant"
+✅ Cleaner UX - navigates back immediately after successful connection
+✅ Better error handling without serialization issues
+✅ Modal conflicts resolved
+
+---
+
+## 🔥 PREVIOUS FIX: Missed Call Forms Error Handling - November 13, 2025
 
 **Date:** November 13, 2025 @ 8:30 PM
 **Status:** ✅ FIXED

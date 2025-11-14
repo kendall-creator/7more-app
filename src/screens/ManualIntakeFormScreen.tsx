@@ -124,11 +124,11 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
   const handleConnectToExisting = async () => {
     if (duplicateParticipants.length === 0) return;
 
+    const existingParticipant = duplicateParticipants[0];
+
     setShowDuplicateModal(false);
 
     try {
-      const existingParticipant = duplicateParticipants[0];
-
       // Create note content with the new information provided
       let noteContent = "📝 Additional Contact Information Submitted\n\n";
       if (firstName || lastName) {
@@ -158,10 +158,13 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
         "Manual Entry"
       );
 
-      setShowSuccessModal(true);
-    } catch (error) {
-      console.error("Error connecting entry to participant:", error);
-      setErrorMessage("Failed to connect entry. Please try again.");
+      // Navigate directly back after successful connection
+      // Don't show success modal as it conflicts with the duplicate modal
+      navigation.goBack();
+    } catch (err) {
+      // Use 'err' instead of 'error' to avoid serialization issues
+      const errorMsg = err instanceof Error ? err.message : "Failed to connect entry. Please try again.";
+      setErrorMessage(errorMsg);
       setShowErrorModal(true);
     }
   };
