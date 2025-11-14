@@ -31,6 +31,7 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
   const [name, setName] = useState("");
   const [callbackWindow, setCallbackWindow] = useState("");
   const [notes, setNotes] = useState("");
+  const [comments, setComments] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
@@ -178,6 +179,7 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
         status: "pending_bridge" as const,
         statusDetail: "awaiting_callback" as const,
         intakeType: "missed_call_voicemail" as const,
+        missedCallComments: comments.trim() || undefined,
         completedGraduationSteps: [],
       };
 
@@ -232,6 +234,7 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
         intakeType: "missed_call_voicemail" as const,
         statusDetail: "awaiting_callback" as const,
         callbackWindow: callbackWindow.trim() || undefined,
+        missedCallComments: comments.trim() || undefined,
         // Minimal required fields - will be filled in later during full intake
         participantNumber: `TEMP-${Date.now()}`,
         dateOfBirth: "1990-01-01", // Placeholder
@@ -344,7 +347,7 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
             </View>
 
             {/* Notes - Required */}
-            <View className="mb-6">
+            <View className="mb-4">
               <Text className="text-sm font-semibold text-gray-700 mb-2">
                 Summary of Voicemail <Text className="text-red-500">*</Text>
               </Text>
@@ -360,6 +363,22 @@ export default function MissedCallVoicemailFormScreen({ navigation }: Props) {
               <Text className="text-xs text-gray-500 mt-1">
                 Required: Document what the caller said (needs, concerns, etc.)
               </Text>
+            </View>
+
+            {/* Comments - Optional */}
+            <View className="mb-6">
+              <Text className="text-sm font-semibold text-gray-700 mb-2">
+                Comments (Optional)
+              </Text>
+              <TextInput
+                className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-900"
+                placeholder="Additional comments about this voicemail..."
+                value={comments}
+                onChangeText={setComments}
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+              />
             </View>
 
             {/* Submit Button */}

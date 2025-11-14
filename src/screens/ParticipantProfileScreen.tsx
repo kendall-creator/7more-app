@@ -218,10 +218,29 @@ export default function ParticipantProfileScreen({ route, navigation }: any) {
         <Pressable onPress={() => navigation.goBack()} className="mb-4">
           <Ionicons name="arrow-back" size={24} color="white" />
         </Pressable>
-        <Text className="text-2xl font-bold text-white mb-2">
-          {participant.firstName} {participant.lastName}
-        </Text>
+        <View className="flex-row items-center mb-2">
+          <Text className="text-2xl font-bold text-white">
+            {participant.firstName} {participant.lastName}
+          </Text>
+          {/* Show voicemail/missed call icon */}
+          {(participant.intakeType === "missed_call_no_voicemail" ||
+            participant.intakeType === "missed_call_voicemail") && (
+            <View className="ml-3">
+              <Ionicons
+                name={participant.intakeType === "missed_call_voicemail" ? "chatbox-ellipses" : "call"}
+                size={24}
+                color="#FCD34D"
+              />
+            </View>
+          )}
+        </View>
         <Text className="text-yellow-100 text-sm mb-3">#{participant.participantNumber}</Text>
+        {/* Show comments if present */}
+        {participant.missedCallComments && (
+          <View className="bg-amber-100 rounded-lg px-3 py-2 mb-3">
+            <Text className="text-gray-900 text-sm">{participant.missedCallComments}</Text>
+          </View>
+        )}
         <View className={`self-start px-3 py-1 rounded-full ${getStatusColor()}`}>
           <Text className={`text-xs font-semibold ${getStatusColor()}`}>{getStatusLabel()}</Text>
         </View>

@@ -2,7 +2,44 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST FIX: Manual Intake Form Freezing Issue - November 14, 2025
+## 🔥 LATEST UPDATE: Missed Call Comments & Icons - November 14, 2025
+
+**Date:** November 14, 2025
+**Status:** ✅ COMPLETE
+
+### What Was Added:
+**Enhanced Missed Call Forms:**
+- Added optional **Comments** field to both missed call forms:
+  - Missed Call - No Voicemail form
+  - Missed Call - Voicemail Received form
+- Comments are stored in the `missedCallComments` field on participant profiles
+- Comments persist and display alongside participant information
+
+**Visual Indicators:**
+- Added **missed call/voicemail icons** next to participant names throughout the app
+- Icon appears on:
+  - Bridge Team Dashboard participant cards
+  - All Participants screen
+  - Participant Profile header
+- **Icon Types:**
+  - 📞 Call icon for "Missed Call - No Voicemail" entries
+  - 💬 Chat icon for "Missed Call - Voicemail Received" entries
+- Icons appear in amber/gold color (#F59E0B) for easy identification
+
+**Comments Display:**
+- Comments appear in a highlighted amber box below participant names
+- Visible on participant cards and profile pages
+- Helps team members quickly see context about missed calls without opening full history
+
+### Benefits:
+✅ Better tracking of missed call context and follow-up needs
+✅ Quick visual identification of participants who came in through missed calls
+✅ Enhanced communication between team members about call circumstances
+✅ Comments field allows documenting urgency, callback preferences, or special circumstances
+
+---
+
+## 🔥 PREVIOUS FIX: Manual Intake Form Freezing Issue - November 14, 2025
 
 **Date:** November 14, 2025
 **Status:** ✅ FIXED

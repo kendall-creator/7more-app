@@ -134,6 +134,7 @@ export interface Participant {
   intakeType?: IntakeType; // How the participant was added
   statusDetail?: StatusDetail; // Additional context for status
   callbackWindow?: string; // For voicemail entries - preferred callback time
+  missedCallComments?: string; // Comments from missed call forms
 
   // Status tracking
   status: ParticipantStatus;

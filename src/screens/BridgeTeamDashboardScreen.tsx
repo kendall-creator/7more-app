@@ -86,16 +86,34 @@ export default function BridgeTeamDashboardScreen() {
       >
         {/* Header Row */}
         <View className="flex-row justify-between items-start mb-3">
-          <View className="flex-1">
+          <View className="flex-1 flex-row items-center">
             <Text className="text-lg font-bold text-gray-900 mb-1">
               {participant.firstName} {participant.lastName}
             </Text>
-            <Text className="text-sm text-gray-500">#{participant.participantNumber}</Text>
+            {/* Show voicemail/missed call icon */}
+            {(participant.intakeType === "missed_call_no_voicemail" ||
+              participant.intakeType === "missed_call_voicemail") && (
+              <View className="ml-2">
+                <Ionicons
+                  name={participant.intakeType === "missed_call_voicemail" ? "chatbox-ellipses" : "call"}
+                  size={18}
+                  color="#F59E0B"
+                />
+              </View>
+            )}
           </View>
           <View className={`px-3 py-1 rounded-full ${badge.color}`}>
             <Text className={`text-xs font-semibold ${badge.color}`}>{badge.text}</Text>
           </View>
         </View>
+
+        {/* Participant Number and Comments if present */}
+        <Text className="text-sm text-gray-500 mb-1">#{participant.participantNumber}</Text>
+        {participant.missedCallComments && (
+          <View className="bg-amber-50 rounded-lg px-2 py-1 mb-2">
+            <Text className="text-xs text-gray-700 italic">{participant.missedCallComments}</Text>
+          </View>
+        )}
 
         {/* Info Row */}
         <View className="flex-row items-center mb-4">
