@@ -94,9 +94,9 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
 
     try {
       if (!selectedParticipant?.id) {
-        setErrorMessage("Invalid participant data");
-        setShowErrorModal(true);
         setIsSubmitting(false);
+        setErrorMessage("Invalid participant data");
+        setTimeout(() => setShowErrorModal(true), 100);
         return;
       }
 
@@ -116,25 +116,40 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
         userName
       );
 
-      setIsSubmitting(false);
-      setSuccessMessage(`Missed call note added to ${selectedParticipant.firstName} ${selectedParticipant.lastName}'s profile. Status remains: ${getParticipantStatusDisplay(selectedParticipant.status)}`);
+      const message = `Missed call note added to ${selectedParticipant.firstName} ${selectedParticipant.lastName}'s profile. Status remains: ${getParticipantStatusDisplay(selectedParticipant.status)}`;
 
+      setIsSubmitting(false);
+      setSuccessMessage(message);
+
+      // Delay showing success modal to allow state to settle after Firebase listener updates
       setTimeout(() => {
         setShowSuccessModal(true);
-      }, 100);
+      }, 150);
 
     } catch (err) {
       setIsSubmitting(false);
       const errorMsg = err instanceof Error ? err.message : "Failed to add information";
       setErrorMessage(errorMsg);
-      setShowErrorModal(true);
+      setTimeout(() => setShowErrorModal(true), 100);
     }
   };
 
   const handleMoveParticipant = () => {
+    if (!selectedParticipant?.id) {
+      setShowActionModal(false);
+      setErrorMessage("Invalid participant data");
+      setTimeout(() => setShowErrorModal(true), 100);
+      return;
+    }
+
+    const participantId = selectedParticipant.id;
     setShowActionModal(false);
-    // Navigate to participant profile where they can change status
-    navigation.navigate("ParticipantProfile", { participantId: selectedParticipant.id });
+    setSelectedParticipant(null);
+
+    // Small delay before navigation to ensure modal closes smoothly
+    setTimeout(() => {
+      navigation.navigate("ParticipantProfile", { participantId });
+    }, 100);
   };
 
   const handleCreateSeparateEntry = async () => {
@@ -161,20 +176,36 @@ export default function MissedCallNoVoicemailFormScreen({ navigation }: Props) {
 
       await addParticipant(participantData);
 
-      setSuccessMessage("New missed call entry created separately in Bridge Team callback queue");
-      setShowSuccessModal(true);
-    } catch (err) {
-      setErrorMessage("Failed to create separate entry. Please try again.");
-      setShowErrorModal(true);
-    } finally {
       setIsSubmitting(false);
+      setSuccessMessage("New missed call entry created separately in Bridge Team callback queue");
+
+      // Delay showing success modal to allow state to settle after Firebase listener updates
+      setTimeout(() => {
+        setShowSuccessModal(true);
+      }, 150);
+    } catch (err) {
+      setIsSubmitting(false);
+      setErrorMessage("Failed to create separate entry. Please try again.");
+      setTimeout(() => setShowErrorModal(true), 100);
     }
   };
 
   const handleAssignToUser = () => {
+    if (!selectedParticipant?.id) {
+      setShowActionModal(false);
+      setErrorMessage("Invalid participant data");
+      setTimeout(() => setShowErrorModal(true), 100);
+      return;
+    }
+
+    const participantId = selectedParticipant.id;
     setShowActionModal(false);
-    // Navigate to participant profile where they can assign
-    navigation.navigate("ParticipantProfile", { participantId: selectedParticipant.id });
+    setSelectedParticipant(null);
+
+    // Small delay before navigation to ensure modal closes smoothly
+    setTimeout(() => {
+      navigation.navigate("ParticipantProfile", { participantId });
+    }, 100);
   };
 
   const handleSubmit = async () => {
