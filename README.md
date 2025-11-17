@@ -2,7 +2,161 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Supporter User Role Added - November 17, 2025
+## 🔥 LATEST UPDATE: Volunteer Interest & Assignment System - November 17, 2025
+
+**Date:** November 17, 2025
+**Status:** ✅ COMPLETE
+
+### What Was Added:
+
+**Complete Volunteer Inquiry and Assignment Workflow:**
+
+The app now includes a comprehensive volunteer management system that automates the entire volunteer intake process from inquiry to task assignment to database management.
+
+#### 1. Volunteer Inquiry System
+- **Automatic Assignment to Debs** - All volunteer inquiries are automatically assigned to Deborah Walker (Debs) for processing
+- **Multi-Select Interest Areas**:
+  - Bridge Team
+  - Clothing Donation
+  - In-Prison Volunteering
+  - Administrative Work
+  - General Volunteer
+  - Monetary Donation
+  - Other (with description field)
+- **Conditional Fields**:
+  - Other interest description (required when "Other" is selected)
+  - Monetary donation amount (required when "Monetary Donation" is selected)
+- **Contact Information**: Email and phone number fields (optional)
+- **Notes Field**: Additional information about the volunteer inquiry
+
+#### 2. Automated Task Routing System
+**When Debs submits a volunteer inquiry:**
+- System automatically creates one task per selected interest area
+- Each task is automatically assigned to the appropriate user based on routing rules:
+  - **Bridge Team** → Kendall
+  - **Clothing Donation** → Gregg
+  - **In-Prison Volunteering** → Josh
+  - **Administrative Work** → Kendall
+  - **General Volunteer** → Debs
+  - **Other** → Debs assigns manually
+  - **Monetary Donation** → Debs (with special logic)
+
+**Task Contents Include:**
+- Volunteer name and contact information
+- Interest area
+- Notes from Debs
+- Follow-up instructions
+- Complete checkbox
+
+#### 3. Monetary Donation Logic
+**Dynamic Instructions Based on Amount:**
+- **Under $1,000**: Task instruction reads "Send them the giving link through the website."
+- **$1,000 or More**: Task instruction reads "Coach them to write a check payable to 7more at: [Admin-Editable Address]"
+- **Admin-Editable Settings**:
+  - Threshold amount (default: $1,000)
+  - Below threshold instruction
+  - Above threshold instruction
+  - Check mailing address
+
+#### 4. Volunteer Database
+**Automatic Database Entry:**
+- Once all tasks are marked complete, volunteer automatically moves to the Volunteer Database
+- All volunteer information is preserved
+- Full history of interactions is maintained
+
+**Admin Capabilities:**
+- View all volunteers with filters by interest area
+- Search by name, email, or phone number
+- Edit any volunteer field
+- Add notes and tags
+- View complete volunteer history
+- Delete volunteer records
+
+#### 5. Convert Volunteer to System User
+**Admins can convert any volunteer into a system user:**
+- Click "Convert to User" button on volunteer record
+- Select user role:
+  - Lead Volunteer
+  - Support Volunteer
+  - Mentor
+  - Bridge Team
+  - Mentorship Leader
+  - Admin
+- System automatically:
+  - Creates user account with email
+  - Generates password (first initial + last name)
+  - Preserves volunteer record and history
+  - Shows login credentials to admin for sharing
+
+**Requirements:**
+- Volunteer must have an email address to convert
+- Admin receives password to share with new user
+
+#### 6. Routing Rules Editor (Admin Only)
+**Configure Task Assignments:**
+- Edit which user receives tasks for each interest area
+- Search and select from all system users
+- View assignment history and last updated information
+- Changes apply immediately to new inquiries
+
+**Donation Settings Management:**
+- Edit threshold amount
+- Customize instructions for below/above threshold
+- Update check mailing address
+- Changes apply to all new monetary donation tasks
+
+#### 7. Volunteer Dashboard (Debs & Admins)
+**Quick Overview:**
+- Pending inquiries count
+- Total volunteers in database
+- Tasks assigned to me
+- Recently completed inquiries (last 5)
+
+**Pending Inquiries View:**
+- All volunteer inquiries awaiting processing
+- Contact information displayed
+- Interest areas shown as badges
+- Monetary donation amounts highlighted
+- Task generation status
+- Days since submission
+
+**Quick Actions:**
+- New Inquiry button
+- View Database button
+- Routing Rules (admins only)
+
+### User Access:
+✅ **Admin** - Full access to all volunteer management features
+✅ **Deborah Walker (Debs)** - Access to Volunteer Dashboard and intake forms
+✅ Task recipients (Kendall, Gregg, Josh, etc.) - Receive assigned tasks in their task list
+
+### Technical Implementation:
+- **State Management**: Zustand store with Firebase real-time sync
+- **Data Storage**: Firebase Realtime Database (`volunteer_inquiries`, `volunteer_database`, `volunteer_routing_rules`, `volunteer_donation_settings`)
+- **Task Integration**: Fully integrated with existing task management system
+- **History Tracking**: All actions logged with timestamps and user attribution
+
+### Workflow Summary:
+1. **Inquiry Arrives** → Automatically assigned to Debs
+2. **Debs Fills Intake Form** → Selects interests, enters volunteer info
+3. **System Processes** → Creates tasks for each selected interest
+4. **Tasks Assigned** → Routed to appropriate users based on rules
+5. **Users Complete Tasks** → Mark tasks with follow-up checkbox
+6. **All Tasks Complete** → Volunteer automatically added to permanent database
+7. **Admin Can Convert** → Turn volunteer into system user with selected role
+
+### Benefits:
+✅ **Automated Workflow** - No manual task assignment needed
+✅ **Multi-Interest Support** - One volunteer can have multiple interests
+✅ **Flexible Routing** - Admin can change task assignments anytime
+✅ **Donation Handling** - Smart logic for different donation amounts
+✅ **Database Management** - Permanent record of all volunteers
+✅ **User Conversion** - Easy path from volunteer to staff member
+✅ **Complete Audit Trail** - Full history of all actions and changes
+
+---
+
+## 🔥 PREVIOUS UPDATE: Supporter User Role Added - November 17, 2025
 
 **Date:** November 17, 2025
 **Status:** ✅ COMPLETE

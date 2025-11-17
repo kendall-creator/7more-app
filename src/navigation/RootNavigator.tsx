@@ -64,6 +64,10 @@ import TaskManagementScreen from "../screens/TaskManagementScreen";
 import IntakeTypeSelectionScreen from "../screens/IntakeTypeSelectionScreen";
 import MissedCallNoVoicemailFormScreen from "../screens/MissedCallNoVoicemailFormScreen";
 import MissedCallVoicemailFormScreen from "../screens/MissedCallVoicemailFormScreen";
+import VolunteerDashboardScreen from "../screens/VolunteerDashboardScreen";
+import VolunteerIntakeFormScreen from "../screens/VolunteerIntakeFormScreen";
+import VolunteerDatabaseScreen from "../screens/VolunteerDatabaseScreen";
+import VolunteerRoutingRulesScreen from "../screens/VolunteerRoutingRulesScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -510,6 +514,10 @@ export default function RootNavigator() {
           <Stack.Screen name="FileManagement" component={FileManagementScreen} />
           <Stack.Screen name="ManageForms" component={ManageFormsScreen} />
           <Stack.Screen name="EditFormQuestions" component={EditFormQuestionsScreen} />
+          <Stack.Screen name="VolunteerDashboard" component={VolunteerDashboardScreen} />
+          <Stack.Screen name="VolunteerIntakeForm" component={VolunteerIntakeFormScreen} />
+          <Stack.Screen name="VolunteerDatabase" component={VolunteerDatabaseScreen} />
+          <Stack.Screen name="VolunteerRoutingRules" component={VolunteerRoutingRulesScreen} />
         </>
       )}
     </Stack.Navigator>

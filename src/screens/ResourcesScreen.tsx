@@ -295,6 +295,26 @@ export default function ResourcesScreen() {
           </View>
         )}
 
+        {/* Volunteer Management Card - For Admins */}
+        {currentUser?.role === "admin" && (
+          <View className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 mb-4">
+            <View className="flex-row items-center mb-3">
+              <Ionicons name="people" size={24} color="#10B981" />
+              <Text className="text-lg font-bold text-emerald-900 ml-2">Volunteer Management</Text>
+            </View>
+            <Text className="text-sm text-gray-600 mb-4">
+              Manage volunteer inquiries, assign tasks, configure routing rules, and maintain the volunteer database.
+            </Text>
+            <Pressable
+              onPress={() => navigation.navigate("VolunteerDashboard")}
+              className="bg-emerald-600 rounded-lg py-3 flex-row items-center justify-center active:opacity-80"
+            >
+              <Ionicons name="arrow-forward" size={18} color="white" />
+              <Text className="text-white text-sm font-semibold ml-2">Open Dashboard</Text>
+            </Pressable>
+          </View>
+        )}
+
         {/* Demographics Report Card - For Admins Only */}
         {currentUser?.role === "admin" && (
           <View className="bg-teal-50 border border-teal-200 rounded-xl p-5 mb-4">
