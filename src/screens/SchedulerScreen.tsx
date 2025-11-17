@@ -33,6 +33,7 @@ export default function SchedulerScreen({ navigation }: any) {
   const userRole = currentUser?.role || "volunteer";
   const isAdmin = userRole === "admin";
   const isSupportVolunteer = userRole === "volunteer_support";
+  const isSupporter = userRole === "supporter";
 
   // Default to "My Schedule" for non-admins, "Manage Schedule" for admins
   const [activeTab, setActiveTab] = useState<"my" | "manage">(isAdmin ? "manage" : "my");
@@ -52,6 +53,9 @@ export default function SchedulerScreen({ navigation }: any) {
       if (isSupportVolunteer) {
         // Support volunteers only see shifts that include volunteer_support role
         filtered = shifts.filter((shift) => shift.allowedRoles.includes("volunteer_support"));
+      } else if (isSupporter) {
+        // Supporters see all shifts (they can view and sign up for any shift the admin allows)
+        filtered = shifts;
       } else {
         // Everyone else sees all shifts they have permission for
         filtered = shifts.filter((shift) => shift.allowedRoles.includes(userRole));
@@ -59,7 +63,7 @@ export default function SchedulerScreen({ navigation }: any) {
     }
 
     return filtered;
-  }, [shifts, userRole, isSupportVolunteer, activeTab, currentUser]);
+  }, [shifts, userRole, isSupportVolunteer, isSupporter, activeTab, currentUser]);
 
   // Get the start of the current week (Monday)
   const getWeekStart = (offset: number = 0) => {
@@ -160,7 +164,9 @@ export default function SchedulerScreen({ navigation }: any) {
 
   const canSignUp = (shift: any) => {
     if (!currentUser) return false;
-    if (!shift.allowedRoles.includes(userRole)) return false;
+    // Supporters can sign up for any shift (not restricted by allowedRoles)
+    // Other roles must be in the shift's allowedRoles array
+    if (!isSupporter && !shift.allowedRoles.includes(userRole)) return false;
     const assignedUsers = shift.assignedUsers || [];
     if (shift.maxVolunteers && assignedUsers.length >= shift.maxVolunteers) return false;
     if (assignedUsers.some((assignment: any) => assignment.userId === currentUser.id)) return false;

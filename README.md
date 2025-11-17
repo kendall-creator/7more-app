@@ -19,8 +19,8 @@ A comprehensive mobile application built with Expo and React Native to help nonp
 - Task filtering automatically shows supporters:
   - Tasks they are assigned to complete
   - Tasks they created and assigned to other users
-- Supporters can view the full volunteer shift schedule
-- Can sign up for shifts they're eligible for based on shift permissions
+- Supporters can view the full volunteer shift schedule (all shifts)
+- Can sign up for any shift regardless of role restrictions
 - Simple, focused navigation with just two tabs (Schedule and Tasks)
 
 **User Management:**
@@ -38,7 +38,7 @@ A comprehensive mobile application built with Expo and React Native to help nonp
 **Role Comparison:**
 - **Lead Volunteer**: Can see all shifts + their tasks + resources
 - **Support Volunteer**: Can see support-designated shifts only + their tasks + resources
-- **Supporter** (NEW): Can see all shifts + tasks they assigned/are assigned to (no resources tab)
+- **Supporter** (NEW): Can see all shifts + sign up for any shift + tasks they assigned/are assigned to (no resources tab)
 
 ---
 
