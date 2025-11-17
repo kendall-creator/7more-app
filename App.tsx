@@ -13,6 +13,7 @@ import { useMentorshipStore } from "./src/state/mentorshipStore";
 import { useGuidanceStore } from "./src/state/guidanceStore";
 import { useTaskStore } from "./src/state/taskStore";
 import { useReportingStore } from "./src/state/reportingStore";
+import { useVolunteerStore } from "./src/state/volunteerStore";
 import { fixAdminPasswordFlag } from "./src/utils/fixAdminPassword";
 
 /*
@@ -48,6 +49,7 @@ export default function App() {
   const initGuidanceListener = useGuidanceStore((s) => s.initializeFirebaseListener);
   const initTasksListener = useTaskStore((s) => s.initializeFirebaseListener);
   const initReportingListener = useReportingStore((s) => s.initializeFirebaseListener);
+  const initVolunteerListener = useVolunteerStore((s) => s.initializeFirebaseListener);
 
   useEffect(() => {
     console.log("🚀 App.tsx: Initializing all Firebase listeners and stores...");
@@ -62,6 +64,7 @@ export default function App() {
     initGuidanceListener();
     initTasksListener();
     initReportingListener();
+    initVolunteerListener();
 
     // Initialize default admin account on first launch
     initializeDefaultAdmin();

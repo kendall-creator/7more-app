@@ -711,3 +711,89 @@ export interface Meeting {
   invitees: MeetingInvitee[]; // List of invited users with RSVP status
 }
 
+// Volunteer Interest System
+export type VolunteerInterestArea =
+  | "bridge_team"
+  | "clothing_donation"
+  | "in_prison_volunteering"
+  | "administrative_work"
+  | "general_volunteer"
+  | "monetary_donation"
+  | "other";
+
+export interface VolunteerRoutingRule {
+  interestArea: VolunteerInterestArea;
+  assignedToUserId: string;
+  assignedToUserName: string;
+  updatedAt?: string;
+  updatedBy?: string;
+  updatedByName?: string;
+}
+
+export interface VolunteerInquiry {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phoneNumber?: string;
+  selectedInterests: VolunteerInterestArea[];
+  otherInterestDescription?: string;
+  monetaryDonationAmount?: number;
+  notes?: string;
+
+  // Status tracking
+  status: "pending" | "in_progress" | "completed";
+  assignedToDebs: boolean;
+  assignedToDebsAt: string; // ISO timestamp
+
+  // Task tracking
+  generatedTaskIds: string[]; // IDs of tasks created from this inquiry
+  allTasksComplete: boolean;
+
+  // History
+  submittedAt: string; // ISO timestamp
+  completedAt?: string; // ISO timestamp when all tasks are done
+  movedToDatabaseAt?: string; // ISO timestamp when moved to volunteer database
+  history: HistoryEntry[];
+}
+
+export interface VolunteerRecord {
+  id: string;
+  originalInquiryId?: string; // Link back to original inquiry if applicable
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phoneNumber?: string;
+  interests: VolunteerInterestArea[];
+  otherInterestDescription?: string;
+  monetaryDonationAmount?: number;
+
+  // Contact preferences
+  preferredContactMethod?: "email" | "phone" | "text";
+
+  // Admin editable fields
+  notes?: string;
+  tags?: string[];
+
+  // Tracking
+  addedAt: string; // ISO timestamp
+  addedBy: string;
+  addedByName: string;
+  lastContactedAt?: string;
+  totalContactAttempts: number;
+
+  // History of all interactions
+  history: HistoryEntry[];
+}
+
+// Monetary Donation Settings (admin-editable)
+export interface MonetaryDonationSettings {
+  threshold: number; // Default 1000
+  belowThresholdInstruction: string; // Default: "Send them the giving link through the website."
+  aboveThresholdInstruction: string; // Default: "Coach them to write a check payable to 7more at: [address]"
+  checkAddress: string; // Admin-editable address
+  updatedAt?: string;
+  updatedBy?: string;
+  updatedByName?: string;
+}
+
