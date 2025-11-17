@@ -1473,6 +1473,14 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
 
               <View className="gap-2 mb-4">
                 {(() => {
+                  if (!sourceWeek) {
+                    return (
+                      <View className="bg-gray-50 rounded-xl p-4 items-center">
+                        <Text className="text-gray-500 text-sm">Select a source week first</Text>
+                      </View>
+                    );
+                  }
+
                   const sourceDate = new Date(sourceWeek);
                   const sourceWeekEnd = new Date(sourceDate);
                   sourceWeekEnd.setDate(sourceDate.getDate() + 6);
