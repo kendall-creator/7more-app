@@ -24,7 +24,7 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
   const deleteShift = useSchedulerStore((s) => s.deleteShift);
   const deleteRecurringGroup = useSchedulerStore((s) => s.deleteRecurringGroup);
   const updateShift = useSchedulerStore((s) => s.updateShift);
-  const copyWeek = useSchedulerStore((s) => s.copyWeek);
+  const adminAssignUserToShift = useSchedulerStore((s) => s.adminAssignUserToShift);
   const saveWeekAsTemplate = useSchedulerStore((s) => s.saveWeekAsTemplate);
   const getTemplates = useSchedulerStore((s) => s.getTemplates);
   const createShiftsFromTemplate = useSchedulerStore((s) => s.createShiftsFromTemplate);
@@ -35,6 +35,9 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showCopyWeekModal, setShowCopyWeekModal] = useState(false);
+  const [showCopyWeekStep2Modal, setShowCopyWeekStep2Modal] = useState(false);
+  const [selectedShiftsToCopy, setSelectedShiftsToCopy] = useState<string[]>([]);
+  const [keepAssignments, setKeepAssignments] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [showSaveTemplateModal, setShowSaveTemplateModal] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -75,6 +78,8 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const roleOptions: { role: UserRole; label: string }[] = [
     { role: "admin", label: "Admin" },
@@ -379,15 +384,129 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
     setSelectedShift(null);
   };
 
-  const handleCopyWeek = () => {
-    if (!sourceWeek || !targetWeek || !currentUser) return;
+  const handleCopyWeekStep1 = () => {
+    if (!sourceWeek) return;
 
-    copyWeek(sourceWeek, targetWeek, currentUser.id, currentUser.name);
-    setSuccessMessage("Week copied successfully");
-    setShowSuccessModal(true);
+    // Get shifts for the selected source week
+    const sourceDate = new Date(sourceWeek);
+    const sourceWeekEnd = new Date(sourceDate);
+    sourceWeekEnd.setDate(sourceDate.getDate() + 6);
+
+    const shiftsInWeek = getShiftsByDateRange(
+      sourceWeek,
+      sourceWeekEnd.toISOString().split('T')[0]
+    );
+
+    // Pre-select all shifts
+    setSelectedShiftsToCopy(shiftsInWeek.map(s => s.id));
+
+    // Close step 1 modal and open step 2
     setShowCopyWeekModal(false);
-    setSourceWeek("");
-    setTargetWeek("");
+    setShowCopyWeekStep2Modal(true);
+  };
+
+  const handleCopyWeek = async () => {
+    if (!sourceWeek || !targetWeek || !currentUser || selectedShiftsToCopy.length === 0) return;
+
+    try {
+      const sourceDate = new Date(sourceWeek);
+      const targetDate = new Date(targetWeek);
+      const daysDiff = Math.floor((targetDate.getTime() - sourceDate.getTime()) / (1000 * 60 * 60 * 24));
+
+      // Get the selected shifts
+      const shiftsToCreate = shifts.filter(shift => selectedShiftsToCopy.includes(shift.id));
+
+      // Create new shifts for target week
+      for (const shift of shiftsToCreate) {
+        const newDate = new Date(shift.date);
+        newDate.setDate(newDate.getDate() + daysDiff);
+
+        const year = newDate.getFullYear();
+        const month = String(newDate.getMonth() + 1).padStart(2, '0');
+        const day = String(newDate.getDate()).padStart(2, '0');
+        const dateString = `${year}-${month}-${day}`;
+
+        await createShift(
+          shift.title,
+          shift.description || "",
+          dateString,
+          shift.startTime,
+          shift.endTime,
+          shift.allowedRoles,
+          currentUser.id,
+          currentUser.name,
+          shift.maxVolunteers,
+          false,
+          12,
+          shift.location || "pam_lychner"
+        );
+
+        // If keeping assignments, assign the same users
+        if (keepAssignments && shift.assignedUsers && shift.assignedUsers.length > 0) {
+          // Wait a bit for the shift to be created
+          await new Promise(resolve => setTimeout(resolve, 100));
+
+          // Find the newly created shift
+          const newShifts = shifts.filter(s =>
+            s.date === dateString &&
+            s.title === shift.title &&
+            s.startTime === shift.startTime
+          );
+
+          if (newShifts.length > 0) {
+            const newShift = newShifts[newShifts.length - 1];
+
+            // Assign each user
+            for (const assignment of shift.assignedUsers) {
+              await adminAssignUserToShift(
+                newShift.id,
+                assignment.userId,
+                assignment.userName,
+                assignment.userRole,
+                assignment.userNickname
+              );
+            }
+          }
+        }
+      }
+
+      setSuccessMessage(`${selectedShiftsToCopy.length} shift(s) copied successfully`);
+      setShowSuccessModal(true);
+      setShowCopyWeekStep2Modal(false);
+      setSourceWeek("");
+      setTargetWeek("");
+      setSelectedShiftsToCopy([]);
+      setKeepAssignments(false);
+    } catch (error) {
+      console.error("Error copying week:", error);
+      setErrorMessage("Failed to copy shifts. Please try again.");
+      setShowErrorModal(true);
+    }
+  };
+
+  const toggleShiftSelection = (shiftId: string) => {
+    if (selectedShiftsToCopy.includes(shiftId)) {
+      setSelectedShiftsToCopy(selectedShiftsToCopy.filter(id => id !== shiftId));
+    } else {
+      setSelectedShiftsToCopy([...selectedShiftsToCopy, shiftId]);
+    }
+  };
+
+  const selectAllShifts = () => {
+    const sourceDate = new Date(sourceWeek);
+    const sourceWeekEnd = new Date(sourceDate);
+    sourceWeekEnd.setDate(sourceDate.getDate() + 6);
+
+    const shiftsInWeek = getShiftsByDateRange(
+      sourceWeek,
+      sourceWeekEnd.toISOString().split('T')[0]
+    );
+
+    setSelectedShiftsToCopy(shiftsInWeek.map(s => s.id));
+  };
+
+  const deselectAllShifts = () => {
+    setSelectedShiftsToCopy([]);
   };
 
   const handleSaveTemplate = () => {
@@ -1239,7 +1358,7 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
         </KeyboardAvoidingView>
       </Modal>
 
-      {/* Copy Week Modal */}
+      {/* Copy Week Modal - Step 1: Select Source Week */}
       <Modal
         visible={showCopyWeekModal}
         transparent
@@ -1252,46 +1371,229 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
         >
           <View className="bg-white rounded-t-3xl pt-6 pb-10 px-6">
             <View className="flex-row items-center justify-between mb-6">
-              <Text className="text-xl font-bold text-gray-900">Copy Week</Text>
+              <Text className="text-xl font-bold text-gray-900">Copy Week - Step 1</Text>
               <Pressable onPress={() => setShowCopyWeekModal(false)} className="w-8 h-8 items-center justify-center">
                 <Ionicons name="close" size={24} color="#374151" />
               </Pressable>
             </View>
 
             <Text className="text-sm text-gray-600 mb-4">
-              Copy all shifts from one week to another. Assignments will not be copied.
+              Select the week you want to copy FROM
             </Text>
 
-            <Text className="text-sm font-semibold text-gray-700 mb-2">Source Week (Monday)</Text>
+            <Text className="text-sm font-semibold text-gray-700 mb-2">Source Week</Text>
             <Pressable
               onPress={() => openDatePicker("sourceWeek")}
-              className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 flex-row items-center justify-between mb-4"
+              className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 flex-row items-center justify-between mb-6"
             >
               <Text className={`text-base ${sourceWeek ? "text-gray-900" : "text-gray-400"}`}>
-                {sourceWeek || "Tap to select date"}
+                {sourceWeek ? (() => {
+                  const [year, month, day] = sourceWeek.split('-').map(Number);
+                  const date = new Date(year, month - 1, day);
+                  return date.toLocaleDateString("en-US", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric"
+                  });
+                })() : "Tap to select date"}
               </Text>
               <Ionicons name="calendar-outline" size={20} color="#6B7280" />
             </Pressable>
 
-            <Text className="text-sm font-semibold text-gray-700 mb-2">Target Week (Monday)</Text>
             <Pressable
-              onPress={() => openDatePicker("targetWeek")}
-              className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 flex-row items-center justify-between mb-6"
+              onPress={handleCopyWeekStep1}
+              disabled={!sourceWeek}
+              className={`rounded-xl py-4 items-center ${
+                sourceWeek ? "bg-blue-600" : "bg-gray-300"
+              }`}
             >
-              <Text className={`text-base ${targetWeek ? "text-gray-900" : "text-gray-400"}`}>
-                {targetWeek || "Tap to select date"}
-              </Text>
-              <Ionicons name="calendar-outline" size={20} color="#6B7280" />
+              <Text className="text-white text-base font-bold">Next</Text>
             </Pressable>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Copy Week Modal - Step 2: Select Shifts and Target Week */}
+      <Modal
+        visible={showCopyWeekStep2Modal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowCopyWeekStep2Modal(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          className="flex-1 bg-black/50 justify-end"
+        >
+          <View className="bg-white rounded-t-3xl pt-6 pb-10 px-6 max-h-[90%]">
+            <View className="flex-row items-center justify-between mb-6">
+              <Pressable
+                onPress={() => {
+                  setShowCopyWeekStep2Modal(false);
+                  setShowCopyWeekModal(true);
+                }}
+                className="flex-row items-center"
+              >
+                <Ionicons name="arrow-back" size={24} color="#374151" />
+                <Text className="text-xl font-bold text-gray-900 ml-2">Copy Week - Step 2</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  setShowCopyWeekStep2Modal(false);
+                  setSourceWeek("");
+                  setTargetWeek("");
+                  setSelectedShiftsToCopy([]);
+                  setKeepAssignments(false);
+                }}
+                className="w-8 h-8 items-center justify-center"
+              >
+                <Ionicons name="close" size={24} color="#374151" />
+              </Pressable>
+            </View>
+
+            <ScrollView className="mb-4">
+              <Text className="text-sm text-gray-600 mb-4">
+                Select which shifts to copy and choose the target week
+              </Text>
+
+              {/* Shifts Selection */}
+              <View className="flex-row items-center justify-between mb-3">
+                <Text className="text-sm font-semibold text-gray-700">
+                  Select Shifts ({selectedShiftsToCopy.length})
+                </Text>
+                <View className="flex-row gap-2">
+                  <Pressable onPress={selectAllShifts} className="px-3 py-1 bg-blue-50 rounded-lg">
+                    <Text className="text-xs font-semibold text-blue-600">All</Text>
+                  </Pressable>
+                  <Pressable onPress={deselectAllShifts} className="px-3 py-1 bg-gray-100 rounded-lg">
+                    <Text className="text-xs font-semibold text-gray-600">None</Text>
+                  </Pressable>
+                </View>
+              </View>
+
+              <View className="gap-2 mb-4">
+                {(() => {
+                  const sourceDate = new Date(sourceWeek);
+                  const sourceWeekEnd = new Date(sourceDate);
+                  sourceWeekEnd.setDate(sourceDate.getDate() + 6);
+
+                  const shiftsInWeek = getShiftsByDateRange(
+                    sourceWeek,
+                    sourceWeekEnd.toISOString().split('T')[0]
+                  ).sort((a, b) => {
+                    const dateCompare = a.date.localeCompare(b.date);
+                    if (dateCompare !== 0) return dateCompare;
+                    return a.startTime.localeCompare(b.startTime);
+                  });
+
+                  if (shiftsInWeek.length === 0) {
+                    return (
+                      <View className="bg-gray-50 rounded-xl p-4 items-center">
+                        <Text className="text-gray-500 text-sm">No shifts found in this week</Text>
+                      </View>
+                    );
+                  }
+
+                  return shiftsInWeek.map((shift) => {
+                    const isSelected = selectedShiftsToCopy.includes(shift.id);
+                    const assignedCount = shift.assignedUsers?.length || 0;
+
+                    return (
+                      <Pressable
+                        key={shift.id}
+                        onPress={() => toggleShiftSelection(shift.id)}
+                        className={`border-2 rounded-xl p-3 ${
+                          isSelected
+                            ? "bg-blue-50 border-blue-600"
+                            : "bg-white border-gray-200"
+                        }`}
+                      >
+                        <View className="flex-row items-start justify-between">
+                          <View className="flex-1">
+                            <Text className={`text-sm font-semibold ${isSelected ? "text-blue-900" : "text-gray-900"}`}>
+                              {shift.title}
+                            </Text>
+                            <Text className={`text-xs mt-1 ${isSelected ? "text-blue-600" : "text-gray-500"}`}>
+                              {(() => {
+                                const [year, month, day] = shift.date.split('-').map(Number);
+                                const date = new Date(year, month - 1, day);
+                                return date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+                              })()} • {shift.startTime} - {shift.endTime}
+                            </Text>
+                            {assignedCount > 0 && (
+                              <Text className={`text-xs mt-1 ${isSelected ? "text-blue-600" : "text-gray-500"}`}>
+                                {assignedCount} assigned
+                              </Text>
+                            )}
+                          </View>
+                          {isSelected && (
+                            <View className="w-6 h-6 bg-blue-600 rounded-full items-center justify-center">
+                              <Ionicons name="checkmark" size={14} color="white" />
+                            </View>
+                          )}
+                        </View>
+                      </Pressable>
+                    );
+                  });
+                })()}
+              </View>
+
+              {/* Keep Assignments Toggle */}
+              <Pressable
+                onPress={() => setKeepAssignments(!keepAssignments)}
+                className={`border-2 rounded-xl p-4 mb-4 flex-row items-center justify-between ${
+                  keepAssignments ? "bg-green-50 border-green-600" : "bg-white border-gray-200"
+                }`}
+              >
+                <View className="flex-1">
+                  <Text className={`text-sm font-semibold ${keepAssignments ? "text-green-900" : "text-gray-900"}`}>
+                    Keep Assigned People
+                  </Text>
+                  <Text className="text-xs text-gray-500 mt-1">
+                    Copy shifts with their current assignments
+                  </Text>
+                </View>
+                {keepAssignments ? (
+                  <View className="w-6 h-6 bg-green-600 rounded-full items-center justify-center">
+                    <Ionicons name="checkmark" size={14} color="white" />
+                  </View>
+                ) : (
+                  <View className="w-6 h-6 bg-gray-300 rounded-full" />
+                )}
+              </Pressable>
+
+              {/* Target Week Selection */}
+              <Text className="text-sm font-semibold text-gray-700 mb-2">Copy To Week</Text>
+              <Pressable
+                onPress={() => openDatePicker("targetWeek")}
+                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 flex-row items-center justify-between mb-4"
+              >
+                <Text className={`text-base ${targetWeek ? "text-gray-900" : "text-gray-400"}`}>
+                  {targetWeek ? (() => {
+                    const [year, month, day] = targetWeek.split('-').map(Number);
+                    const date = new Date(year, month - 1, day);
+                    return date.toLocaleDateString("en-US", {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric"
+                    });
+                  })() : "Tap to select date"}
+                </Text>
+                <Ionicons name="calendar-outline" size={20} color="#6B7280" />
+              </Pressable>
+            </ScrollView>
 
             <Pressable
               onPress={handleCopyWeek}
-              disabled={!sourceWeek || !targetWeek}
+              disabled={!targetWeek || selectedShiftsToCopy.length === 0}
               className={`rounded-xl py-4 items-center ${
-                sourceWeek && targetWeek ? "bg-blue-600" : "bg-gray-300"
+                targetWeek && selectedShiftsToCopy.length > 0 ? "bg-blue-600" : "bg-gray-300"
               }`}
             >
-              <Text className="text-white text-base font-bold">Copy Week</Text>
+              <Text className="text-white text-base font-bold">
+                Copy {selectedShiftsToCopy.length} Shift{selectedShiftsToCopy.length !== 1 ? "s" : ""}
+              </Text>
             </Pressable>
           </View>
         </KeyboardAvoidingView>
@@ -1491,6 +1793,32 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
               className="bg-gray-600 rounded-xl py-3 items-center"
             >
               <Text className="text-white font-semibold">Done</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Error Modal */}
+      <Modal
+        visible={showErrorModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowErrorModal(false)}
+      >
+        <View className="flex-1 bg-black/50 justify-center items-center px-6">
+          <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
+            <View className="items-center mb-4">
+              <View className="w-16 h-16 bg-red-100 rounded-full items-center justify-center mb-3">
+                <Ionicons name="alert-circle" size={40} color="#DC2626" />
+              </View>
+              <Text className="text-xl font-bold text-gray-900 mb-2">Error</Text>
+              <Text className="text-center text-gray-600">{errorMessage}</Text>
+            </View>
+            <Pressable
+              onPress={() => setShowErrorModal(false)}
+              className="bg-gray-600 rounded-xl py-3 items-center"
+            >
+              <Text className="text-white font-semibold">OK</Text>
             </Pressable>
           </View>
         </View>
