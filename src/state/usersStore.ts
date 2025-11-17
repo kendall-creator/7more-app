@@ -230,6 +230,29 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
       console.log("Updated default admin to not require password change");
     }
 
+    // Check if Deborah Walker (Debs) account exists
+    const debsEmail = "debs@7more.net";
+    const existingDebs = state.getUserByEmail(debsEmail);
+
+    if (!existingDebs) {
+      const debsUser: InvitedUser = {
+        id: "user_debs_default",
+        name: "Deborah Walker",
+        nickname: "Debs",
+        email: debsEmail,
+        role: "admin", // Give Debs admin access for volunteer management
+        roles: ["admin"],
+        password: "dwalker", // Simple password: dwalker
+        invitedAt: new Date().toISOString(),
+        invitedBy: "system",
+        requiresPasswordChange: false,
+      };
+
+      const debsRef = ref(database, `users/${debsUser.id}`);
+      await firebaseSet(debsRef, debsUser);
+      console.log("Default Debs account created:", debsEmail);
+    }
+
     // Update isInitialized flag in Firebase
     if (!state.isInitialized) {
       const initRef = ref(database, "usersInitialized");

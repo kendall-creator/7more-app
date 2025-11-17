@@ -202,13 +202,20 @@ export default function AdminHomepageScreen() {
                   <Text className="text-white text-sm font-semibold mt-2">Test Email</Text>
                 </Pressable>
               </View>
-              <View className="flex-row gap-3">
+              <View className="flex-row gap-3 mb-3">
                 <Pressable
                   onPress={() => navigation.navigate("FileManagement")}
                   className="flex-1 bg-emerald-600 rounded-2xl p-4 active:opacity-80"
                 >
                   <Ionicons name="folder-open" size={24} color="white" />
                   <Text className="text-white text-sm font-semibold mt-2">File Management</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => navigation.navigate("VolunteerDashboard")}
+                  className="flex-1 bg-green-600 rounded-2xl p-4 active:opacity-80"
+                >
+                  <Ionicons name="people" size={24} color="white" />
+                  <Text className="text-white text-sm font-semibold mt-2">Volunteer Mgmt</Text>
                 </Pressable>
               </View>
             </>

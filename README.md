@@ -130,6 +130,39 @@ The app now includes a comprehensive volunteer management system that automates 
 ✅ **Deborah Walker (Debs)** - Access to Volunteer Dashboard and intake forms
 ✅ Task recipients (Kendall, Gregg, Josh, etc.) - Receive assigned tasks in their task list
 
+### Login Credentials:
+**Admin Account:**
+- Email: kendall@7more.net
+- Password: 7moreHouston!
+
+**Deborah Walker (Debs) Account:**
+- Email: debs@7more.net
+- Password: dwalker
+- Role: Admin (full access to volunteer management)
+
+Both accounts are automatically created on first app launch.
+
+### How to Access:
+1. **For Admins:**
+   - Log in to the app
+   - Go to the Homepage tab
+   - Look for "Volunteer Mgmt" button in Quick Actions (green button)
+   - Or go to Resources tab → "Volunteer Management" card
+
+2. **For Debs:**
+   - Log in with debs@7more.net
+   - Go to Homepage tab
+   - Click "Volunteer Mgmt" button in Quick Actions
+   - Or go to Resources tab → "Volunteer Management" card
+
+3. **To Add a New Volunteer Inquiry:**
+   - Open Volunteer Dashboard
+   - Click "New Inquiry" button
+   - Fill out the intake form with volunteer information
+   - Select interest areas (can select multiple)
+   - Add notes if needed
+   - Submit - tasks will be automatically created and assigned
+
 ### Technical Implementation:
 - **State Management**: Zustand store with Firebase real-time sync
 - **Data Storage**: Firebase Realtime Database (`volunteer_inquiries`, `volunteer_database`, `volunteer_routing_rules`, `volunteer_donation_settings`)
