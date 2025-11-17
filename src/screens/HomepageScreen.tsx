@@ -161,6 +161,20 @@ export default function HomepageScreen() {
       </View>
 
       <ScrollView className="flex-1 px-6 py-4" contentContainerStyle={contentContainerStyle}>
+        {/* Quick Actions - For users with volunteer management access */}
+        {(currentUser?.role === "mentorship_leader" || currentUser?.role === "bridge_team") && (
+          <View className="mb-4">
+            <Text className="text-base font-bold text-[#3c3832] mb-3">Quick Actions</Text>
+            <Pressable
+              onPress={() => navigation.navigate("VolunteerIntakeForm")}
+              className="bg-purple-600 rounded-2xl p-4 active:opacity-80 flex-row items-center"
+            >
+              <Ionicons name="person-add-outline" size={24} color="white" />
+              <Text className="text-white text-sm font-semibold ml-3">Add New Volunteer</Text>
+            </Pressable>
+          </View>
+        )}
+
         {/* Mentees Needing Assignment - Mentor Leaders Only */}
         {isMentorshipLeader && menteesNeedingAssignment.length > 0 && (
           <Pressable

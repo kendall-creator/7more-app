@@ -9,6 +9,7 @@ import { useCurrentUser } from "../state/authStore";
 
 type RootStackParamList = {
   TaskDetail: { taskId: string };
+  VolunteerIntakeForm: undefined;
 };
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -159,10 +160,22 @@ export default function VolunteerTasksScreen() {
     <SafeAreaView className="flex-1 bg-gray-50">
       {/* Header */}
       <View className="px-4 py-3 bg-white border-b border-gray-200">
-        <Text className="text-2xl font-bold text-gray-900">Volunteer Tasks</Text>
-        <Text className="text-sm text-gray-600 mt-1">
-          Tasks from volunteer inquiries assigned to you
-        </Text>
+        <View className="flex-row items-center justify-between">
+          <View className="flex-1">
+            <Text className="text-2xl font-bold text-gray-900">Volunteer Tasks</Text>
+            <Text className="text-sm text-gray-600 mt-1">
+              Tasks from volunteer inquiries assigned to you
+            </Text>
+          </View>
+          {(currentUser?.role === "admin" || currentUser?.role === "bridge_team_leader") && (
+            <Pressable
+              onPress={() => navigation.navigate("VolunteerIntakeForm")}
+              className="bg-indigo-600 rounded-lg p-3 ml-3"
+            >
+              <Ionicons name="add" size={24} color="white" />
+            </Pressable>
+          )}
+        </View>
       </View>
 
       {/* Stats */}

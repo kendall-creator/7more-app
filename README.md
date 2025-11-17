@@ -2,7 +2,69 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Volunteer Interest & Assignment System - November 17, 2025
+## 🔥 LATEST UPDATE: Add Volunteer Buttons - November 17, 2025
+
+**Date:** November 17, 2025
+**Status:** ✅ COMPLETE
+
+### What Was Added:
+
+**Quick Access to Add Volunteers:**
+The app now has convenient "Add Volunteer" buttons in multiple locations for easy volunteer intake:
+
+#### 1. Volunteers Tab (Admin & Bridge Team Leaders)
+- **Add Button in Header** - A prominent "+" button appears in the top-right corner of the Volunteers tab
+- Shows only for admins and bridge team leaders
+- Opens the volunteer intake form directly
+- Quick access without navigating through multiple screens
+
+#### 2. Admin Homepage Quick Actions
+- **New "Add Volunteer" Button** - Purple button in Quick Actions section
+- Located below the "Volunteer Mgmt" button for easy access
+- Admins can quickly add new volunteer inquiries
+- Consistent with the app's design language
+
+#### 3. Homepage for Non-Admin Staff
+- **Quick Actions Section** - New section for mentorship leaders and bridge team members
+- "Add New Volunteer" button appears at the top of their homepage
+- Provides direct access to volunteer intake form
+- Visible for:
+  - Mentorship Leaders
+  - Bridge Team members
+
+### Benefits:
+✅ **Faster Volunteer Intake** - Multiple access points reduce navigation time
+✅ **Role-Based Access** - Only authorized users see the add buttons
+✅ **Consistent Experience** - Same intake form accessible from multiple locations
+✅ **Improved Workflow** - Staff can add volunteers from their primary work screens
+
+### How to Use:
+1. **From Volunteers Tab:**
+   - Go to the Volunteers tab (admins and bridge team leaders)
+   - Click the "+" button in the top-right corner
+   - Fill out the volunteer intake form
+
+2. **From Admin Homepage:**
+   - Go to Admin Homepage
+   - Scroll to Quick Actions
+   - Click "Add Volunteer" (purple button)
+   - Complete the intake form
+
+3. **From Staff Homepage:**
+   - Mentorship leaders and bridge team see Quick Actions at the top
+   - Click "Add New Volunteer"
+   - Submit volunteer information
+
+### Technical Implementation:
+- Updated `VolunteerTasksScreen.tsx` with header button
+- Modified `AdminHomepageScreen.tsx` Quick Actions
+- Enhanced `HomepageScreen.tsx` with conditional Quick Actions
+- All buttons navigate to `VolunteerIntakeForm` screen
+- Role-based visibility ensures proper access control
+
+---
+
+## 🔥 PREVIOUS UPDATE: Volunteer Interest & Assignment System - November 17, 2025
 
 **Date:** November 17, 2025
 **Status:** ✅ COMPLETE

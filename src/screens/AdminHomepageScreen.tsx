@@ -218,6 +218,16 @@ export default function AdminHomepageScreen() {
                   <Text className="text-white text-sm font-semibold mt-2">Volunteer Mgmt</Text>
                 </Pressable>
               </View>
+              <View className="flex-row gap-3">
+                <Pressable
+                  onPress={() => navigation.navigate("VolunteerIntakeForm")}
+                  className="flex-1 bg-purple-600 rounded-2xl p-4 active:opacity-80"
+                >
+                  <Ionicons name="person-add-outline" size={24} color="white" />
+                  <Text className="text-white text-sm font-semibold mt-2">Add Volunteer</Text>
+                </Pressable>
+                <View className="flex-1" />
+              </View>
             </>
           )}
         </View>
