@@ -553,6 +553,7 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
     setShowCreateModal(false);
     setShowEditModal(false);
     setShowCopyWeekModal(false);
+    setShowCopyWeekStep2Modal(false);
     setShowSaveTemplateModal(false);
     setShowTemplateModal(false);
 
