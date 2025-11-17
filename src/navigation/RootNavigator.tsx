@@ -68,6 +68,7 @@ import VolunteerDashboardScreen from "../screens/VolunteerDashboardScreen";
 import VolunteerIntakeFormScreen from "../screens/VolunteerIntakeFormScreen";
 import VolunteerDatabaseScreen from "../screens/VolunteerDatabaseScreen";
 import VolunteerRoutingRulesScreen from "../screens/VolunteerRoutingRulesScreen";
+import VolunteerTasksScreen from "../screens/VolunteerTasksScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -135,6 +136,16 @@ function MainTabs() {
             }}
           />
           <Tab.Screen
+            name="Volunteers"
+            component={VolunteerTasksScreen}
+            options={{
+              tabBarLabel: "Volunteers",
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="people-circle" size={size} color={color} />
+              ),
+            }}
+          />
+          <Tab.Screen
             name="Scheduler"
             component={SchedulerScreen}
             options={{
@@ -191,6 +202,16 @@ function MainTabs() {
               tabBarLabel: "Tasks",
               tabBarIcon: ({ color, size }) => (
                 <Ionicons name="checkbox" size={size} color={color} />
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Volunteers"
+            component={VolunteerTasksScreen}
+            options={{
+              tabBarLabel: "Volunteers",
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="people-circle" size={size} color={color} />
               ),
             }}
           />
@@ -325,6 +346,14 @@ function MainTabs() {
             }}
           />
           <Tab.Screen
+            name="Volunteers"
+            component={VolunteerTasksScreen}
+            options={{
+              tabBarLabel: "Volunteers",
+              tabBarIcon: ({ color, size }) => <Ionicons name="people-circle" size={size} color={color} />,
+            }}
+          />
+          <Tab.Screen
             name="Resources"
             component={ResourcesScreen}
             options={{
@@ -363,6 +392,14 @@ function MainTabs() {
             }}
           />
           <Tab.Screen
+            name="Volunteers"
+            component={VolunteerTasksScreen}
+            options={{
+              tabBarLabel: "Volunteers",
+              tabBarIcon: ({ color, size }) => <Ionicons name="people-circle" size={size} color={color} />,
+            }}
+          />
+          <Tab.Screen
             name="Resources"
             component={ResourcesScreen}
             options={{
@@ -390,6 +427,14 @@ function MainTabs() {
             options={{
               tabBarLabel: "My Mentees",
               tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />,
+            }}
+          />
+          <Tab.Screen
+            name="Volunteers"
+            component={VolunteerTasksScreen}
+            options={{
+              tabBarLabel: "Volunteers",
+              tabBarIcon: ({ color, size }) => <Ionicons name="people-circle" size={size} color={color} />,
             }}
           />
           <Tab.Screen

@@ -148,20 +148,30 @@ Both accounts are automatically created on first app launch.
    - Go to the Homepage tab
    - Look for "Volunteer Mgmt" button in Quick Actions (green button)
    - Or go to Resources tab → "Volunteer Management" card
+   - **NEW: Volunteers Tab** - See all volunteer inquiry tasks assigned to you in a dedicated tab
 
 2. **For Debs:**
    - Log in with debs@7more.net
    - Go to Homepage tab
    - Click "Volunteer Mgmt" button in Quick Actions
    - Or go to Resources tab → "Volunteer Management" card
+   - **NEW: Volunteers Tab** - See all volunteer inquiry tasks assigned to you
 
-3. **To Add a New Volunteer Inquiry:**
-   - Open Volunteer Dashboard
+3. **For Task Recipients (Kendall, Gregg, Josh, etc.):**
+   - Log in to the app
+   - **NEW: Volunteers Tab** - A dedicated tab appears in your navigation showing only volunteer-related tasks
+   - See all volunteer inquiry tasks assigned to you separate from regular tasks
+   - Tasks are organized by status: Overdue, In Progress, Pending, Completed
+   - Click any task to view details and mark as complete
+
+4. **To Add a New Volunteer Inquiry:**
+   - Open Volunteer Dashboard (via Homepage button or Resources card)
    - Click "New Inquiry" button
    - Fill out the intake form with volunteer information
    - Select interest areas (can select multiple)
    - Add notes if needed
    - Submit - tasks will be automatically created and assigned
+   - **Recipients will see these tasks in their Volunteers tab**
 
 ### Technical Implementation:
 - **State Management**: Zustand store with Firebase real-time sync
