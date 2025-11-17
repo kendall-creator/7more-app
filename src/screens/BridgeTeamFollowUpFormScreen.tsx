@@ -19,6 +19,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { BridgeTeamFollowUpFormData, TransitionalHome } from "../types";
 import { sendResourcesEmail } from "../services/emailService";
 import { sendAircallSMS } from "../api/aircall-sms";
+import { sendBridgeTeamResourcesEmail } from "../api/resend-email";
 
 // Constants from intake form
 const GENDER_OPTIONS = ["Male", "Female", "Non-binary", "Prefer not to say"];
@@ -104,7 +105,6 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
   const [selectedResources, setSelectedResources] = useState<string[]>([]);
   const [resourcesOtherDescription, setResourcesOtherDescription] = useState("");
   const [resourceNotes, setResourceNotes] = useState("");
-  const [sendResourcesEmailChecked, setSendResourcesEmailChecked] = useState(false);
   const [showResourcesModal, setShowResourcesModal] = useState(false);
   const [showResourcePreviewModal, setShowResourcePreviewModal] = useState(false);
 
@@ -253,7 +253,7 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
         resourcesSentList: selectedResources,
         resourcesOtherDescription,
         resourceNotes,
-        sendResourcesEmail: sendResourcesEmailChecked,
+        sendResourcesEmail: false, // No longer auto-sending, email is sent manually via button
       };
 
       // Save form data
@@ -875,7 +875,6 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
                     setSelectedResources([]);
                     setResourcesOtherDescription("");
                     setResourceNotes("");
-                    setSendResourcesEmailChecked(false);
                   }}
                   className={`flex-1 border-2 rounded-xl py-3 px-4 ${
                     !resourcesSent ? "bg-gray-100 border-gray-300" : "bg-white border-gray-200"
@@ -943,11 +942,21 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
                     <View className="flex-row gap-3 flex-wrap">
                       <Pressable
                         onPress={async () => {
-                          // Check if participant has email
+                          // Validate email exists
                           if (!email || email.trim() === "") {
                             Alert.alert(
                               "No Email Address",
                               "Please add an email address for this participant in Section 1 before sending resources via email.",
+                              [{ text: "OK" }]
+                            );
+                            return;
+                          }
+
+                          // Validate at least one resource is selected
+                          if (selectedResources.length === 0) {
+                            Alert.alert(
+                              "No Resources Selected",
+                              "Please select at least one resource to send.",
                               [{ text: "OK" }]
                             );
                             return;
@@ -960,26 +969,60 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
                               .filter((r) => selectedResources.includes(r.id))
                               .map((r) => ({
                                 title: r.title,
-                                content: r.content,
-                                category: r.category,
+                                description: r.content,
                               }));
 
-                            // Send email using Gmail SMTP
-                            const result = await sendResourcesEmail(
-                              email,
-                              participant.firstName,
-                              resourcesToSend,
-                              currentUser?.name || "Bridge Team"
-                            );
+                            // Send email using Resend
+                            const result = await sendBridgeTeamResourcesEmail({
+                              participantEmail: email,
+                              participantName: participant.firstName,
+                              resources: resourcesToSend,
+                              notes: resourceNotes || undefined,
+                              senderName: currentUser?.name || "Bridge Team",
+                            });
 
                             if (result.success) {
-                              Alert.alert("Success", "Resources sent via email successfully!");
+                              // Log the email send to participant history
+                              try {
+                                const { addHistoryEntry } = useParticipantStore.getState();
+                                await addHistoryEntry(participant.id, {
+                                  type: "form_submitted",
+                                  description: "Resources emailed to participant",
+                                  createdBy: currentUser.id,
+                                  createdByName: currentUser.name,
+                                  metadata: {
+                                    participantId: participant.id,
+                                    participantEmail: email,
+                                    resourcesSent: resourcesToSend.map(r => r.title),
+                                    sentBy: currentUser.id,
+                                    sentByName: currentUser.name,
+                                    sentVia: "email",
+                                    sentAt: new Date().toISOString(),
+                                    notes: resourceNotes,
+                                    messageId: result.messageId,
+                                  },
+                                });
+                              } catch (logError) {
+                                console.error("Failed to log email send:", logError);
+                              }
+
+                              Alert.alert(
+                                "Success",
+                                `Resources emailed to ${email} from bridgeteam@7more.net.`,
+                                [{ text: "OK" }]
+                              );
                             } else {
                               Alert.alert(
                                 "Email Error",
-                                result.error || "Could not send email. Please ensure Gmail is configured in ENV tab."
+                                result.error || "Could not send email. Please ensure RESEND_API_KEY is configured in ENV tab."
                               );
                             }
+                          } catch (error) {
+                            console.error("Error sending email:", error);
+                            Alert.alert(
+                              "Error",
+                              "An unexpected error occurred while sending the email. Please try again."
+                            );
                           } finally {
                             setIsSendingEmail(false);
                           }
@@ -1083,28 +1126,6 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
                     textAlignVertical="top"
                   />
                 </View>
-
-                {/* Email resources checkbox */}
-                <Pressable
-                  onPress={() => setSendResourcesEmailChecked(!sendResourcesEmailChecked)}
-                  className="flex-row items-start"
-                >
-                  <View
-                    className={`w-6 h-6 rounded border-2 items-center justify-center mr-3 mt-0.5 ${
-                      sendResourcesEmailChecked ? "bg-slate-700 border-slate-700" : "bg-white border-gray-300"
-                    }`}
-                  >
-                    {sendResourcesEmailChecked && <Ionicons name="checkmark" size={18} color="white" />}
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-base text-gray-900 font-medium">
-                      Automatically email the selected resources to the participant
-                    </Text>
-                    <Text className="text-sm text-gray-600 mt-1">
-                      Resources will be sent from the 7more email account
-                    </Text>
-                  </View>
-                </Pressable>
               </View>
             )}
           </View>

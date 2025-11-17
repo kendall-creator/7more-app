@@ -2,7 +2,101 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Add Volunteer Buttons - November 17, 2025
+## 🔥 LATEST UPDATE: Bridge Team Resource Email Integration - November 17, 2025
+
+**Date:** November 17, 2025
+**Status:** ✅ COMPLETE
+
+### What Was Added:
+
+**Direct Email Integration for Bridge Team Follow-Up:**
+
+The Bridge Team Follow-Up form now includes direct email functionality using Resend API to send resources to participants from bridgeteam@7more.net.
+
+#### Key Features:
+
+1. **Email Button in Follow-Up Form**
+   - Blue "Email" button appears when resources are selected
+   - Sends resources directly from bridgeteam@7more.net
+   - Uses verified domain 7more.net with proper SPF/DKIM/DMARC
+   - Professional HTML email template with resource details
+
+2. **Automatic Email Logging**
+   - Every email sent is automatically logged to participant history
+   - Tracks: participant email, resources sent, sender name, timestamp
+   - Records Resend message ID for delivery tracking
+   - Includes notes if provided by Bridge Team member
+
+3. **Smart Validation**
+   - Validates participant has email address before allowing send
+   - Requires at least one resource to be selected
+   - Clear error messages guide users through the process
+
+4. **Email Template Features**
+   - Personalized greeting with participant's first name
+   - Bulleted list of selected resources with descriptions
+   - Additional notes section (if provided)
+   - Professional signature with Bridge Team contact info
+   - Reply-to address: bridgeteam@7more.net
+
+5. **Checkbox Removed**
+   - Previous "Automatically email" checkbox has been removed
+   - Email is now sent manually via the Email button
+   - Gives Bridge Team members full control over when emails are sent
+
+### Benefits:
+✅ **Professional Communication** - All emails sent from bridgeteam@7more.net
+✅ **Verified Domain** - DNS properly configured with SPF, DKIM, and DMARC
+✅ **Full Tracking** - Every email logged with timestamp and message ID
+✅ **User Control** - Bridge Team decides exactly when to send resources
+✅ **Beautiful Template** - Professional HTML email design
+✅ **Easy Setup** - Only requires RESEND_API_KEY in ENV tab
+
+### How to Use:
+
+1. **In Bridge Team Follow-Up Form:**
+   - Select resources to send to participant
+   - Optionally add notes in the Notes field
+   - Click the blue "Email" button
+   - Resources are immediately sent from bridgeteam@7more.net
+   - Success toast confirms delivery
+
+2. **Email is automatically logged:**
+   - View in participant history
+   - Shows all resources sent, timestamp, and sender name
+
+### Technical Implementation:
+- **New API Service**: `/src/api/resend-email.ts`
+  - `sendBridgeTeamResourcesEmail()` function
+  - Professional HTML email template generator
+  - Full error handling and validation
+
+- **Updated Screen**: `BridgeTeamFollowUpFormScreen.tsx`
+  - Removed auto-send checkbox
+  - Wired Email button to Resend service
+  - Added email logging to participant history
+  - Smart validation for email and resources
+
+- **DNS Configuration**: 7more.net (already verified)
+  - DKIM verified at resend._domainkey.7more.net
+  - SPF record at send.7more.net
+  - DMARC record at _dmarc.7more.net
+  - MX record: feedback-smtp.us-east-1.amazonses.com
+
+- **Dependencies**:
+  - Installed `resend` package (v6.4.2)
+
+### Environment Setup:
+Add to ENV tab in Vibecode:
+```
+RESEND_API_KEY=your_resend_api_key_here
+```
+
+Domain 7more.net is already verified in Resend with all DNS records configured correctly.
+
+---
+
+## 🔥 PREVIOUS UPDATE: Add Volunteer Buttons - November 17, 2025
 
 **Date:** November 17, 2025
 **Status:** ✅ COMPLETE
