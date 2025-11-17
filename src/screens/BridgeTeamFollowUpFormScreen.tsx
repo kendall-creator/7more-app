@@ -641,7 +641,7 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
                 >
                   {needsPhoneCall && <Ionicons name="checkmark" size={18} color="white" />}
                 </View>
-                <Text className="text-base text-gray-900">Phone call needed</Text>
+                <Text className="text-base text-gray-900">Needs help getting a phone</Text>
               </Pressable>
 
               <Pressable
