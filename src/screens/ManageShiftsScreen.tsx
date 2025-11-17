@@ -587,7 +587,7 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
       setShowCopyWeekModal(true);
     } else if (datePickerTarget === "targetWeek") {
       setTargetWeek(dateString);
-      setShowCopyWeekModal(true);
+      setShowCopyWeekStep2Modal(true);
     } else if (datePickerTarget === "templateWeek") {
       setTemplateWeekStart(dateString);
       setShowTemplateModal(true);
