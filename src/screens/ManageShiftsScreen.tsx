@@ -213,8 +213,16 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
   }, [editShift]);
 
   const handleCreate = () => {
-    if (!title || !startTime || !endTime || !currentUser || !location) return;
-    if (!date && selectedDaysOfWeek.length === 0) return;
+    console.log("handleCreate called with:", { title, location, startTime, endTime, date, selectedDaysOfWeek, selectedRoles });
+
+    if (!title || !startTime || !endTime || !currentUser || !location) {
+      console.log("Missing required fields:", { title, startTime, endTime, currentUser: !!currentUser, location });
+      return;
+    }
+    if (!date && selectedDaysOfWeek.length === 0) {
+      console.log("No date or days selected");
+      return;
+    }
 
     // If creating shifts for multiple days in the SAME week (not recurring)
     if (!isRecurring && selectedDaysOfWeek.length > 0) {
