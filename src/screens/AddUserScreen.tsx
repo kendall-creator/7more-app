@@ -77,6 +77,11 @@ export default function AddUserScreen({ navigation }: any) {
       label: "Support Volunteer",
       description: "Can only sign up for support volunteer shifts",
     },
+    {
+      value: "supporter",
+      label: "Supporter",
+      description: "View schedule and tasks they assigned or are assigned to",
+    },
   ];
 
   const handleSubmit = async () => {

@@ -103,6 +103,11 @@ export default function EditUserScreen({ navigation, route }: any) {
       label: "Support Volunteer",
       description: "Can only sign up for support volunteer shifts",
     },
+    {
+      value: "supporter",
+      label: "Supporter",
+      description: "View schedule and tasks they assigned or are assigned to",
+    },
   ];
 
   const togglePermission = (section: keyof ReportingPermissions, type: 'canView' | 'canEdit') => {

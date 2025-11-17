@@ -3,7 +3,8 @@
 // volunteer_support = Support Volunteer (can only see support-specific shifts)
 // board_member = Board Member (can view scheduler, assign/receive tasks, view monthly reporting)
 // bridge_team_leader = Bridge Team Leader (admin capabilities but only for Bridge Team items)
-export type UserRole = "admin" | "bridge_team" | "bridge_team_leader" | "mentorship_leader" | "mentor" | "volunteer" | "volunteer_support" | "board_member";
+// supporter = Support role (can view schedule and tasks assigned to them or that they assigned)
+export type UserRole = "admin" | "bridge_team" | "bridge_team_leader" | "mentorship_leader" | "mentor" | "volunteer" | "volunteer_support" | "board_member" | "supporter";
 
 // Volunteer categories for shift access
 export type VolunteerCategory = "lead" | "support";

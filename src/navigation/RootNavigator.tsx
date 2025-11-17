@@ -75,6 +75,7 @@ function MainTabs() {
   // Determine if user is a mentor or mentorship leader (they get the 4-tab layout)
   const isMentor = userRole === "mentor" || userRole === "mentorship_leader";
   const isVolunteer = userRole === "volunteer" || userRole === "volunteer_support";
+  const isSupporter = userRole === "supporter";
 
   return (
     <Tab.Navigator
@@ -417,6 +418,28 @@ function MainTabs() {
             options={{
               tabBarLabel: "Resources",
               tabBarIcon: ({ color, size}) => <Ionicons name="document-text" size={size} color={color} />,
+            }}
+          />
+        </>
+      )}
+
+      {/* Supporters see only Schedule and Tasks (only tasks they assigned or are assigned to) */}
+      {isSupporter && (
+        <>
+          <Tab.Screen
+            name="Scheduler"
+            component={SchedulerScreen}
+            options={{
+              tabBarLabel: "Schedule",
+              tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />,
+            }}
+          />
+          <Tab.Screen
+            name="TaskList"
+            component={TaskListScreen}
+            options={{
+              tabBarLabel: "Tasks",
+              tabBarIcon: ({ color, size }) => <Ionicons name="checkbox" size={size} color={color} />,
             }}
           />
         </>

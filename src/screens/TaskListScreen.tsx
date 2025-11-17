@@ -18,10 +18,15 @@ export default function TaskListScreen() {
   const allParticipants = useParticipantStore((s) => s.participants);
 
   // Filter tasks for current user
-  const userTasks = useMemo(
-    () => allTasks.filter((t) => t.assignedToUserId === currentUser?.id),
-    [allTasks, currentUser?.id]
-  );
+  // For supporters: show tasks assigned to them OR tasks they assigned to others
+  const userTasks = useMemo(() => {
+    if (currentUser?.role === "supporter") {
+      return allTasks.filter(
+        (t) => t.assignedToUserId === currentUser?.id || t.assignedByUserId === currentUser?.id
+      );
+    }
+    return allTasks.filter((t) => t.assignedToUserId === currentUser?.id);
+  }, [allTasks, currentUser?.id, currentUser?.role]);
 
   // Filter participants assigned to current user (for mentors and mentorship leaders)
   const assignedParticipants = useMemo(

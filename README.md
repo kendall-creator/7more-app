@@ -2,7 +2,47 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Missed Call Comments & Icons - November 14, 2025
+## 🔥 LATEST UPDATE: Supporter User Role Added - November 17, 2025
+
+**Date:** November 17, 2025
+**Status:** ✅ COMPLETE
+
+### What Was Added:
+**New "Supporter" User Role:**
+- Added a new user type called "supporter" with limited, focused permissions
+- Supporters have access to only two features:
+  - **Schedule Tab** - View and sign up for volunteer shifts
+  - **Tasks Tab** - View tasks assigned to them OR tasks they assigned to others
+- Perfect for volunteers or support staff who need basic access without full system permissions
+
+**Features:**
+- Task filtering automatically shows supporters:
+  - Tasks they are assigned to complete
+  - Tasks they created and assigned to other users
+- Supporters can view the full volunteer shift schedule
+- Can sign up for shifts they're eligible for based on shift permissions
+- Simple, focused navigation with just two tabs (Schedule and Tasks)
+
+**User Management:**
+- "Supporter" role option added to Add User and Edit User screens
+- Description: "View schedule and tasks they assigned or are assigned to"
+- Can be assigned when creating new users or updating existing users
+
+### Benefits:
+✅ Focused access for support volunteers and limited-permission staff
+✅ Can participate in shift scheduling without full system access
+✅ Can track their own tasks and see tasks they assigned
+✅ Simplified interface with minimal navigation reduces complexity
+✅ Perfect for community volunteers who help with specific tasks
+
+**Role Comparison:**
+- **Lead Volunteer**: Can see all shifts + their tasks + resources
+- **Support Volunteer**: Can see support-designated shifts only + their tasks + resources
+- **Supporter** (NEW): Can see all shifts + tasks they assigned/are assigned to (no resources tab)
+
+---
+
+## 🔥 PREVIOUS UPDATE: Missed Call Comments & Icons - November 14, 2025
 
 **Date:** November 14, 2025
 **Status:** ✅ COMPLETE
@@ -799,11 +839,15 @@ The app features a role-based tab navigation system:
 4. **Reporting** - Monthly reporting with read-only access to posted reports
 5. **Resources** - Resource library
 
+**For Supporters (2 tabs):**
+1. **Schedule** - View and sign up for volunteer shifts
+2. **Tasks** - View tasks assigned to them or tasks they assigned to others
+
 ## Features
 
 ### Role-Based Access
 
-The app supports eight distinct user roles:
+The app supports nine distinct user roles:
 
 1. **Admin** - Complete overview of the program with metrics, analytics, and full access to all features including shift and mentorship management, form customization
 2. **Bridge Team Leader** - Full admin capabilities but only for Bridge Team operations (can manage Bridge Team members, see only Bridge Team participants, tasks assigned to Bridge Team)
@@ -813,6 +857,7 @@ The app supports eight distinct user roles:
 6. **Board Member** - View scheduler, can sign up for volunteer shifts, can have tasks assigned and assign tasks to others, read-only access to monthly reporting
 7. **Lead Volunteer** - Can sign up for any available volunteer shift
 8. **Support Volunteer** - Can only sign up for shifts specifically designated for support volunteers
+9. **Supporter** - Can view schedule and sign up for shifts, view tasks assigned to them or that they assigned to others
 
 ### Key Functionality
 
