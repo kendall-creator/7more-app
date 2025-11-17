@@ -276,7 +276,7 @@ export const useSchedulerStore = create<SchedulerStore>()((set, get) => ({
     const newAssignment: ShiftAssignment = {
       userId,
       userName,
-      userNickname,
+      ...(userNickname ? { userNickname } : {}),
       userRole,
       signedUpAt: new Date().toISOString(),
     };
@@ -349,7 +349,7 @@ export const useSchedulerStore = create<SchedulerStore>()((set, get) => ({
     const newAssignment: ShiftAssignment = {
       userId,
       userName,
-      userNickname,
+      ...(userNickname ? { userNickname } : {}),
       userRole,
       signedUpAt: new Date().toISOString(),
     };
