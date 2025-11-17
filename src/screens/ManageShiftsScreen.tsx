@@ -1165,9 +1165,9 @@ export default function ManageShiftsScreen({ navigation, route }: any) {
 
             <Pressable
               onPress={handleCreate}
-              disabled={!title || !date || !startTime || !endTime || selectedRoles.length === 0}
+              disabled={!title || !location || !startTime || !endTime || selectedRoles.length === 0 || (!date && selectedDaysOfWeek.length === 0)}
               className={`rounded-xl py-4 items-center ${
-                title && date && startTime && endTime && selectedRoles.length > 0
+                title && location && startTime && endTime && selectedRoles.length > 0 && (date || selectedDaysOfWeek.length > 0)
                   ? "bg-gray-600"
                   : "bg-gray-300"
               }`}
