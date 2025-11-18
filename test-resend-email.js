@@ -1,27 +1,18 @@
 /**
  * Test script to send email using Resend API
- * Run with: node test-resend-email.js
+ * Run with: RESEND_API_KEY=re_xxx node test-resend-email.js
  */
-
-// Load environment variables from .env file
-require('dotenv').config();
 
 const { Resend } = require('resend');
 
 async function testEmail() {
   console.log('🧪 Testing Resend Email Service...\n');
 
-  // Get API key from environment
-  const resendApiKey = process.env.RESEND_API_KEY;
-
-  if (!resendApiKey) {
-    console.error('❌ RESEND_API_KEY not found in environment variables');
-    console.error('Please add RESEND_API_KEY to .env file');
-    process.exit(1);
-  }
+  // Use the API key directly
+  const resendApiKey = 're_Qy3mKgtN_DJC97ndnTw1WVxdTBWNw1iLj';
 
   console.log('✅ RESEND_API_KEY found');
-  console.log(`   Key starts with: ${resendApiKey.substring(0, 15)}...`);
+  console.log(`   Key starts with: ${resendApiKey.substring(0, 8)}...`);
 
   // Initialize Resend
   const resend = new Resend(resendApiKey);
