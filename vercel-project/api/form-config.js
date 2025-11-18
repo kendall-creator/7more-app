@@ -110,15 +110,25 @@ module.exports = async (req, res) => {
   }
 
   try {
-    // Try to fetch form config from Firebase (if you want to store config in Firebase)
-    // const db = admin.database();
-    // const configRef = db.ref('formConfig');
-    // const snapshot = await configRef.once('value');
-    // const config = snapshot.val() || defaultFormConfig;
+    // Fetch form config from Firebase Realtime Database
+    const db = admin.database();
+    const configRef = db.ref('formConfig/participantIntake');
+    const snapshot = await configRef.once('value');
 
-    // For simplicity, returning default config
-    // In production, you can fetch this from Firebase or a database
-    const config = defaultFormConfig;
+    let config = snapshot.val();
+
+    // If no config exists in Firebase, use default
+    if (!config) {
+      console.log('No config found in Firebase, using default config');
+      config = defaultFormConfig;
+    }
+
+    // Ensure fields are enabled and sorted by order
+    if (config.fields) {
+      config.fields = config.fields
+        .filter(f => f.enabled !== false)
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
+    }
 
     return res.status(200).json({
       success: true,
@@ -126,9 +136,11 @@ module.exports = async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching form config:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'Failed to fetch form configuration',
+    // Fallback to default config on error
+    return res.status(200).json({
+      success: true,
+      data: defaultFormConfig,
+      warning: 'Using default configuration due to error',
     });
   }
 };
