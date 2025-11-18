@@ -2,9 +2,69 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Admin Homepage Cleanup & Volunteer Resources - November 18, 2025
+## 🔥 LATEST UPDATE: Dynamic Auto-Updating Web Forms - November 18, 2025
 
 **Date:** November 18, 2025
+**Status:** ✅ COMPLETE
+
+### What Was Implemented:
+
+**Dynamic Form System:**
+- ✅ Form configurations now sync automatically to Firebase
+- ✅ Changes made in the app instantly update the website form
+- ✅ Single source of truth - no more manual exports or re-uploading
+- ✅ Live web endpoint at `http://172.17.0.2:3001/forms/participant-intake`
+
+**How It Works:**
+1. **In the App:** Edit form fields, options, or settings using the form editor
+2. **Automatic Sync:** Changes are instantly saved to Firebase
+3. **Website Updates:** The embedded form on your website automatically reflects the changes
+4. **Submissions:** All form submissions (web + app) go to the same Firebase database
+
+**Technical Implementation:**
+- Form config stored in Firebase at `formConfig/participantIntake`
+- Client-side Firebase SDK fetches latest config on page load
+- Backend endpoint serves dynamic HTML that pulls config in real-time
+- All submissions create participants with `status: "pending_bridge"`
+
+### For Website Embedding (Wix):
+
+**Option 1: Direct iFrame Embed**
+```html
+<iframe
+  src="http://172.17.0.2:3001/forms/participant-intake"
+  width="100%"
+  height="1200px"
+  frameborder="0"
+  style="border: none;">
+</iframe>
+```
+
+**Option 2: Direct Link**
+Simply link to: `http://172.17.0.2:3001/forms/participant-intake`
+
+**Production Setup (Required):**
+For public access, you'll need to:
+1. Deploy the backend to a hosting service (Render, Railway, Heroku)
+2. Get a custom domain or use the hosting URL
+3. Update the iframe/link to use your production URL
+
+Example production URL:
+```html
+<iframe src="https://forms.7more.org/participant-intake" ...></iframe>
+```
+
+### Benefits:
+✅ **Auto-Updating** - Edit once in app, updates everywhere
+✅ **No Re-exports** - Never manually upload forms again
+✅ **Single Database** - All submissions in one place
+✅ **Real-time Sync** - Changes appear instantly
+✅ **Easy Maintenance** - Update form fields without touching code
+
+---
+
+## Previous Update: Admin Homepage Cleanup & Volunteer Resources - November 18, 2025
+
 **Status:** ✅ COMPLETE
 
 ### What Was Changed:

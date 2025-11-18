@@ -23,6 +23,14 @@ const WORKSPACE_DIR = "/home/user/workspace/";
 app.use(cors()); // Allow requests from any origin (can be restricted later)
 app.use(express.json());
 
+// Import routers
+const dynamicFormSimple = require('./dynamicFormSimple');
+const fileRouter = require('./fileServer');
+
+// Use routers
+app.use('/', dynamicFormSimple); // Dynamic form routes
+app.use('/', fileRouter); // File management routes
+
 // Health check endpoint
 app.get("/", (req, res) => {
   res.json({
