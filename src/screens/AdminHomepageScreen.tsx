@@ -188,37 +188,12 @@ export default function AdminHomepageScreen() {
             <>
               <View className="flex-row gap-3 mb-3">
                 <Pressable
-                  onPress={() => navigation.navigate("EmbeddableForm")}
-                  className="flex-1 bg-indigo-600 rounded-2xl p-4 active:opacity-80"
-                >
-                  <Ionicons name="code-slash" size={24} color="white" />
-                  <Text className="text-white text-sm font-semibold mt-2">Web Form Code</Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => navigation.navigate("TestEmail")}
-                  className="flex-1 bg-blue-500 rounded-2xl p-4 active:opacity-80"
-                >
-                  <Ionicons name="mail" size={24} color="white" />
-                  <Text className="text-white text-sm font-semibold mt-2">Test Email</Text>
-                </Pressable>
-              </View>
-              <View className="flex-row gap-3 mb-3">
-                <Pressable
-                  onPress={() => navigation.navigate("FileManagement")}
-                  className="flex-1 bg-emerald-600 rounded-2xl p-4 active:opacity-80"
-                >
-                  <Ionicons name="folder-open" size={24} color="white" />
-                  <Text className="text-white text-sm font-semibold mt-2">File Management</Text>
-                </Pressable>
-                <Pressable
                   onPress={() => navigation.navigate("VolunteerDashboard")}
                   className="flex-1 bg-green-600 rounded-2xl p-4 active:opacity-80"
                 >
                   <Ionicons name="people" size={24} color="white" />
                   <Text className="text-white text-sm font-semibold mt-2">Volunteer Mgmt</Text>
                 </Pressable>
-              </View>
-              <View className="flex-row gap-3">
                 <Pressable
                   onPress={() => navigation.navigate("VolunteerIntakeForm")}
                   className="flex-1 bg-purple-600 rounded-2xl p-4 active:opacity-80"
@@ -226,7 +201,6 @@ export default function AdminHomepageScreen() {
                   <Ionicons name="person-add-outline" size={24} color="white" />
                   <Text className="text-white text-sm font-semibold mt-2">Add Volunteer</Text>
                 </Pressable>
-                <View className="flex-1" />
               </View>
             </>
           )}

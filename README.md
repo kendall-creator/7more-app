@@ -2,9 +2,37 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Web-Embeddable Forms - November 18, 2025
+## 🔥 LATEST UPDATE: Admin Homepage Cleanup & Volunteer Resources - November 18, 2025
 
 **Date:** November 18, 2025
+**Status:** ✅ COMPLETE
+
+### What Was Changed:
+
+**Admin Homepage Cleanup:**
+- Removed "Test Email" button from admin homepage (testing feature no longer needed on main screen)
+- Removed "Web Form Code" button from admin homepage (moved to better location)
+- Removed "File Management" button from admin homepage (relocated to Volunteer Management)
+- Streamlined Quick Actions to focus on core workflows
+
+**Volunteer Management Resources Section:**
+- Added new "Resources (Admin Only)" section in Volunteer Management Dashboard
+- Moved File Management to Resources section under Volunteer Management
+- File Management now accessible from Volunteer Management → Resources
+- Better organization: all volunteer-related resources in one place
+- Routing Rules remains in the Resources section alongside File Management
+
+### Benefits:
+✅ **Cleaner Admin Homepage** - Focus on primary tasks (participants, tasks, schedules)
+✅ **Better Organization** - File Management logically grouped with Volunteer Management
+✅ **Admin-Only Access** - Resources section only visible to admin users
+✅ **Easier Navigation** - Related features grouped together
+✅ **Reduced Clutter** - Removed testing/development tools from main screen
+
+---
+
+## Previous Update: Web-Embeddable Forms - November 18, 2025
+
 **Status:** ✅ COMPLETE
 
 ### What Was Added:

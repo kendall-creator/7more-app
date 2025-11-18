@@ -242,10 +242,25 @@ export default function VolunteerDashboardScreen() {
           </View>
         )}
 
-        {/* Admin Actions (if user is admin) */}
+        {/* Resources for Admin (if user is admin) */}
         {currentUser?.role === "admin" && (
           <View className="px-4 pb-4">
-            <Text className="text-lg font-bold text-gray-900 mb-3">Admin Settings</Text>
+            <Text className="text-lg font-bold text-gray-900 mb-3">Resources (Admin Only)</Text>
+
+            <Pressable
+              onPress={() => navigation.navigate("FileManagement" as any)}
+              className="bg-white rounded-lg p-4 mb-3 border border-gray-200 flex-row items-center justify-between"
+            >
+              <View className="flex-row items-center">
+                <Ionicons name="folder-open" size={24} color="#10B981" />
+                <View className="ml-3">
+                  <Text className="text-base font-semibold text-gray-900">File Management</Text>
+                  <Text className="text-sm text-gray-600">Access volunteer and participant forms</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+            </Pressable>
+
             <Pressable
               onPress={() => navigation.navigate("VolunteerRoutingRules")}
               className="bg-white rounded-lg p-4 border border-gray-200 flex-row items-center justify-between"
