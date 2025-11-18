@@ -5,7 +5,7 @@
  * Uses bridgeteam@7more.net as the sender address.
  *
  * Setup:
- * 1. Add RESEND_API_KEY to ENV tab in Vibecode
+ * 1. Add EXPO_PUBLIC_RESEND_API_KEY to ENV tab in Vibecode
  * 2. Domain 7more.net should already be verified in Resend
  */
 
@@ -90,13 +90,13 @@ export async function sendBridgeTeamResourcesEmail({
 }: BridgeTeamEmailParams): Promise<ResendEmailResult> {
   try {
     // Get Resend API key from environment
-    const resendApiKey = process.env.RESEND_API_KEY;
+    const resendApiKey = process.env.EXPO_PUBLIC_RESEND_API_KEY;
 
     if (!resendApiKey) {
-      console.error("❌ RESEND_API_KEY not found in environment");
+      console.error("❌ EXPO_PUBLIC_RESEND_API_KEY not found in environment");
       return {
         success: false,
-        error: "Email service not configured. Please add RESEND_API_KEY to ENV tab.",
+        error: "Email service not configured. Please add EXPO_PUBLIC_RESEND_API_KEY to ENV tab.",
       };
     }
 
