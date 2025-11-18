@@ -13,6 +13,12 @@ export default function BridgeTeamDashboardScreen() {
   const originalAdmin = useOriginalAdmin();
   const stopImpersonation = useAuthStore((s) => s.stopImpersonation);
   const allParticipants = useParticipantStore((s) => s.participants);
+  const bulkMoveToMentorship = useParticipantStore((s) => s.bulkMoveToMentorship);
+
+  // Selection state
+  const [selectionMode, setSelectionMode] = React.useState(false);
+  const [selectedParticipants, setSelectedParticipants] = React.useState<Set<string>>(new Set());
+  const [isProcessing, setIsProcessing] = React.useState(false);
 
   // Filter outside of the selector to avoid infinite loops
   const participants = React.useMemo(
@@ -74,33 +80,95 @@ export default function BridgeTeamDashboardScreen() {
     }
   };
 
+  const toggleSelection = (participantId: string) => {
+    setSelectedParticipants((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(participantId)) {
+        newSet.delete(participantId);
+      } else {
+        newSet.add(participantId);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedParticipants.size === participants.length) {
+      setSelectedParticipants(new Set());
+    } else {
+      setSelectedParticipants(new Set(participants.map((p) => p.id)));
+    }
+  };
+
+  const handleBulkMoveToMentorship = async () => {
+    if (!currentUser || selectedParticipants.size === 0) return;
+
+    setIsProcessing(true);
+    try {
+      await bulkMoveToMentorship(Array.from(selectedParticipants), currentUser.id, currentUser.name);
+      setSelectedParticipants(new Set());
+      setSelectionMode(false);
+    } catch (error) {
+      console.error("Failed to bulk move participants:", error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const cancelSelection = () => {
+    setSelectionMode(false);
+    setSelectedParticipants(new Set());
+  };
+
   const renderParticipantCard = (participant: Participant) => {
     const badge = getStatusBadge(participant);
     const lastContactInfo = getLastContactInfo(participant);
+    const isSelected = selectedParticipants.has(participant.id);
 
     return (
       <Pressable
         key={participant.id}
-        onPress={() => navigation.navigate("ParticipantProfile", { participantId: participant.id })}
-        className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 active:opacity-70"
+        onPress={() => {
+          if (selectionMode) {
+            toggleSelection(participant.id);
+          } else {
+            navigation.navigate("ParticipantProfile", { participantId: participant.id });
+          }
+        }}
+        className={`bg-white rounded-2xl p-4 mb-3 border ${
+          isSelected ? "border-yellow-500 border-2" : "border-gray-100"
+        } active:opacity-70`}
       >
         {/* Header Row */}
         <View className="flex-row justify-between items-start mb-3">
           <View className="flex-1 flex-row items-center">
-            <Text className="text-lg font-bold text-gray-900 mb-1">
-              {participant.firstName} {participant.lastName}
-            </Text>
-            {/* Show voicemail/missed call icon */}
-            {(participant.intakeType === "missed_call_no_voicemail" ||
-              participant.intakeType === "missed_call_voicemail") && (
-              <View className="ml-2">
-                <Ionicons
-                  name={participant.intakeType === "missed_call_voicemail" ? "chatbox-ellipses" : "call"}
-                  size={18}
-                  color="#F59E0B"
-                />
+            {selectionMode && (
+              <View className="mr-3">
+                <View
+                  className={`w-6 h-6 rounded-full border-2 ${
+                    isSelected ? "bg-yellow-500 border-yellow-500" : "border-gray-300"
+                  } items-center justify-center`}
+                >
+                  {isSelected && <Ionicons name="checkmark" size={16} color="white" />}
+                </View>
               </View>
             )}
+            <View className="flex-1">
+              <Text className="text-lg font-bold text-gray-900 mb-1">
+                {participant.firstName} {participant.lastName}
+              </Text>
+              {/* Show voicemail/missed call icon */}
+              {(participant.intakeType === "missed_call_no_voicemail" ||
+                participant.intakeType === "missed_call_voicemail") && (
+                <View className="ml-2">
+                  <Ionicons
+                    name={participant.intakeType === "missed_call_voicemail" ? "chatbox-ellipses" : "call"}
+                    size={18}
+                    color="#F59E0B"
+                  />
+                </View>
+              )}
+            </View>
           </View>
           <View className={`px-3 py-1 rounded-full ${badge.color}`}>
             <Text className={`text-xs font-semibold ${badge.color}`}>{badge.text}</Text>
@@ -137,58 +205,62 @@ export default function BridgeTeamDashboardScreen() {
           </View>
         </View>
 
-        {/* Action Buttons */}
-        <View className="flex-row gap-2">
-          <Pressable
-            onPress={(e) => {
-              e.stopPropagation();
-              navigation.navigate("BridgeTeamFollowUpForm", {
-                participantId: participant.id,
-              });
-            }}
-            className="flex-1 bg-green-50 border border-green-200 rounded-xl py-2 items-center active:opacity-70"
-          >
-            <Text className="text-gray-900 text-xs font-semibold">Contacted</Text>
-          </Pressable>
+        {/* Action Buttons - only show if not in selection mode */}
+        {!selectionMode && (
+          <>
+            <View className="flex-row gap-2">
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  navigation.navigate("BridgeTeamFollowUpForm", {
+                    participantId: participant.id,
+                  });
+                }}
+                className="flex-1 bg-green-50 border border-green-200 rounded-xl py-2 items-center active:opacity-70"
+              >
+                <Text className="text-gray-900 text-xs font-semibold">Contacted</Text>
+              </Pressable>
 
-          <Pressable
-            onPress={(e) => {
-              e.stopPropagation();
-              navigation.navigate("MoveToMentorship", { participantId: participant.id });
-            }}
-            className="flex-1 bg-gray-50 border border-gray-200 rounded-xl py-2 items-center active:opacity-70"
-          >
-            <Text className="text-yellow-700 text-xs font-semibold">To Mentorship</Text>
-          </Pressable>
-        </View>
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  navigation.navigate("MoveToMentorship", { participantId: participant.id });
+                }}
+                className="flex-1 bg-gray-50 border border-gray-200 rounded-xl py-2 items-center active:opacity-70"
+              >
+                <Text className="text-yellow-700 text-xs font-semibold">To Mentorship</Text>
+              </Pressable>
+            </View>
 
-        <View className="flex-row gap-2 mt-2">
-          <Pressable
-            onPress={(e) => {
-              e.stopPropagation();
-              navigation.navigate("ContactForm", {
-                participantId: participant.id,
-                outcomeType: "attempted",
-              });
-            }}
-            className="flex-1 bg-amber-50 border border-amber-200 rounded-xl py-2 items-center active:opacity-70"
-          >
-            <Text className="text-amber-700 text-xs font-semibold">Attempted</Text>
-          </Pressable>
+            <View className="flex-row gap-2 mt-2">
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  navigation.navigate("ContactForm", {
+                    participantId: participant.id,
+                    outcomeType: "attempted",
+                  });
+                }}
+                className="flex-1 bg-amber-50 border border-amber-200 rounded-xl py-2 items-center active:opacity-70"
+              >
+                <Text className="text-amber-700 text-xs font-semibold">Attempted</Text>
+              </Pressable>
 
-          <Pressable
-            onPress={(e) => {
-              e.stopPropagation();
-              navigation.navigate("ContactForm", {
-                participantId: participant.id,
-                outcomeType: "unable",
-              });
-            }}
-            className="flex-1 bg-gray-50 border border-gray-200 rounded-xl py-2 items-center active:opacity-70"
-          >
-            <Text className="text-gray-700 text-xs font-semibold">Unable</Text>
-          </Pressable>
-        </View>
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  navigation.navigate("ContactForm", {
+                    participantId: participant.id,
+                    outcomeType: "unable",
+                  });
+                }}
+                className="flex-1 bg-gray-50 border border-gray-200 rounded-xl py-2 items-center active:opacity-70"
+              >
+                <Text className="text-gray-700 text-xs font-semibold">Unable</Text>
+              </Pressable>
+            </View>
+          </>
+        )}
       </Pressable>
     );
   };
@@ -221,14 +293,69 @@ export default function BridgeTeamDashboardScreen() {
               {participants.length} participant{participants.length !== 1 ? "s" : ""} waiting
             </Text>
           </View>
-          <Pressable
-            onPress={() => navigation.navigate("IntakeTypeSelection")}
-            className="w-12 h-12 bg-yellow-500 rounded-full items-center justify-center active:opacity-70"
-          >
-            <Ionicons name="add" size={28} color="white" />
-          </Pressable>
+          {!selectionMode ? (
+            <View className="flex-row gap-2">
+              <Pressable
+                onPress={() => setSelectionMode(true)}
+                className="w-12 h-12 bg-gray-500 rounded-full items-center justify-center active:opacity-70"
+              >
+                <Ionicons name="checkmark-done" size={24} color="white" />
+              </Pressable>
+              <Pressable
+                onPress={() => navigation.navigate("IntakeTypeSelection")}
+                className="w-12 h-12 bg-yellow-500 rounded-full items-center justify-center active:opacity-70"
+              >
+                <Ionicons name="add" size={28} color="white" />
+              </Pressable>
+            </View>
+          ) : (
+            <Pressable
+              onPress={cancelSelection}
+              className="px-4 py-2 bg-gray-500 rounded-full active:opacity-70"
+            >
+              <Text className="text-white text-sm font-semibold">Cancel</Text>
+            </Pressable>
+          )}
         </View>
       </View>
+
+      {/* Selection Bar */}
+      {selectionMode && (
+        <View className="bg-yellow-500 px-6 py-3">
+          <View className="flex-row items-center justify-between">
+            <Pressable onPress={toggleSelectAll} className="flex-row items-center">
+              <View
+                className={`w-6 h-6 rounded-full border-2 ${
+                  selectedParticipants.size === participants.length
+                    ? "bg-white border-white"
+                    : "border-white"
+                } items-center justify-center mr-2`}
+              >
+                {selectedParticipants.size === participants.length && (
+                  <Ionicons name="checkmark" size={16} color="#EAB308" />
+                )}
+              </View>
+              <Text className="text-white font-semibold">
+                {selectedParticipants.size === participants.length ? "Deselect All" : "Select All"} (
+                {selectedParticipants.size})
+              </Text>
+            </Pressable>
+            {selectedParticipants.size > 0 && (
+              <Pressable
+                onPress={handleBulkMoveToMentorship}
+                disabled={isProcessing}
+                className={`px-4 py-2 bg-white rounded-lg active:opacity-70 ${
+                  isProcessing ? "opacity-50" : ""
+                }`}
+              >
+                <Text className="text-yellow-700 font-bold text-sm">
+                  {isProcessing ? "Moving..." : "Move to Mentorship"}
+                </Text>
+              </Pressable>
+            )}
+          </View>
+        </View>
+      )}
 
       {/* Stats Cards */}
       <View className="px-6 py-4 flex-row gap-3">

@@ -30,6 +30,8 @@ interface ParticipantActions {
   assignToBridgeTeam: (participantId: string, userId: string) => Promise<void>;
   assignToMentorLeader: (participantId: string, userId: string) => Promise<void>;
   assignToMentor: (participantId: string, mentorId: string, leaderId: string, leaderName: string) => Promise<void>;
+  bulkMoveToMentorship: (participantIds: string[], userId: string, userName: string) => Promise<void>;
+  bulkAssignToMentor: (participantIds: string[], mentorId: string, leaderId: string, leaderName: string) => Promise<void>;
   recordContact: (formData: ContactFormData, userId: string, userName: string) => Promise<void>;
   recordBridgeFollowUp: (formData: BridgeTeamFollowUpFormData, userId: string, userName: string) => Promise<void>;
   recordInitialContact: (formData: InitialContactFormData, userId: string, userName: string) => Promise<void>;
@@ -306,6 +308,106 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
 
     const participantRef = ref(database, `participants/${participantId}`);
     await firebaseSet(participantRef, updatedParticipant);
+  },
+
+  bulkMoveToMentorship: async (participantIds, userId, userName) => {
+    if (!database) {
+      throw new Error("Firebase not configured. Please add Firebase credentials in ENV tab.");
+    }
+
+    console.log(`🔄 Bulk moving ${participantIds.length} participants to mentorship...`);
+
+    const now = new Date().toISOString();
+
+    // Process each participant
+    for (const participantId of participantIds) {
+      const participant = get().participants.find((p) => p.id === participantId);
+      if (!participant) {
+        console.warn(`⚠️ Participant ${participantId} not found, skipping...`);
+        continue;
+      }
+
+      // Only move if in bridge team statuses
+      if (!["pending_bridge", "bridge_attempted", "bridge_contacted", "bridge_unable"].includes(participant.status)) {
+        console.warn(`⚠️ Participant ${participant.firstName} ${participant.lastName} is not in bridge team status, skipping...`);
+        continue;
+      }
+
+      const updatedParticipant = {
+        ...participant,
+        status: "pending_mentor" as ParticipantStatus,
+        movedToMentorshipAt: now,
+        assignedBridgeTeamMember: userId,
+        history: [
+          ...participant.history,
+          {
+            id: `history_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            type: "status_change" as const,
+            description: "Bulk moved to mentorship assignment queue",
+            createdBy: userId,
+            createdByName: userName,
+            createdAt: now,
+          },
+        ],
+      };
+
+      const participantRef = ref(database, `participants/${participantId}`);
+      await firebaseSet(participantRef, updatedParticipant);
+      console.log(`✅ Moved ${participant.firstName} ${participant.lastName} to mentorship`);
+    }
+
+    console.log(`✅ Bulk move complete: ${participantIds.length} participants processed`);
+  },
+
+  bulkAssignToMentor: async (participantIds, mentorId, leaderId, leaderName) => {
+    if (!database) {
+      throw new Error("Firebase not configured. Please add Firebase credentials in ENV tab.");
+    }
+
+    console.log(`🔄 Bulk assigning ${participantIds.length} participants to mentor...`);
+
+    const now = new Date();
+    const firstMonthlyReportDue = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    // Process each participant
+    for (const participantId of participantIds) {
+      const participant = get().participants.find((p) => p.id === participantId);
+      if (!participant) {
+        console.warn(`⚠️ Participant ${participantId} not found, skipping...`);
+        continue;
+      }
+
+      // Only assign if in pending_mentor status
+      if (participant.status !== "pending_mentor") {
+        console.warn(`⚠️ Participant ${participant.firstName} ${participant.lastName} is not pending mentor assignment, skipping...`);
+        continue;
+      }
+
+      const updatedParticipant = {
+        ...participant,
+        assignedMentor: mentorId,
+        assignedToMentorAt: now.toISOString(),
+        nextMonthlyReportDue: firstMonthlyReportDue,
+        status: "initial_contact_pending" as ParticipantStatus,
+        history: [
+          ...participant.history,
+          {
+            id: `history_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            type: "assignment_change" as const,
+            description: "Bulk assigned to mentor",
+            createdBy: leaderId,
+            createdByName: leaderName,
+            createdAt: now.toISOString(),
+          },
+        ],
+      };
+
+      const participantRef = ref(database, `participants/${participantId}`);
+      await firebaseSet(participantRef, updatedParticipant);
+      console.log(`✅ Assigned ${participant.firstName} ${participant.lastName} to mentor`);
+    }
+
+    console.log(`✅ Bulk assignment complete: ${participantIds.length} participants processed`);
   },
 
   recordContact: async (formData, userId, userName) => {

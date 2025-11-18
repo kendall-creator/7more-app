@@ -2,7 +2,95 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Bridge Team Resource Email Integration - November 17, 2025
+## 🔥 LATEST UPDATE: Bulk Selection and Assignment - November 18, 2025
+
+**Date:** November 18, 2025
+**Status:** ✅ COMPLETE
+
+### What Was Added:
+
+**Bulk Selection and Movement for Participants:**
+
+Both Bridge Team and Mentorship Leader dashboards now support bulk selection, allowing admins and leaders to efficiently move or assign multiple participants at once.
+
+#### Key Features:
+
+1. **Bridge Team Bulk Selection**
+   - Multi-select button (checkmark icon) in header
+   - Visual checkbox indicators on each participant card
+   - "Select All" / "Deselect All" toggle with count display
+   - "Move to Mentorship" button for bulk operations
+   - Only moves participants in appropriate statuses (pending_bridge, bridge_attempted, etc.)
+   - Yellow selection bar shows count and bulk actions
+
+2. **Mentorship Leader Bulk Assignment**
+   - Multi-select button (checkmark icon) in header
+   - Visual checkbox indicators on each participant card
+   - "Select All" / "Deselect All" toggle with count display
+   - "Assign to Mentor" button opens mentor picker modal
+   - Beautiful mentor selection modal with scrollable list
+   - Only assigns participants with status "pending_mentor"
+   - Yellow selection bar shows count and bulk actions
+
+3. **Smart Selection Mode**
+   - Toggle selection mode on/off
+   - Cancel button to exit selection mode
+   - Cards show yellow border when selected
+   - Individual action buttons hidden during selection mode
+   - Cards are clickable to toggle selection
+
+4. **Store-Level Bulk Actions**
+   - `bulkMoveToMentorship()` - moves multiple participants to mentorship
+   - `bulkAssignToMentor()` - assigns multiple participants to a specific mentor
+   - Each action validates participant status before processing
+   - Logs history entry for each participant with "bulk" description
+   - Processes participants sequentially with error handling
+
+### Benefits:
+✅ **Time Savings** - Process multiple participants in seconds instead of minutes
+✅ **Reduced Errors** - Less repetitive clicking reduces mistakes
+✅ **Better UX** - Clean, intuitive selection interface
+✅ **Role-Based** - Available to admins and Bridge Team/Mentorship leaders
+✅ **Status Validation** - Only processes participants in correct statuses
+✅ **Full Tracking** - Every bulk action logged in participant history
+
+### How to Use:
+
+1. **As Bridge Team Leader or Admin:**
+   - Go to Bridge Team Dashboard
+   - Tap the checkmark icon in header to enter selection mode
+   - Tap participants to select them (or use "Select All")
+   - Tap "Move to Mentorship" to bulk move all selected participants
+   - Selected participants move to pending mentor status
+
+2. **As Mentorship Leader or Admin:**
+   - Go to Mentorship Leader Dashboard
+   - Tap the checkmark icon in header to enter selection mode
+   - Tap participants to select them (or use "Select All")
+   - Tap "Assign to Mentor" to see mentor list
+   - Select a mentor to bulk assign all selected participants
+   - Selected participants are assigned to the chosen mentor
+
+### Technical Implementation:
+- **Updated Store**: `participantStore.ts`
+  - New action: `bulkMoveToMentorship(participantIds, userId, userName)`
+  - New action: `bulkAssignToMentor(participantIds, mentorId, leaderId, leaderName)`
+  - Both actions process participants sequentially with validation
+
+- **Updated Screens**:
+  - `BridgeTeamDashboardScreen.tsx` - Added selection mode UI and bulk move
+  - `MentorshipLeaderDashboardScreen.tsx` - Added selection mode UI and mentor picker modal
+
+- **UI Components**:
+  - Selection mode toggle button
+  - Checkbox indicators on cards
+  - Yellow selection bar with count and actions
+  - Mentor picker modal with scrollable list
+  - Visual feedback (yellow borders on selected cards)
+
+---
+
+## 🔥 PREVIOUS UPDATE: Bridge Team Resource Email Integration - November 17, 2025
 
 **Date:** November 17, 2025
 **Status:** ✅ COMPLETE
