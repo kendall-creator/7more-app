@@ -24,7 +24,13 @@ export default function FilteredParticipantsScreen() {
   // Get all users for mentor selection
   const allUsers = useUsersStore((s) => s.invitedUsers);
   const mentors = useMemo(() => {
-    return allUsers.filter((user) => user.role === "mentor" || user.roles?.includes("mentor"));
+    return allUsers.filter((user) =>
+      user.role === "admin" ||
+      user.role === "mentorship_leader" ||
+      user.role === "mentor" ||
+      user.roles?.includes("mentor") ||
+      user.roles?.includes("mentorship_leader")
+    );
   }, [allUsers]);
 
   // Selection state
