@@ -22,12 +22,36 @@ A comprehensive mobile application built with Expo and React Native to help nonp
 - Better organization: all volunteer-related resources in one place
 - Routing Rules remains in the Resources section alongside File Management
 
+**File Management Updates:**
+- Updated file list to show embeddable forms ready for website integration
+- Now displays:
+  - **Participant Intake Form** (embeddable-forms/participant-intake-form.html)
+  - **Volunteer Intake Form** (embeddable-forms/volunteer-intake-form.html)
+  - **Integration Guide** (complete instructions)
+  - **Quick Embed Codes** (copy-paste examples)
+
+### How to Embed Forms on Your Website:
+
+**From the App:**
+1. Go to **Volunteer Management** → **Resources** → **File Management**
+2. Tap on **Participant Intake Form** or **Volunteer Intake Form**
+3. Choose "Copy Link" or "Open in Browser" to download
+4. Follow the instructions in the **Integration Guide**
+
+**Key Features:**
+- ✅ Submissions automatically appear in the app
+- ✅ Real-time Firebase sync
+- ✅ Mobile-responsive design
+- ✅ No backend coding required
+- ✅ Easy to embed (iframe, direct link, WordPress)
+
 ### Benefits:
 ✅ **Cleaner Admin Homepage** - Focus on primary tasks (participants, tasks, schedules)
 ✅ **Better Organization** - File Management logically grouped with Volunteer Management
 ✅ **Admin-Only Access** - Resources section only visible to admin users
 ✅ **Easier Navigation** - Related features grouped together
 ✅ **Reduced Clutter** - Removed testing/development tools from main screen
+✅ **Quick Access to Forms** - Embeddable forms ready to download and use
 
 ---
 

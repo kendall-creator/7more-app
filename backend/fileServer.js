@@ -47,9 +47,10 @@ router.get('/api/files/list', (req, res) => {
 });
 
 // Download a specific file
-router.get('/api/files/download/:filename', (req, res) => {
+router.get('/api/files/download/:filename(*)', (req, res) => {
   try {
     const fileName = req.params.filename;
+    // Support subdirectories by using the full path
     const filePath = path.join(WORKSPACE_DIR, fileName);
 
     // Security check: ensure file is within workspace
@@ -69,8 +70,9 @@ router.get('/api/files/download/:filename', (req, res) => {
     }
 
     // Set appropriate headers
-    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
-    res.setHeader('Content-Type', getMimeType(fileName));
+    const baseFileName = path.basename(fileName);
+    res.setHeader('Content-Disposition', `attachment; filename="${baseFileName}"`);
+    res.setHeader('Content-Type', getMimeType(baseFileName));
     res.setHeader('Content-Length', stats.size);
 
     // Stream the file

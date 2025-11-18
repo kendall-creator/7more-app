@@ -27,28 +27,28 @@ export default function FileManagementScreen() {
   // Pre-defined important files that we know exist
   const IMPORTANT_FILES = [
     {
-      name: "vercel-project.zip",
-      description: "Vercel deployment package",
-      icon: "archive",
-      color: "bg-[#fcc85c]",
+      name: "embeddable-forms/participant-intake-form.html",
+      description: "Participant Intake Form - Embed on your website",
+      icon: "code-slash",
+      color: "bg-indigo-600",
     },
     {
-      name: "README.md",
-      description: "Project documentation",
+      name: "embeddable-forms/volunteer-intake-form.html",
+      description: "Volunteer Intake Form - Embed on your website",
+      icon: "code-slash",
+      color: "bg-purple-600",
+    },
+    {
+      name: "embeddable-forms/INTEGRATION_GUIDE.md",
+      description: "Complete integration guide & instructions",
       icon: "document-text",
       color: "bg-blue-500",
     },
     {
-      name: "VERCEL_DEPLOYMENT_SUMMARY.md",
-      description: "Vercel deployment guide",
+      name: "embeddable-forms/QUICK_EMBED_CODES.md",
+      description: "Quick copy-paste embed codes",
       icon: "document",
       color: "bg-green-500",
-    },
-    {
-      name: "embedded-form.html",
-      description: "Embeddable participant form",
-      icon: "code-slash",
-      color: "bg-orange-500",
     },
   ];
 
