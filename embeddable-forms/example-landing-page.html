@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>7more - Get Involved</title>
+  <meta name="description" content="Join 7more to support those returning from incarceration through our participant program or volunteer opportunities.">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f9fafb;
+      color: #1f2937;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, #4b5563 0%, #1f2937 100%);
+      color: white;
+      padding: 80px 20px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 48px;
+      font-weight: 700;
+      margin: 0 0 20px 0;
+      line-height: 1.2;
+    }
+
+    .hero p {
+      font-size: 20px;
+      opacity: 0.95;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Options Section */
+    .options-section {
+      max-width: 1200px;
+      margin: -60px auto 60px auto;
+      padding: 0 20px;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+
+    .option-card {
+      background: white;
+      padding: 48px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .option-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .option-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px auto;
+      background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+    }
+
+    .option-card:first-child .option-icon {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    }
+
+    .option-card h2 {
+      font-size: 32px;
+      font-weight: 700;
+      margin: 0 0 16px 0;
+      color: #1f2937;
+    }
+
+    .option-card p {
+      font-size: 16px;
+      color: #6b7280;
+      margin: 0 0 32px 0;
+      line-height: 1.6;
+    }
+
+    .cta-button {
+      display: inline-block;
+      padding: 18px 36px;
+      font-size: 18px;
+      font-weight: 600;
+      color: white;
+      background: #4f46e5;
+      text-decoration: none;
+      border-radius: 12px;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .cta-button:hover {
+      background: #4338ca;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+    }
+
+    .cta-button:active {
+      transform: translateY(0);
+    }
+
+    .cta-button.secondary {
+      background: #4b5563;
+      box-shadow: 0 4px 12px rgba(75, 85, 99, 0.3);
+    }
+
+    .cta-button.secondary:hover {
+      background: #374151;
+      box-shadow: 0 6px 20px rgba(75, 85, 99, 0.4);
+    }
+
+    /* Features Section */
+    .features-section {
+      max-width: 1200px;
+      margin: 80px auto;
+      padding: 0 20px;
+      text-align: center;
+    }
+
+    .features-section h2 {
+      font-size: 36px;
+      font-weight: 700;
+      margin: 0 0 16px 0;
+      color: #1f2937;
+    }
+
+    .features-section > p {
+      font-size: 18px;
+      color: #6b7280;
+      margin: 0 0 48px 0;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+
+    .feature {
+      padding: 32px;
+      text-align: left;
+    }
+
+    .feature-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 16px;
+    }
+
+    .feature h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0 0 8px 0;
+      color: #1f2937;
+    }
+
+    .feature p {
+      font-size: 15px;
+      color: #6b7280;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* Footer */
+    .footer {
+      background: #1f2937;
+      color: white;
+      padding: 48px 20px;
+      text-align: center;
+      margin-top: 80px;
+    }
+
+    .footer p {
+      font-size: 14px;
+      opacity: 0.8;
+      margin: 0;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 968px) {
+      .hero h1 {
+        font-size: 36px;
+      }
+
+      .hero p {
+        font-size: 18px;
+      }
+
+      .options-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+
+      .option-card {
+        padding: 36px;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .features-section {
+        margin: 60px auto;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero {
+        padding: 60px 20px;
+      }
+
+      .hero h1 {
+        font-size: 28px;
+      }
+
+      .hero p {
+        font-size: 16px;
+      }
+
+      .options-section {
+        margin: -40px auto 40px auto;
+      }
+
+      .option-card {
+        padding: 28px;
+      }
+
+      .option-card h2 {
+        font-size: 26px;
+      }
+
+      .cta-button {
+        padding: 16px 28px;
+        font-size: 16px;
+      }
+
+      .features-section h2 {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>Get Involved with 7more</h1>
+    <p>Join us in making a difference in the lives of those returning from incarceration through support, mentorship, and community.</p>
+  </section>
+
+  <!-- Options Section -->
+  <section class="options-section">
+    <div class="options-grid">
+
+      <!-- Participant Card -->
+      <div class="option-card">
+        <div class="option-icon">🤝</div>
+        <h2>Need Support?</h2>
+        <p>If you are recently released and looking for support, resources, and mentorship, apply to our program. We're here to help you succeed.</p>
+        <a href="./participant-intake-form.html" class="cta-button secondary">
+          Apply as Participant
+        </a>
+      </div>
+
+      <!-- Volunteer Card -->
+      <div class="option-card">
+        <div class="option-icon">💙</div>
+        <h2>Want to Help?</h2>
+        <p>Join our team of volunteers and help make a lasting impact in your community. Every contribution matters.</p>
+        <a href="./volunteer-intake-form.html" class="cta-button">
+          Volunteer with Us
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <h2>How We Help</h2>
+    <p>Our comprehensive program provides support at every stage of the reentry journey.</p>
+
+    <div class="features-grid">
+
+      <div class="feature">
+        <div class="feature-icon">👥</div>
+        <h3>Bridge Team</h3>
+        <p>Our Bridge Team provides immediate support and resources to participants as they transition back into the community.</p>
+      </div>
+
+      <div class="feature">
+        <div class="feature-icon">🎓</div>
+        <h3>Mentorship</h3>
+        <p>One-on-one mentorship pairs participants with dedicated volunteers who provide guidance and accountability.</p>
+      </div>
+
+      <div class="feature">
+        <div class="feature-icon">📚</div>
+        <h3>Resources</h3>
+        <p>Access to housing, employment, education, and other critical resources needed for successful reintegration.</p>
+      </div>
+
+      <div class="feature">
+        <div class="feature-icon">🙏</div>
+        <h3>Faith-Based</h3>
+        <p>Grounded in Christian principles, we provide spiritual support and encouragement throughout the journey.</p>
+      </div>
+
+      <div class="feature">
+        <div class="feature-icon">💼</div>
+        <h3>Job Support</h3>
+        <p>Resume building, interview prep, and connections with employers who believe in second chances.</p>
+      </div>
+
+      <div class="feature">
+        <div class="feature-icon">🎉</div>
+        <h3>Community</h3>
+        <p>A welcoming community that celebrates progress and provides ongoing support and encouragement.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2025 7more. All rights reserved. Making a difference, one life at a time.</p>
+  </footer>
+
+</body>
+</html>

@@ -2,7 +2,142 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Bulk Selection and Assignment - November 18, 2025
+## 🔥 LATEST UPDATE: Web-Embeddable Forms - November 18, 2025
+
+**Date:** November 18, 2025
+**Status:** ✅ COMPLETE
+
+### What Was Added:
+
+**Embeddable Web Forms for Your Website:**
+
+Two beautiful, standalone HTML forms that can be embedded directly into your website. Both forms submit data directly to Firebase and automatically sync with the mobile app.
+
+#### Key Features:
+
+1. **Participant Intake Form** (`/embeddable-forms/participant-intake-form.html`)
+   - Collects all participant information (name, DOB, gender, release date, facility)
+   - Beautiful, mobile-responsive design matching app aesthetic
+   - Direct Firebase integration - no backend required
+   - Automatic age and time-out calculations
+   - Form validation with helpful error messages
+   - Success confirmation message
+   - Automatically appears in Bridge Team Dashboard with "pending_bridge" status
+
+2. **Volunteer Intake Form** (`/embeddable-forms/volunteer-intake-form.html`)
+   - Collects volunteer information with multiple interest areas
+   - Checkbox selection for Bridge Team, Clothing Donation, Prison Volunteering, etc.
+   - Conditional fields (monetary donation amount, other description)
+   - Mobile-responsive design with modern UI
+   - Direct Firebase integration
+   - Automatically creates volunteer inquiry in the system
+   - Appears in Admin Dashboard and generates follow-up tasks
+
+3. **Complete Integration Guide** (`/embeddable-forms/INTEGRATION_GUIDE.md`)
+   - Step-by-step Firebase configuration instructions
+   - Multiple embedding options (direct link, iframe, WordPress, React)
+   - Security considerations and Firebase rules
+   - Customization guide for colors and fields
+   - Complete testing checklist
+   - Troubleshooting section
+
+4. **Quick Reference Card** (`/embeddable-forms/QUICK_EMBED_CODES.md`)
+   - Copy-paste embed codes for both forms
+   - WordPress shortcode examples
+   - Firebase hosting deployment guide
+   - Responsive card layouts
+   - Quick troubleshooting tips
+
+### Benefits:
+✅ **No Backend Needed** - Direct Firebase integration from static HTML
+✅ **Easy Integration** - Multiple embedding options (iframe, direct link, WordPress)
+✅ **Automatic Sync** - Submissions appear immediately in mobile app
+✅ **Mobile Responsive** - Works perfectly on all devices
+✅ **Beautiful Design** - Professional UI matching your brand
+✅ **Self-Contained** - No dependencies on external services
+✅ **Customizable** - Easy to modify colors, fields, and styling
+
+### How to Use:
+
+1. **Get Firebase Credentials:**
+   - Go to Firebase Console → Project Settings
+   - Copy your web app configuration
+
+2. **Update the Forms:**
+   - Open `participant-intake-form.html` and `volunteer-intake-form.html`
+   - Replace the Firebase config at the top of the `<script>` section
+
+3. **Upload to Your Website:**
+   - Upload both HTML files to your web server
+   - Or use Firebase Hosting (free) for instant deployment
+
+4. **Embed on Your Website:**
+   ```html
+   <!-- Option 1: Direct Link -->
+   <a href="https://yourdomain.com/participant-intake-form.html">Apply as Participant</a>
+
+   <!-- Option 2: iFrame Embed -->
+   <iframe
+     src="https://yourdomain.com/participant-intake-form.html"
+     width="100%"
+     height="1200px"
+     frameborder="0"
+   ></iframe>
+   ```
+
+5. **Test & Go Live:**
+   - Submit test data through the forms
+   - Verify data appears in Firebase Console
+   - Verify data appears in mobile app
+   - Share the form URLs with your team
+
+### Technical Details:
+- **Files Created:**
+  - `/embeddable-forms/participant-intake-form.html` - Complete standalone form
+  - `/embeddable-forms/volunteer-intake-form.html` - Complete standalone form
+  - `/embeddable-forms/INTEGRATION_GUIDE.md` - Full documentation (30+ pages)
+  - `/embeddable-forms/QUICK_EMBED_CODES.md` - Quick reference guide
+
+- **Technologies Used:**
+  - Pure HTML5, CSS3, and JavaScript (no frameworks)
+  - Firebase JS SDK v10.7.1 (loaded from CDN)
+  - Mobile-first responsive design
+  - Modern CSS with flexbox and grid
+
+- **Data Flow:**
+  - Participant Form → Firebase `/participants/{id}` → Bridge Team Dashboard
+  - Volunteer Form → Firebase `/volunteerInquiries/{id}` → Admin Dashboard & Tasks
+
+### Real-World Usage Examples:
+
+1. **Church Website Integration:**
+   - Add forms to "Get Involved" page
+   - Link from navigation menu
+   - Embed in existing page layout
+
+2. **Facebook Page:**
+   - Host forms on Firebase (free)
+   - Share direct links on social media
+   - Track submissions in mobile app
+
+3. **Email Campaigns:**
+   - Include form links in newsletters
+   - Send personalized volunteer invitations
+   - Track responses automatically
+
+4. **QR Codes:**
+   - Generate QR codes pointing to forms
+   - Print on flyers and posters
+   - Display at events and services
+
+### Documentation:
+- **Full Guide:** `/embeddable-forms/INTEGRATION_GUIDE.md`
+- **Quick Start:** `/embeddable-forms/QUICK_EMBED_CODES.md`
+- Both guides include screenshots, examples, and troubleshooting
+
+---
+
+## 🔥 PREVIOUS UPDATE: Bulk Selection and Assignment - November 18, 2025
 
 **Date:** November 18, 2025
 **Status:** ✅ COMPLETE

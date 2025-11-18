@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>7more Participant Intake Form</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #ffffff;
+      color: #1f2937;
+    }
+
+    .form-container {
+      max-width: 700px;
+      margin: 0 auto;
+      background: white;
+    }
+
+    .form-header {
+      background: #4b5563;
+      padding: 40px 24px;
+      text-align: left;
+    }
+
+    .form-header h1 {
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .form-header p {
+      color: #fef3c7;
+      font-size: 16px;
+    }
+
+    .form-body {
+      padding: 32px 24px;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+
+    .required {
+      color: #ef4444;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      background: #f9fafb;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #4b5563;
+      background: white;
+    }
+
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    .radio-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .radio-option {
+      flex: 1 1 30%;
+      min-width: 120px;
+      padding: 12px;
+      border: 2px solid #d1d5db;
+      border-radius: 12px;
+      background: white;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .radio-option:hover {
+      border-color: #9ca3af;
+    }
+
+    .radio-option.selected {
+      border-color: #4b5563;
+      background: #f9fafb;
+    }
+
+    .radio-option input[type="radio"] {
+      display: none;
+    }
+
+    .radio-option label {
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #374151;
+      display: block;
+    }
+
+    .radio-option.selected label {
+      color: #eab308;
+    }
+
+    .select-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .select-option {
+      padding: 12px 16px;
+      border: 2px solid #d1d5db;
+      border-radius: 12px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .select-option:hover {
+      border-color: #9ca3af;
+    }
+
+    .select-option.selected {
+      border-color: #4b5563;
+      background: #f9fafb;
+    }
+
+    .select-option input[type="radio"] {
+      display: none;
+    }
+
+    .select-option label {
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #374151;
+      display: block;
+    }
+
+    .select-option.selected label {
+      color: #eab308;
+    }
+
+    .other-input-wrapper {
+      margin-top: 12px;
+    }
+
+    .submit-button {
+      width: 100%;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      background: #4b5563;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .submit-button:hover {
+      opacity: 0.9;
+    }
+
+    .submit-button:active {
+      opacity: 0.8;
+    }
+
+    .submit-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .success-message {
+      display: none;
+      padding: 20px;
+      background: #d1fae5;
+      border: 2px solid #10b981;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      color: #065f46;
+    }
+
+    .error-message {
+      display: none;
+      padding: 20px;
+      background: #fee2e2;
+      border: 2px solid #ef4444;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      color: #991b1b;
+    }
+
+    @media (max-width: 640px) {
+      .form-header {
+        padding: 32px 20px;
+      }
+
+      .form-header h1 {
+        font-size: 24px;
+      }
+
+      .form-body {
+        padding: 24px 20px;
+      }
+
+      .radio-group {
+        flex-direction: column;
+      }
+
+      .radio-option {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <div class="form-header">
+      <h1>Participant Intake Form</h1>
+      <p>Welcome! Please fill out the information below to get started with our program.</p>
+    </div>
+
+    <div class="form-body">
+      <div id="successMessage" class="success-message">
+        <strong>Thank you!</strong> Your information has been received. Our Bridge Team will contact you soon.
+      </div>
+
+      <div id="errorMessage" class="error-message">
+        <strong>Error:</strong> <span id="errorText"></span>
+      </div>
+
+      <form id="participantForm">
+        <!-- Participant Number -->
+        <div class="form-group">
+          <label class="form-label">Participant Number <span class="required">*</span></label>
+          <input type="text" name="participantNumber" class="form-input" placeholder="Enter participant number" required>
+        </div>
+
+        <!-- First Name -->
+        <div class="form-group">
+          <label class="form-label">First Name <span class="required">*</span></label>
+          <input type="text" name="firstName" class="form-input" placeholder="Enter first name" required>
+        </div>
+
+        <!-- Last Name -->
+        <div class="form-group">
+          <label class="form-label">Last Name <span class="required">*</span></label>
+          <input type="text" name="lastName" class="form-input" placeholder="Enter last name" required>
+        </div>
+
+        <!-- Date of Birth -->
+        <div class="form-group">
+          <label class="form-label">Date of Birth <span class="required">*</span></label>
+          <input type="date" name="dateOfBirth" class="form-input" required>
+        </div>
+
+        <!-- Gender -->
+        <div class="form-group">
+          <label class="form-label">Gender <span class="required">*</span></label>
+          <div class="radio-group" id="genderGroup">
+            <div class="radio-option">
+              <input type="radio" name="gender" value="Male" id="genderMale" required>
+              <label for="genderMale">Male</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" name="gender" value="Female" id="genderFemale">
+              <label for="genderFemale">Female</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" name="gender" value="Other" id="genderOther">
+              <label for="genderOther">Other</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone Number -->
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="tel" name="phoneNumber" class="form-input" placeholder="(555) 123-4567">
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-input" placeholder="email@example.com">
+        </div>
+
+        <!-- Release Date -->
+        <div class="form-group">
+          <label class="form-label">Release Date <span class="required">*</span></label>
+          <input type="date" name="releaseDate" class="form-input" required>
+        </div>
+
+        <!-- Released From -->
+        <div class="form-group">
+          <label class="form-label">Released From <span class="required">*</span></label>
+          <div class="select-group" id="releasedFromGroup">
+            <div class="select-option">
+              <input type="radio" name="releasedFrom" value="County Jail" id="releasedCounty" required>
+              <label for="releasedCounty">County Jail</label>
+            </div>
+            <div class="select-option">
+              <input type="radio" name="releasedFrom" value="State Prison" id="releasedState">
+              <label for="releasedState">State Prison</label>
+            </div>
+            <div class="select-option">
+              <input type="radio" name="releasedFrom" value="Federal Prison" id="releasedFederal">
+              <label for="releasedFederal">Federal Prison</label>
+            </div>
+            <div class="select-option">
+              <input type="radio" name="releasedFrom" value="Other" id="releasedOther">
+              <label for="releasedOther">Other</label>
+            </div>
+          </div>
+          <div id="otherFacilityWrapper" class="other-input-wrapper" style="display: none;">
+            <label class="form-label">Please specify:</label>
+            <input type="text" name="releasedFrom_other" id="releasedFromOther" class="form-input" placeholder="Enter facility name">
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="submit-button" id="submitButton">Submit Form</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Firebase configuration - REPLACE WITH YOUR ACTUAL CONFIG
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      databaseURL: "YOUR_DATABASE_URL",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    // Radio option selection handlers
+    document.querySelectorAll('.radio-option, .select-option').forEach(option => {
+      option.addEventListener('click', function() {
+        const input = this.querySelector('input[type="radio"]');
+        const name = input.name;
+
+        // Remove selected class from siblings
+        document.querySelectorAll(`input[name="${name}"]`).forEach(radio => {
+          radio.closest('.radio-option, .select-option').classList.remove('selected');
+        });
+
+        // Add selected class to this option
+        this.classList.add('selected');
+        input.checked = true;
+
+        // Show/hide "Other" input for releasedFrom
+        if (name === 'releasedFrom') {
+          const otherWrapper = document.getElementById('otherFacilityWrapper');
+          const otherInput = document.getElementById('releasedFromOther');
+
+          if (input.value === 'Other') {
+            otherWrapper.style.display = 'block';
+            otherInput.required = true;
+          } else {
+            otherWrapper.style.display = 'none';
+            otherInput.required = false;
+            otherInput.value = '';
+          }
+        }
+      });
+    });
+
+    // Form submission handler
+    document.getElementById('participantForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const submitButton = document.getElementById('submitButton');
+      const successMessage = document.getElementById('successMessage');
+      const errorMessage = document.getElementById('errorMessage');
+      const errorText = document.getElementById('errorText');
+
+      // Hide messages
+      successMessage.style.display = 'none';
+      errorMessage.style.display = 'none';
+
+      // Disable submit button
+      submitButton.disabled = true;
+      submitButton.textContent = 'Submitting...';
+
+      try {
+        // Collect form data
+        const formData = new FormData(this);
+        const data = {};
+        formData.forEach((value, key) => {
+          data[key] = value;
+        });
+
+        // Handle "Other" option for releasedFrom
+        if (data.releasedFrom === 'Other') {
+          if (!data.releasedFrom_other || !data.releasedFrom_other.trim()) {
+            throw new Error('Please specify the facility name');
+          }
+        }
+
+        // Calculate age and timeOut
+        const dateOfBirth = new Date(data.dateOfBirth);
+        const releaseDate = new Date(data.releaseDate);
+        const today = new Date();
+
+        // Calculate age
+        let age = today.getFullYear() - dateOfBirth.getFullYear();
+        const monthDiff = today.getMonth() - dateOfBirth.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dateOfBirth.getDate())) {
+          age--;
+        }
+
+        // Calculate timeOut (days since release)
+        const diffTime = Math.abs(today.getTime() - releaseDate.getTime());
+        const timeOut = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        // Get the actual releasedFrom value
+        const releasedFromValue = data.releasedFrom === 'Other'
+          ? data.releasedFrom_other
+          : data.releasedFrom;
+
+        // Import Firebase
+        const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js');
+        const { getDatabase, ref, set } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js');
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Create participant object
+        const participantId = `participant_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const participant = {
+          id: participantId,
+          participantNumber: data.participantNumber || '',
+          firstName: data.firstName || '',
+          lastName: data.lastName || '',
+          dateOfBirth: dateOfBirth.toISOString(),
+          age: age,
+          gender: data.gender || '',
+          phoneNumber: data.phoneNumber || null,
+          email: data.email || null,
+          releaseDate: releaseDate.toISOString(),
+          timeOut: timeOut,
+          releasedFrom: releasedFromValue || '',
+          status: 'pending_bridge',
+          submittedAt: new Date().toISOString(),
+          movedToBridgeAt: new Date().toISOString(),
+          completedGraduationSteps: [],
+          notes: [],
+          history: [
+            {
+              id: `history_${Date.now()}`,
+              type: 'form_submitted',
+              description: 'Participant submitted intake form (web)',
+              createdAt: new Date().toISOString()
+            }
+          ]
+        };
+
+        // Save to Firebase
+        const participantRef = ref(database, `participants/${participantId}`);
+        await set(participantRef, participant);
+
+        // Show success message
+        successMessage.style.display = 'block';
+
+        // Reset form
+        this.reset();
+        document.querySelectorAll('.radio-option, .select-option').forEach(opt => {
+          opt.classList.remove('selected');
+        });
+        document.getElementById('otherFacilityWrapper').style.display = 'none';
+
+        // Scroll to success message
+        successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      } catch (error) {
+        console.error('Form submission error:', error);
+        errorText.textContent = error.message || 'Failed to submit form. Please try again.';
+        errorMessage.style.display = 'block';
+        errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } finally {
+        // Re-enable submit button
+        submitButton.disabled = false;
+        submitButton.textContent = 'Submit Form';
+      }
+    });
+  </script>
+</body>
+</html>

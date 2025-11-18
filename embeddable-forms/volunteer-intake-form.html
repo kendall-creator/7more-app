@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>7more Volunteer Inquiry Form</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #ffffff;
+      color: #1f2937;
+    }
+
+    .form-container {
+      max-width: 700px;
+      margin: 0 auto;
+      background: white;
+    }
+
+    .form-header {
+      background: #4f46e5;
+      padding: 40px 24px;
+      text-align: left;
+    }
+
+    .form-header h1 {
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .form-header p {
+      color: #e0e7ff;
+      font-size: 16px;
+    }
+
+    .form-body {
+      padding: 32px 24px;
+    }
+
+    .form-section {
+      margin-bottom: 32px;
+    }
+
+    .form-section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 4px;
+    }
+
+    .required {
+      color: #ef4444;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: white;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #4f46e5;
+    }
+
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .checkbox-option {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+    }
+
+    .checkbox-option:hover {
+      border-color: #9ca3af;
+    }
+
+    .checkbox-option.selected {
+      background: #eef2ff;
+      border-color: #4f46e5;
+    }
+
+    .checkbox-option input[type="checkbox"] {
+      display: none;
+    }
+
+    .checkbox-icon {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #9ca3af;
+      border-radius: 4px;
+      margin-right: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .checkbox-option.selected .checkbox-icon {
+      background: #4f46e5;
+      border-color: #4f46e5;
+    }
+
+    .checkbox-icon::after {
+      content: '✓';
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+      display: none;
+    }
+
+    .checkbox-option.selected .checkbox-icon::after {
+      display: block;
+    }
+
+    .checkbox-label {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1f2937;
+      cursor: pointer;
+    }
+
+    .checkbox-option.selected .checkbox-label {
+      color: #3730a3;
+    }
+
+    .conditional-field {
+      margin-top: 12px;
+      padding-left: 32px;
+    }
+
+    .helper-text {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .amount-input-wrapper {
+      position: relative;
+    }
+
+    .amount-input-wrapper::before {
+      content: '$';
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #374151;
+      font-size: 16px;
+    }
+
+    .amount-input {
+      padding-left: 28px;
+    }
+
+    .submit-button {
+      width: 100%;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      color: white;
+      background: #4f46e5;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .submit-button:hover {
+      background: #4338ca;
+    }
+
+    .submit-button:active {
+      background: #3730a3;
+    }
+
+    .submit-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .success-message {
+      display: none;
+      padding: 20px;
+      background: #d1fae5;
+      border: 2px solid #10b981;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      color: #065f46;
+    }
+
+    .error-message {
+      display: none;
+      padding: 20px;
+      background: #fee2e2;
+      border: 2px solid #ef4444;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      color: #991b1b;
+    }
+
+    @media (max-width: 640px) {
+      .form-header {
+        padding: 32px 20px;
+      }
+
+      .form-header h1 {
+        font-size: 24px;
+      }
+
+      .form-body {
+        padding: 24px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <div class="form-header">
+      <h1>Volunteer Inquiry Form</h1>
+      <p>Thank you for your interest in volunteering with 7more! Please fill out the information below.</p>
+    </div>
+
+    <div class="form-body">
+      <div id="successMessage" class="success-message">
+        <strong>Thank you!</strong> Your volunteer inquiry has been submitted. We will contact you soon.
+      </div>
+
+      <div id="errorMessage" class="error-message">
+        <strong>Error:</strong> <span id="errorText"></span>
+      </div>
+
+      <form id="volunteerForm">
+        <!-- Basic Information Section -->
+        <div class="form-section">
+          <h2 class="form-section-title">Basic Information</h2>
+
+          <div class="form-group">
+            <label class="form-label">First Name <span class="required">*</span></label>
+            <input type="text" name="firstName" class="form-input" placeholder="Enter first name" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Last Name <span class="required">*</span></label>
+            <input type="text" name="lastName" class="form-input" placeholder="Enter last name" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-input" placeholder="email@example.com">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" name="phoneNumber" class="form-input" placeholder="(555) 123-4567">
+          </div>
+        </div>
+
+        <!-- Interest Areas Section -->
+        <div class="form-section">
+          <h2 class="form-section-title">Interest Areas <span class="required">*</span></h2>
+          <p class="helper-text" style="margin-bottom: 12px;">Select all that apply</p>
+
+          <div class="checkbox-group">
+            <div class="checkbox-option" data-value="bridge_team">
+              <input type="checkbox" name="interests" value="bridge_team" id="interestBridge">
+              <div class="checkbox-icon"></div>
+              <label class="checkbox-label" for="interestBridge">Bridge Team</label>
+            </div>
+
+            <div class="checkbox-option" data-value="clothing_donation">
+              <input type="checkbox" name="interests" value="clothing_donation" id="interestClothing">
+              <div class="checkbox-icon"></div>
+              <label class="checkbox-label" for="interestClothing">Clothing Donation</label>
+            </div>
+
+            <div class="checkbox-option" data-value="in_prison_volunteering">
+              <input type="checkbox" name="interests" value="in_prison_volunteering" id="interestPrison">
+              <div class="checkbox-icon"></div>
+              <label class="checkbox-label" for="interestPrison">In-Prison Volunteering</label>
+            </div>
+
+            <div class="checkbox-option" data-value="administrative_work">
+              <input type="checkbox" name="interests" value="administrative_work" id="interestAdmin">
+              <div class="checkbox-icon"></div>
+              <label class="checkbox-label" for="interestAdmin">Administrative Work</label>
+            </div>
+
+            <div class="checkbox-option" data-value="general_volunteer">
+              <input type="checkbox" name="interests" value="general_volunteer" id="interestGeneral">
+              <div class="checkbox-icon"></div>
+              <label class="checkbox-label" for="interestGeneral">General Volunteer</label>
+            </div>
+
+            <div class="checkbox-option" data-value="monetary_donation">
+              <input type="checkbox" name="interests" value="monetary_donation" id="interestMonetary">
+              <div class="checkbox-icon"></div>
+              <label class="checkbox-label" for="interestMonetary">Monetary Donation</label>
+            </div>
+
+            <!-- Monetary Donation Amount (Conditional) -->
+            <div id="monetaryAmountWrapper" class="conditional-field" style="display: none;">
+              <label class="form-label">Donation Amount <span class="required">*</span></label>
+              <div class="amount-input-wrapper">
+                <input type="number" name="monetaryAmount" id="monetaryAmount" class="form-input amount-input" placeholder="0.00" step="0.01" min="0">
+              </div>
+              <p class="helper-text">Amounts under $500: Online payment link will be sent</p>
+              <p class="helper-text">Amounts $500+: Instructions for mailing a check will be provided</p>
+            </div>
+
+            <div class="checkbox-option" data-value="other">
+              <input type="checkbox" name="interests" value="other" id="interestOther">
+              <div class="checkbox-icon"></div>
+              <label class="checkbox-label" for="interestOther">Other</label>
+            </div>
+
+            <!-- Other Description (Conditional) -->
+            <div id="otherDescriptionWrapper" class="conditional-field" style="display: none;">
+              <label class="form-label">Describe Other Interest <span class="required">*</span></label>
+              <textarea name="otherDescription" id="otherDescription" class="form-input form-textarea" placeholder="Please describe the other interest area"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Notes Section -->
+        <div class="form-section">
+          <h2 class="form-section-title">Additional Notes</h2>
+          <div class="form-group">
+            <label class="form-label">Additional Information</label>
+            <textarea name="notes" class="form-input form-textarea" placeholder="Any additional information..."></textarea>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="submit-button" id="submitButton">Submit Inquiry</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Firebase configuration - REPLACE WITH YOUR ACTUAL CONFIG
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      databaseURL: "YOUR_DATABASE_URL",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    // Track selected interests
+    let selectedInterests = new Set();
+
+    // Checkbox option selection handlers
+    document.querySelectorAll('.checkbox-option').forEach(option => {
+      option.addEventListener('click', function(e) {
+        // Don't trigger if clicking on the actual input (though it's hidden)
+        if (e.target.tagName === 'INPUT') return;
+
+        const input = this.querySelector('input[type="checkbox"]');
+        const value = this.getAttribute('data-value');
+
+        // Toggle checkbox
+        input.checked = !input.checked;
+
+        // Toggle selected class
+        if (input.checked) {
+          this.classList.add('selected');
+          selectedInterests.add(value);
+        } else {
+          this.classList.remove('selected');
+          selectedInterests.delete(value);
+        }
+
+        // Show/hide conditional fields
+        const monetaryWrapper = document.getElementById('monetaryAmountWrapper');
+        const monetaryInput = document.getElementById('monetaryAmount');
+        const otherWrapper = document.getElementById('otherDescriptionWrapper');
+        const otherInput = document.getElementById('otherDescription');
+
+        // Handle monetary donation
+        if (value === 'monetary_donation') {
+          if (input.checked) {
+            monetaryWrapper.style.display = 'block';
+            monetaryInput.required = true;
+          } else {
+            monetaryWrapper.style.display = 'none';
+            monetaryInput.required = false;
+            monetaryInput.value = '';
+          }
+        }
+
+        // Handle other
+        if (value === 'other') {
+          if (input.checked) {
+            otherWrapper.style.display = 'block';
+            otherInput.required = true;
+          } else {
+            otherWrapper.style.display = 'none';
+            otherInput.required = false;
+            otherInput.value = '';
+          }
+        }
+      });
+    });
+
+    // Form submission handler
+    document.getElementById('volunteerForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const submitButton = document.getElementById('submitButton');
+      const successMessage = document.getElementById('successMessage');
+      const errorMessage = document.getElementById('errorMessage');
+      const errorText = document.getElementById('errorText');
+
+      // Hide messages
+      successMessage.style.display = 'none';
+      errorMessage.style.display = 'none';
+
+      // Validate at least one interest selected
+      if (selectedInterests.size === 0) {
+        errorText.textContent = 'Please select at least one interest area';
+        errorMessage.style.display = 'block';
+        errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return;
+      }
+
+      // Disable submit button
+      submitButton.disabled = true;
+      submitButton.textContent = 'Submitting...';
+
+      try {
+        // Collect form data
+        const formData = new FormData(this);
+        const data = {
+          firstName: formData.get('firstName'),
+          lastName: formData.get('lastName'),
+          email: formData.get('email') || null,
+          phoneNumber: formData.get('phoneNumber') || null,
+          notes: formData.get('notes') || null,
+          selectedInterests: Array.from(selectedInterests),
+          otherInterestDescription: selectedInterests.has('other') ? formData.get('otherDescription') : null,
+          monetaryDonationAmount: selectedInterests.has('monetary_donation') ? parseFloat(formData.get('monetaryAmount')) : null
+        };
+
+        // Additional validation
+        if (selectedInterests.has('other') && (!data.otherInterestDescription || !data.otherInterestDescription.trim())) {
+          throw new Error('Please describe the "Other" interest');
+        }
+
+        if (selectedInterests.has('monetary_donation')) {
+          if (!data.monetaryDonationAmount || data.monetaryDonationAmount <= 0) {
+            throw new Error('Please enter a valid donation amount');
+          }
+        }
+
+        // Import Firebase
+        const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js');
+        const { getDatabase, ref, set, push } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js');
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Create volunteer inquiry object
+        const inquiryId = `inquiry_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const inquiry = {
+          id: inquiryId,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          phoneNumber: data.phoneNumber,
+          selectedInterests: data.selectedInterests,
+          otherInterestDescription: data.otherInterestDescription,
+          monetaryDonationAmount: data.monetaryDonationAmount,
+          notes: data.notes,
+          status: 'new',
+          submittedAt: new Date().toISOString(),
+          taskIds: [],
+          history: [
+            {
+              id: `history_${Date.now()}`,
+              type: 'inquiry_created',
+              description: 'Volunteer inquiry submitted (web)',
+              createdAt: new Date().toISOString()
+            }
+          ]
+        };
+
+        // Save to Firebase
+        const inquiryRef = ref(database, `volunteerInquiries/${inquiryId}`);
+        await set(inquiryRef, inquiry);
+
+        // Show success message
+        successMessage.style.display = 'block';
+
+        // Reset form
+        this.reset();
+        selectedInterests.clear();
+        document.querySelectorAll('.checkbox-option').forEach(opt => {
+          opt.classList.remove('selected');
+        });
+        document.getElementById('monetaryAmountWrapper').style.display = 'none';
+        document.getElementById('otherDescriptionWrapper').style.display = 'none';
+        document.getElementById('monetaryAmount').required = false;
+        document.getElementById('otherDescription').required = false;
+
+        // Scroll to success message
+        successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      } catch (error) {
+        console.error('Form submission error:', error);
+        errorText.textContent = error.message || 'Failed to submit form. Please try again.';
+        errorMessage.style.display = 'block';
+        errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } finally {
+        // Re-enable submit button
+        submitButton.disabled = false;
+        submitButton.textContent = 'Submit Inquiry';
+      }
+    });
+  </script>
+</body>
+</html>
