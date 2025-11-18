@@ -57,19 +57,28 @@ Both Bridge Team and Mentorship Leader dashboards now support bulk selection, al
 ### How to Use:
 
 1. **As Bridge Team Leader or Admin:**
-   - Go to Bridge Team Dashboard
-   - Tap the checkmark icon in header to enter selection mode
+   - Go to Bridge Team Dashboard OR Admin Dashboard > click any bridge team status card
+   - Tap the checkmark icon (✓✓) in header to enter selection mode
    - Tap participants to select them (or use "Select All")
    - Tap "Move to Mentorship" to bulk move all selected participants
    - Selected participants move to pending mentor status
 
 2. **As Mentorship Leader or Admin:**
-   - Go to Mentorship Leader Dashboard
-   - Tap the checkmark icon in header to enter selection mode
+   - Go to Mentorship Leader Dashboard OR Admin Dashboard > Pending Mentor Assignment
+   - Tap the checkmark icon (✓✓) in header to enter selection mode
    - Tap participants to select them (or use "Select All")
-   - Tap "Assign to Mentor" to see mentor list
+   - Tap "Assign to Mentor" or "Assign Mentor" to see mentor list
    - Select a mentor to bulk assign all selected participants
    - Selected participants are assigned to the chosen mentor
+
+3. **From Admin Dashboard Filtered Lists (New!):**
+   - Tap any status card (e.g., "Pending Bridge Team", "Pending Mentor Assignment", etc.)
+   - You'll see the filtered participants screen with "17 participants" shown
+   - Tap the checkmark icon (✓✓) in the top right next to "Back" button
+   - Checkboxes appear - select the participants you want
+   - Available actions depend on participant statuses:
+     - Bridge team participants: "To Mentorship" button appears
+     - Pending mentor participants: "Assign Mentor" button appears
 
 ### Technical Implementation:
 - **Updated Store**: `participantStore.ts`
@@ -80,6 +89,7 @@ Both Bridge Team and Mentorship Leader dashboards now support bulk selection, al
 - **Updated Screens**:
   - `BridgeTeamDashboardScreen.tsx` - Added selection mode UI and bulk move
   - `MentorshipLeaderDashboardScreen.tsx` - Added selection mode UI and mentor picker modal
+  - `FilteredParticipantsScreen.tsx` - Added full bulk selection support (NEW!)
 
 - **UI Components**:
   - Selection mode toggle button
@@ -87,6 +97,7 @@ Both Bridge Team and Mentorship Leader dashboards now support bulk selection, al
   - Yellow selection bar with count and actions
   - Mentor picker modal with scrollable list
   - Visual feedback (yellow borders on selected cards)
+  - Smart action buttons based on participant statuses
 
 ---
 
