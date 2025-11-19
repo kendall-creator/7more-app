@@ -2,7 +2,20 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Public Production Deployment Package Ready - November 18, 2025
+## 🔥 LATEST UPDATE: Mentor Contact Tracking Statistics - November 19, 2025
+
+**Date:** November 19, 2025
+**Status:** ✅ COMPLETE
+
+### What Was Changed:
+- Added mentor contact tracking statistics to Mentor Dashboard header
+- Shows number of participants that need to be contacted (initial, attempted, unable)
+- Shows number of participants that have been contacted (active mentorship)
+- Clean visual design with gray and green status cards
+
+---
+
+## Previous Update: Public Production Deployment Package Ready - November 18, 2025
 
 **Date:** November 18, 2025
 **Status:** ✅ DEPLOYMENT PACKAGE READY

@@ -40,6 +40,10 @@ export default function MentorDashboardScreen() {
   const unableToContact = participants.filter((p) => p.status === "mentor_unable");
   const activeParticipants = participants.filter((p) => p.status === "active_mentorship");
 
+  // Calculate mentor contact status
+  const needsToContact = pendingInitialContact.length + attemptedContact.length + unableToContact.length;
+  const hasContacted = activeParticipants.length;
+
   const renderParticipantCard = (participant: Participant, section: "initial" | "attempted" | "unable" | "active") => {
     const daysSince = getDaysSinceAssignment(participant.assignedToMentorAt);
 
@@ -311,6 +315,16 @@ export default function MentorDashboardScreen() {
         <Text className="text-yellow-100 text-sm">
           {participants.length} participant{participants.length !== 1 ? "s" : ""} assigned
         </Text>
+        <View className="flex-row mt-3 gap-3">
+          <View className="flex-1 bg-gray-700 rounded-lg px-3 py-2">
+            <Text className="text-white text-lg font-bold">{needsToContact}</Text>
+            <Text className="text-gray-300 text-xs">Need to Contact</Text>
+          </View>
+          <View className="flex-1 bg-green-700 rounded-lg px-3 py-2">
+            <Text className="text-white text-lg font-bold">{hasContacted}</Text>
+            <Text className="text-gray-100 text-xs">Contacted</Text>
+          </View>
+        </View>
       </View>
 
       {/* Stats Cards */}
