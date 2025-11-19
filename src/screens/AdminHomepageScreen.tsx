@@ -136,13 +136,23 @@ export default function AdminHomepageScreen() {
   const mentorStats = useMemo(() => {
     const users = invitedUsers.filter((u) => u.role === "mentor" || u.role === "mentorship_leader").length;
     const totalParticipants = visibleParticipants.filter(
-      (p) => p.status === "pending_mentor" || p.status === "active_mentorship" || p.status === "graduated"
+      (p) => p.status === "pending_mentor" || p.status === "initial_contact_pending" ||
+             p.status === "assigned_mentor" || p.status === "mentor_attempted" ||
+             p.status === "mentor_unable" || p.status === "active_mentorship" || p.status === "graduated"
     ).length;
-    const pendingMentor = visibleParticipants.filter((p) => p.status === "pending_mentor").length;
-    const activeMentorship = visibleParticipants.filter((p) => p.status === "active_mentorship").length;
+
+    // Pending: needs mentor assignment OR needs initial contact
+    const pending = visibleParticipants.filter(
+      (p) => p.status === "pending_mentor" || p.status === "initial_contact_pending" ||
+             p.status === "assigned_mentor" || p.status === "mentor_attempted" ||
+             p.status === "mentor_unable"
+    ).length;
+
+    // Contacted: active mentorship (initial contact completed)
+    const contacted = visibleParticipants.filter((p) => p.status === "active_mentorship").length;
     const graduated = visibleParticipants.filter((p) => p.status === "graduated").length;
 
-    return { users, totalParticipants, pendingMentor, activeMentorship, graduated };
+    return { users, totalParticipants, pending, contacted, graduated };
   }, [invitedUsers, visibleParticipants]);
 
   return (
@@ -370,17 +380,17 @@ export default function AdminHomepageScreen() {
           <View className="flex-row flex-wrap gap-2">
             <Pressable
               onPress={() => navigation.navigate("FilteredParticipants", { status: "pending_mentor" })}
-              className="flex-1 min-w-[45%] bg-red-50 rounded-xl p-3 border border-red-200"
+              className="flex-1 min-w-[45%] bg-gray-50 rounded-xl p-3 border border-gray-200"
             >
-              <Text className="text-xl font-bold text-red-600">{formatNumber(mentorStats.pendingMentor)}</Text>
-              <Text className="text-xs text-[#99896c] mt-1">Need Assignment</Text>
+              <Text className="text-xl font-bold text-gray-600">{formatNumber(mentorStats.pending)}</Text>
+              <Text className="text-xs text-[#99896c] mt-1">Pending</Text>
             </Pressable>
             <Pressable
               onPress={() => navigation.navigate("FilteredParticipants", { status: "active_mentorship" })}
               className="flex-1 min-w-[45%] bg-green-50 rounded-xl p-3 border border-green-200"
             >
-              <Text className="text-xl font-bold text-green-600">{formatNumber(mentorStats.activeMentorship)}</Text>
-              <Text className="text-xs text-[#99896c] mt-1">Active Mentorship</Text>
+              <Text className="text-xl font-bold text-green-600">{formatNumber(mentorStats.contacted)}</Text>
+              <Text className="text-xs text-[#99896c] mt-1">Contacted</Text>
             </Pressable>
             <Pressable
               onPress={() => navigation.navigate("FilteredParticipants", { status: "graduated" })}

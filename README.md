@@ -11,7 +11,10 @@ A comprehensive mobile application built with Expo and React Native to help nonp
 - Added mentor contact tracking statistics to Mentor Dashboard header
 - Shows number of participants that need to be contacted (initial, attempted, unable)
 - Shows number of participants that have been contacted (active mentorship)
+- Updated Admin Homepage Mentorship section to display "Pending" and "Contacted" labels
 - Clean visual design with gray and green status cards
+- "Pending" includes: participants needing mentor assignment OR needing initial contact (pending_mentor, initial_contact_pending, assigned_mentor, mentor_attempted, mentor_unable)
+- "Contacted" includes: participants in active mentorship (initial contact completed)
 
 ---
 
