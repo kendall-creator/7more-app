@@ -2,7 +2,44 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Intake Form Fields Added to Bridge Team Contact Form - November 20, 2025
+## 🔥 LATEST UPDATE: Bridge Team Follow-Up Form Restructured - November 20, 2025
+
+**Date:** November 20, 2025
+**Status:** ✅ COMPLETE
+
+### What Was Changed:
+- **Participant Interface Updated**: Added new fields to store intake form data
+  - nickname (optional)
+  - address (optional)
+  - referralSource (optional)
+  - otherReferralSource (optional)
+  - criticalNeeds (array, optional)
+  - legalStatus (array, optional)
+
+- **Intake Form Enhancement**: ManualIntakeFormScreen now saves all new fields to participant object
+  - Nickname, address, referral source, critical needs, and legal status are now persisted
+  - Data flows from intake form to Bridge Team Follow-Up Form automatically
+
+- **Bridge Team Follow-Up Form Restructure**:
+  - **Section 1: Participant Information** - Now only shows basic participant data from intake (pre-filled and editable)
+    - First Name, Last Name, Participant Number, DOB, Gender, Phone, Email, Release Date, Released From
+    - "Confirm all information is accurate" button remains in Section 1
+
+  - **NEW Section 2: Confirm Previous Answers** - Shows intake form responses (all editable)
+    - Which of the following apply to this participant? (shows selected legal status items from intake)
+    - What are the critical needs? (shows selected needs from intake)
+    - How did the participant hear about 7more? (shows referral source from intake)
+    - All answers are pre-filled from intake form and can be edited if needed
+
+  - **Section 3: Mandated Restrictions** (renumbered from Section 2)
+  - **Section 4: Communication Confirmation** (renumbered from Section 3)
+  - **Section 5: Resources Sent** (renumbered from Section 4)
+
+- **Data Flow**: Bridge Team can now review and confirm answers given during intake, with the ability to edit if information has changed
+
+---
+
+## Previous Update: Intake Form Fields Added to Bridge Team Contact Form - November 20, 2025
 
 **Date:** November 20, 2025
 **Status:** ✅ COMPLETE

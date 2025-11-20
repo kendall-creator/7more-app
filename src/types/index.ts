@@ -131,6 +131,14 @@ export interface Participant {
   timeOut: number; // Days calculated from release date
   releasedFrom: string; // Facility name
 
+  // New intake form fields
+  nickname?: string; // Optional nickname
+  address?: string; // Optional full address
+  referralSource?: string; // How they heard about 7more
+  otherReferralSource?: string; // Custom referral source if "Other" selected
+  criticalNeeds?: string[]; // Array of critical needs
+  legalStatus?: string[]; // Array of legal status items
+
   // Intake tracking
   intakeType?: IntakeType; // How the participant was added
   statusDetail?: StatusDetail; // Additional context for status

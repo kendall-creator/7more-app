@@ -98,17 +98,17 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
   const [releasedFrom, setReleasedFrom] = useState(participant?.releasedFrom || "");
   const [otherReleaseLocation, setOtherReleaseLocation] = useState("");
 
-  // New fields from intake form
-  const [nickname, setNickname] = useState("");
-  const [address, setAddress] = useState("");
-  const [referralSource, setReferralSource] = useState("");
-  const [otherReferralSource, setOtherReferralSource] = useState("");
-  const [criticalNeeds, setCriticalNeeds] = useState<string[]>([]);
-  const [legalStatus, setLegalStatus] = useState<string[]>([]);
-
   // Modals for Section 1
   const [showGenderModal, setShowGenderModal] = useState(false);
   const [showReleaseLocationModal, setShowReleaseLocationModal] = useState(false);
+
+  // Section 2 - Confirm Previous Answers (from intake form)
+  const [referralSource, setReferralSource] = useState(participant?.referralSource || "");
+  const [otherReferralSource, setOtherReferralSource] = useState(participant?.otherReferralSource || "");
+  const [criticalNeeds, setCriticalNeeds] = useState<string[]>(participant?.criticalNeeds || []);
+  const [legalStatus, setLegalStatus] = useState<string[]>(participant?.legalStatus || []);
+
+  // Modals for Section 2
   const [showReferralSourceModal, setShowReferralSourceModal] = useState(false);
   const [showCriticalNeedsModal, setShowCriticalNeedsModal] = useState(false);
   const [showLegalStatusModal, setShowLegalStatusModal] = useState(false);
@@ -476,95 +476,6 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
                   />
                 </View>
               )}
-
-              {/* Nickname */}
-              <View className="mb-3">
-                <Text className="text-xs text-gray-500 mb-1">Nickname (Optional)</Text>
-                <TextInput
-                  className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-base text-gray-900"
-                  value={nickname}
-                  onChangeText={setNickname}
-                  placeholder="Enter nickname"
-                />
-              </View>
-
-              {/* Full Address */}
-              <View className="mb-3">
-                <Text className="text-xs text-gray-500 mb-1">Full Address (Optional)</Text>
-                <TextInput
-                  className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-base text-gray-900"
-                  value={address}
-                  onChangeText={setAddress}
-                  placeholder="Street address, City, State, ZIP"
-                  multiline
-                  numberOfLines={2}
-                />
-              </View>
-
-              {/* Referral Source */}
-              <View className="mb-3">
-                <Text className="text-xs text-gray-500 mb-1">How did the participant hear about 7more? (Optional)</Text>
-                <Pressable
-                  onPress={() => setShowReferralSourceModal(true)}
-                  className="bg-white border border-gray-200 rounded-lg px-3 py-2"
-                >
-                  <View className="flex-row items-center justify-between">
-                    <Text className={`text-base ${referralSource ? "text-gray-900" : "text-gray-400"}`}>
-                      {referralSource || "Select referral source"}
-                    </Text>
-                    <Ionicons name="chevron-down" size={20} color="#6B7280" />
-                  </View>
-                </Pressable>
-              </View>
-
-              {/* Other Referral Source - Conditional */}
-              {referralSource === "Other" && (
-                <View className="mb-3">
-                  <Text className="text-xs text-gray-500 mb-1">Please Specify</Text>
-                  <TextInput
-                    className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-base text-gray-900"
-                    value={otherReferralSource}
-                    onChangeText={setOtherReferralSource}
-                    placeholder="Enter how they heard about 7more"
-                  />
-                </View>
-              )}
-
-              {/* Critical Needs */}
-              <View className="mb-3">
-                <Text className="text-xs text-gray-500 mb-1">What are the critical needs? (Optional)</Text>
-                <Pressable
-                  onPress={() => setShowCriticalNeedsModal(true)}
-                  className="bg-white border border-gray-200 rounded-lg px-3 py-2"
-                >
-                  <View className="flex-row items-center justify-between">
-                    <Text className={`text-base ${criticalNeeds.length > 0 ? "text-gray-900" : "text-gray-400"}`}>
-                      {criticalNeeds.length > 0
-                        ? `${criticalNeeds.length} selected`
-                        : "Select critical needs"}
-                    </Text>
-                    <Ionicons name="chevron-down" size={20} color="#6B7280" />
-                  </View>
-                </Pressable>
-              </View>
-
-              {/* Legal Status / Which of the following apply */}
-              <View>
-                <Text className="text-xs text-gray-500 mb-1">Which of the following apply to this participant? (Optional)</Text>
-                <Pressable
-                  onPress={() => setShowLegalStatusModal(true)}
-                  className="bg-white border border-gray-200 rounded-lg px-3 py-2"
-                >
-                  <View className="flex-row items-center justify-between">
-                    <Text className={`text-base ${legalStatus.length > 0 ? "text-gray-900" : "text-gray-400"}`}>
-                      {legalStatus.length > 0
-                        ? `${legalStatus.length} selected`
-                        : "Select applicable options"}
-                    </Text>
-                    <Ionicons name="chevron-down" size={20} color="#6B7280" />
-                  </View>
-                </Pressable>
-              </View>
             </View>
 
             {/* Confirmation button */}
@@ -595,9 +506,98 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
             </View>
           </View>
 
-          {/* SECTION 2 - Mandated Restrictions */}
+          {/* SECTION 2 - Confirm Previous Answers (from intake form) */}
           <View className="mb-6">
-            <Text className="text-lg font-bold text-gray-900 mb-1">Section 2: Mandated Restrictions</Text>
+            <Text className="text-lg font-bold text-gray-900 mb-1">Section 2: Confirm Previous Answers</Text>
+            <Text className="text-sm text-gray-600 mb-4">
+              Review and edit answers from the intake form as needed
+            </Text>
+
+            <View className="bg-gray-50 rounded-xl p-4 mb-4 border border-gray-200">
+              {/* Which of the following apply to this participant */}
+              <View className="mb-3">
+                <Text className="text-xs text-gray-500 mb-1">Which of the following apply to this participant?</Text>
+                <Pressable
+                  onPress={() => setShowLegalStatusModal(true)}
+                  className="bg-white border border-gray-200 rounded-lg px-3 py-2"
+                >
+                  <View className="flex-row items-center justify-between">
+                    <Text className={`text-base ${legalStatus.length > 0 ? "text-gray-900" : "text-gray-400"}`}>
+                      {legalStatus.length > 0
+                        ? `${legalStatus.length} selected`
+                        : "None selected"}
+                    </Text>
+                    <Ionicons name="chevron-down" size={20} color="#6B7280" />
+                  </View>
+                </Pressable>
+                {legalStatus.length > 0 && (
+                  <View className="mt-2">
+                    {legalStatus.map((status) => (
+                      <Text key={status} className="text-xs text-gray-600 ml-2">• {status}</Text>
+                    ))}
+                  </View>
+                )}
+              </View>
+
+              {/* Critical Needs */}
+              <View className="mb-3">
+                <Text className="text-xs text-gray-500 mb-1">What are the critical needs?</Text>
+                <Pressable
+                  onPress={() => setShowCriticalNeedsModal(true)}
+                  className="bg-white border border-gray-200 rounded-lg px-3 py-2"
+                >
+                  <View className="flex-row items-center justify-between">
+                    <Text className={`text-base ${criticalNeeds.length > 0 ? "text-gray-900" : "text-gray-400"}`}>
+                      {criticalNeeds.length > 0
+                        ? `${criticalNeeds.length} selected`
+                        : "None selected"}
+                    </Text>
+                    <Ionicons name="chevron-down" size={20} color="#6B7280" />
+                  </View>
+                </Pressable>
+                {criticalNeeds.length > 0 && (
+                  <View className="mt-2">
+                    {criticalNeeds.map((need) => (
+                      <Text key={need} className="text-xs text-gray-600 ml-2">• {need}</Text>
+                    ))}
+                  </View>
+                )}
+              </View>
+
+              {/* How did they hear about 7more */}
+              <View>
+                <Text className="text-xs text-gray-500 mb-1">How did the participant hear about 7more?</Text>
+                <Pressable
+                  onPress={() => setShowReferralSourceModal(true)}
+                  className="bg-white border border-gray-200 rounded-lg px-3 py-2"
+                >
+                  <View className="flex-row items-center justify-between">
+                    <Text className={`text-base ${referralSource ? "text-gray-900" : "text-gray-400"}`}>
+                      {referralSource || "Not specified"}
+                    </Text>
+                    <Ionicons name="chevron-down" size={20} color="#6B7280" />
+                  </View>
+                </Pressable>
+              </View>
+
+              {/* Other Referral Source - Conditional */}
+              {referralSource === "Other" && (
+                <View className="mt-3">
+                  <Text className="text-xs text-gray-500 mb-1">Please Specify</Text>
+                  <TextInput
+                    className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-base text-gray-900"
+                    value={otherReferralSource}
+                    onChangeText={setOtherReferralSource}
+                    placeholder="Enter how they heard about 7more"
+                  />
+                </View>
+              )}
+            </View>
+          </View>
+
+          {/* SECTION 3 - Mandated Restrictions */}
+          <View className="mb-6">
+            <Text className="text-lg font-bold text-gray-900 mb-1">Section 3: Mandated Restrictions</Text>
 
             {/* Helper text for Bridge Team */}
             <View className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
@@ -738,9 +738,9 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
             </View>
           </View>
 
-          {/* SECTION 3 - Communication Confirmation */}
+          {/* SECTION 4 - Communication Confirmation */}
           <View className="mb-6">
-            <Text className="text-lg font-bold text-gray-900 mb-1">Section 3: Communication Confirmation</Text>
+            <Text className="text-lg font-bold text-gray-900 mb-1">Section 4: Communication Confirmation</Text>
             <Text className="text-sm text-gray-600 mb-4">
               Confirm participant expectations for follow-up
             </Text>
@@ -764,9 +764,9 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
             </Pressable>
           </View>
 
-          {/* SECTION 4 - Resources Sent */}
+          {/* SECTION 5 - Resources Sent */}
           <View className="mb-6">
-            <Text className="text-lg font-bold text-gray-900 mb-1">Section 4: Resources Sent</Text>
+            <Text className="text-lg font-bold text-gray-900 mb-1">Section 5: Resources Sent</Text>
             <Text className="text-sm text-gray-600 mb-4">
               Track resources shared with the participant
             </Text>
