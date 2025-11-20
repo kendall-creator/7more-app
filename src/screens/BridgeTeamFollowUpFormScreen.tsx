@@ -124,6 +124,7 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
   const [selectedResources, setSelectedResources] = useState<string[]>([]);
   const [resourcesOtherDescription, setResourcesOtherDescription] = useState("");
   const [resourceNotes, setResourceNotes] = useState("");
+  const [noResourcesReason, setNoResourcesReason] = useState("");
   const [showResourcesModal, setShowResourcesModal] = useState(false);
   const [showResourcePreviewModal, setShowResourcePreviewModal] = useState(false);
 
@@ -220,6 +221,11 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
 
     if (resourcesSent && selectedResources.length === 0 && !resourcesOtherDescription.trim()) {
       alert("Please select at least one resource or describe other resources sent.");
+      return;
+    }
+
+    if (!resourcesSent && !noResourcesReason.trim()) {
+      alert("Please explain why no resources were sent.");
       return;
     }
 
@@ -701,6 +707,24 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
                 </Pressable>
               </View>
             </View>
+
+            {/* No resources reason - conditional */}
+            {!resourcesSent && (
+              <View className="bg-yellow-50 rounded-xl p-4 border border-yellow-200 mt-4">
+                <Text className="text-sm font-semibold text-gray-700 mb-2">
+                  Why were no resources sent? <Text className="text-red-500">*</Text>
+                </Text>
+                <TextInput
+                  className="bg-white border border-gray-200 rounded-xl px-4 py-3 text-base"
+                  placeholder="Explain why no resources were sent..."
+                  value={noResourcesReason}
+                  onChangeText={setNoResourcesReason}
+                  multiline
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                />
+              </View>
+            )}
 
             {/* Resources details - conditional */}
             {resourcesSent && (
