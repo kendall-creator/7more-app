@@ -2,12 +2,19 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Persistent API Key Storage + Form Enhancements - November 20, 2025
+## 🔥 LATEST UPDATE: Live Call Intake Auto-Moves to Mentorship + API Key Persistence - November 20, 2025
 
 **Date:** November 20, 2025
 **Status:** ✅ COMPLETE
 
 ### What Was Changed:
+
+#### Live Call Intake Workflow Streamlined
+- **Live Call Intake now moves directly to mentorship** after completing the follow-up form
+  - Previously: Moved to "bridge_contacted" status, requiring manual move to mentorship
+  - Now: Automatically moves to "pending_mentor" status after form submission
+  - Rationale: Everything is completed in one call, so participant is ready for mentor assignment immediately
+  - Success message: "Live Call Intake completed successfully! Participant moved to mentorship queue."
 
 #### API Key Persistence (CRITICAL FIX)
 - **Created apiKeysStore**: New Zustand store with AsyncStorage persistence for API keys

@@ -295,20 +295,20 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
       // Save form data
       await recordBridgeFollowUp(formData, currentUser.id, currentUser.name);
 
-      // For Live Call Intake, mark as contacted (not moved to mentorship automatically)
-      // For regular flow, move to mentorship queue
+      // For Live Call Intake: Move directly to mentorship queue (everything completed in one call)
+      // For regular flow: Also move directly to mentorship queue
       const updateParticipantStatus = useParticipantStore.getState().updateParticipantStatus;
 
       if (fromLiveCallIntake) {
-        // Live Call Intake: Mark as contacted, leave "To Mentorship" button available
+        // Live Call Intake: Everything done in one call, move directly to mentorship
         await updateParticipantStatus(
           participant.id,
-          "bridge_contacted",
+          "pending_mentor",
           currentUser.id,
           currentUser.name,
-          "Live Call Intake completed - participant contacted and follow-up documented"
+          "Live Call Intake completed - participant contacted and moved to mentorship assignment queue"
         );
-        alert("Live Call Intake completed successfully! Participant marked as contacted.");
+        alert("Live Call Intake completed successfully! Participant moved to mentorship queue.");
       } else {
         // Regular flow: Move directly to mentorship queue
         await updateParticipantStatus(
