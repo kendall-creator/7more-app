@@ -32,6 +32,34 @@ const RELEASE_LOCATION_OPTIONS = [
   "Other",
 ];
 
+const REFERRAL_SOURCE_OPTIONS = [
+  "I met them in person",
+  "Family/friend",
+  "Online",
+  "Other",
+];
+
+const CRITICAL_NEEDS_OPTIONS = [
+  "Needs help getting a phone",
+  "Employment needed",
+  "Housing needed",
+  "Clothing needed",
+  "Food needed",
+  "Building",
+  "Healthy relationships",
+  "Managing finances",
+];
+
+const LEGAL_STATUS_OPTIONS = [
+  "The participant is on parole",
+  "The participant is on probation",
+  "The participant is on an ankle monitor",
+  "The participant has an SA conviction",
+  "The participant has an SA–Minor conviction",
+  "The participant has barriers that prevent them from working right now",
+  "None of these apply",
+];
+
 export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any) {
   const { participantId, fromLiveCallIntake } = route.params;
   const currentUser = useCurrentUser();
@@ -70,9 +98,20 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
   const [releasedFrom, setReleasedFrom] = useState(participant?.releasedFrom || "");
   const [otherReleaseLocation, setOtherReleaseLocation] = useState("");
 
+  // New fields from intake form
+  const [nickname, setNickname] = useState("");
+  const [address, setAddress] = useState("");
+  const [referralSource, setReferralSource] = useState("");
+  const [otherReferralSource, setOtherReferralSource] = useState("");
+  const [criticalNeeds, setCriticalNeeds] = useState<string[]>([]);
+  const [legalStatus, setLegalStatus] = useState<string[]>([]);
+
   // Modals for Section 1
   const [showGenderModal, setShowGenderModal] = useState(false);
   const [showReleaseLocationModal, setShowReleaseLocationModal] = useState(false);
+  const [showReferralSourceModal, setShowReferralSourceModal] = useState(false);
+  const [showCriticalNeedsModal, setShowCriticalNeedsModal] = useState(false);
+  const [showLegalStatusModal, setShowLegalStatusModal] = useState(false);
 
   // Section 2 - Mandated Restrictions
   const [onParole, setOnParole] = useState(false);
@@ -140,6 +179,22 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
       setSelectedResources(selectedResources.filter((id) => id !== resourceId));
     } else {
       setSelectedResources([...selectedResources, resourceId]);
+    }
+  };
+
+  const toggleLegalStatus = (option: string) => {
+    if (legalStatus.includes(option)) {
+      setLegalStatus(legalStatus.filter((item) => item !== option));
+    } else {
+      setLegalStatus([...legalStatus, option]);
+    }
+  };
+
+  const toggleCriticalNeed = (option: string) => {
+    if (criticalNeeds.includes(option)) {
+      setCriticalNeeds(criticalNeeds.filter((item) => item !== option));
+    } else {
+      setCriticalNeeds([...criticalNeeds, option]);
     }
   };
 
@@ -421,6 +476,95 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
                   />
                 </View>
               )}
+
+              {/* Nickname */}
+              <View className="mb-3">
+                <Text className="text-xs text-gray-500 mb-1">Nickname (Optional)</Text>
+                <TextInput
+                  className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-base text-gray-900"
+                  value={nickname}
+                  onChangeText={setNickname}
+                  placeholder="Enter nickname"
+                />
+              </View>
+
+              {/* Full Address */}
+              <View className="mb-3">
+                <Text className="text-xs text-gray-500 mb-1">Full Address (Optional)</Text>
+                <TextInput
+                  className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-base text-gray-900"
+                  value={address}
+                  onChangeText={setAddress}
+                  placeholder="Street address, City, State, ZIP"
+                  multiline
+                  numberOfLines={2}
+                />
+              </View>
+
+              {/* Referral Source */}
+              <View className="mb-3">
+                <Text className="text-xs text-gray-500 mb-1">How did the participant hear about 7more? (Optional)</Text>
+                <Pressable
+                  onPress={() => setShowReferralSourceModal(true)}
+                  className="bg-white border border-gray-200 rounded-lg px-3 py-2"
+                >
+                  <View className="flex-row items-center justify-between">
+                    <Text className={`text-base ${referralSource ? "text-gray-900" : "text-gray-400"}`}>
+                      {referralSource || "Select referral source"}
+                    </Text>
+                    <Ionicons name="chevron-down" size={20} color="#6B7280" />
+                  </View>
+                </Pressable>
+              </View>
+
+              {/* Other Referral Source - Conditional */}
+              {referralSource === "Other" && (
+                <View className="mb-3">
+                  <Text className="text-xs text-gray-500 mb-1">Please Specify</Text>
+                  <TextInput
+                    className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-base text-gray-900"
+                    value={otherReferralSource}
+                    onChangeText={setOtherReferralSource}
+                    placeholder="Enter how they heard about 7more"
+                  />
+                </View>
+              )}
+
+              {/* Critical Needs */}
+              <View className="mb-3">
+                <Text className="text-xs text-gray-500 mb-1">What are the critical needs? (Optional)</Text>
+                <Pressable
+                  onPress={() => setShowCriticalNeedsModal(true)}
+                  className="bg-white border border-gray-200 rounded-lg px-3 py-2"
+                >
+                  <View className="flex-row items-center justify-between">
+                    <Text className={`text-base ${criticalNeeds.length > 0 ? "text-gray-900" : "text-gray-400"}`}>
+                      {criticalNeeds.length > 0
+                        ? `${criticalNeeds.length} selected`
+                        : "Select critical needs"}
+                    </Text>
+                    <Ionicons name="chevron-down" size={20} color="#6B7280" />
+                  </View>
+                </Pressable>
+              </View>
+
+              {/* Legal Status / Which of the following apply */}
+              <View>
+                <Text className="text-xs text-gray-500 mb-1">Which of the following apply to this participant? (Optional)</Text>
+                <Pressable
+                  onPress={() => setShowLegalStatusModal(true)}
+                  className="bg-white border border-gray-200 rounded-lg px-3 py-2"
+                >
+                  <View className="flex-row items-center justify-between">
+                    <Text className={`text-base ${legalStatus.length > 0 ? "text-gray-900" : "text-gray-400"}`}>
+                      {legalStatus.length > 0
+                        ? `${legalStatus.length} selected`
+                        : "Select applicable options"}
+                    </Text>
+                    <Ionicons name="chevron-down" size={20} color="#6B7280" />
+                  </View>
+                </Pressable>
+              </View>
             </View>
 
             {/* Confirmation button */}
@@ -1077,6 +1221,153 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
                 </Text>
               </Pressable>
             ))}
+          </View>
+        </Pressable>
+      </Modal>
+
+      {/* Referral Source Modal */}
+      <Modal
+        visible={showReferralSourceModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowReferralSourceModal(false)}
+      >
+        <Pressable
+          className="flex-1 bg-black/50 justify-center items-center"
+          onPress={() => setShowReferralSourceModal(false)}
+        >
+          <View className="bg-white rounded-2xl p-6 mx-6 w-80">
+            <Text className="text-lg font-bold text-gray-900 mb-4">How did they hear about 7more?</Text>
+            {REFERRAL_SOURCE_OPTIONS.map((option) => (
+              <Pressable
+                key={option}
+                onPress={() => {
+                  setReferralSource(option);
+                  if (option !== "Other") {
+                    setOtherReferralSource("");
+                  }
+                  setShowReferralSourceModal(false);
+                }}
+                className={`border-2 rounded-xl p-4 mb-3 ${
+                  referralSource === option
+                    ? "bg-slate-100 border-slate-700"
+                    : "bg-white border-gray-200"
+                }`}
+              >
+                <Text
+                  className={`text-base font-semibold ${
+                    referralSource === option ? "text-slate-900" : "text-gray-900"
+                  }`}
+                >
+                  {option}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </Pressable>
+      </Modal>
+
+      {/* Critical Needs Modal */}
+      <Modal
+        visible={showCriticalNeedsModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowCriticalNeedsModal(false)}
+      >
+        <Pressable
+          className="flex-1 bg-black/50 justify-center items-center"
+          onPress={() => setShowCriticalNeedsModal(false)}
+        >
+          <View className="bg-white rounded-2xl p-6 mx-6 w-80 max-h-96">
+            <Text className="text-lg font-bold text-gray-900 mb-4">Critical Needs</Text>
+            <ScrollView>
+              {CRITICAL_NEEDS_OPTIONS.map((option) => {
+                const isSelected = criticalNeeds.includes(option);
+                return (
+                  <Pressable
+                    key={option}
+                    onPress={() => toggleCriticalNeed(option)}
+                    className={`border-2 rounded-xl p-4 mb-3 flex-row items-center justify-between ${
+                      isSelected
+                        ? "bg-yellow-50 border-yellow-600"
+                        : "bg-white border-gray-200"
+                    }`}
+                  >
+                    <Text
+                      className={`text-sm flex-1 ${
+                        isSelected ? "text-yellow-900 font-semibold" : "text-gray-700"
+                      }`}
+                    >
+                      {option}
+                    </Text>
+                    {isSelected && (
+                      <View className="w-6 h-6 bg-yellow-600 rounded-full items-center justify-center ml-3">
+                        <Ionicons name="checkmark" size={16} color="white" />
+                      </View>
+                    )}
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+            <Pressable
+              onPress={() => setShowCriticalNeedsModal(false)}
+              className="bg-gray-600 rounded-xl py-3 items-center active:opacity-80 mt-4"
+            >
+              <Text className="text-white text-sm font-semibold">Done</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
+
+      {/* Legal Status Modal */}
+      <Modal
+        visible={showLegalStatusModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowLegalStatusModal(false)}
+      >
+        <Pressable
+          className="flex-1 bg-black/50 justify-center items-center"
+          onPress={() => setShowLegalStatusModal(false)}
+        >
+          <View className="bg-white rounded-2xl p-6 mx-6 w-80 max-h-96">
+            <Text className="text-lg font-bold text-gray-900 mb-2">Which of the following apply?</Text>
+            <Text className="text-sm text-gray-500 mb-4">(Select all that apply)</Text>
+            <ScrollView>
+              {LEGAL_STATUS_OPTIONS.map((option) => {
+                const isSelected = legalStatus.includes(option);
+                return (
+                  <Pressable
+                    key={option}
+                    onPress={() => toggleLegalStatus(option)}
+                    className={`border-2 rounded-xl p-4 mb-3 flex-row items-center justify-between ${
+                      isSelected
+                        ? "bg-yellow-50 border-yellow-600"
+                        : "bg-white border-gray-200"
+                    }`}
+                  >
+                    <Text
+                      className={`text-sm flex-1 ${
+                        isSelected ? "text-yellow-900 font-semibold" : "text-gray-700"
+                      }`}
+                    >
+                      {option}
+                    </Text>
+                    {isSelected && (
+                      <View className="w-6 h-6 bg-yellow-600 rounded-full items-center justify-center ml-3">
+                        <Ionicons name="checkmark" size={16} color="white" />
+                      </View>
+                    )}
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+            <Pressable
+              onPress={() => setShowLegalStatusModal(false)}
+              className="bg-gray-600 rounded-xl py-3 items-center active:opacity-80 mt-4"
+            >
+              <Text className="text-white text-sm font-semibold">Done</Text>
+            </Pressable>
           </View>
         </Pressable>
       </Modal>

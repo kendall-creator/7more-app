@@ -2,7 +2,25 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Critical Needs Section Moved to Intake Form - November 20, 2025
+## 🔥 LATEST UPDATE: Intake Form Fields Added to Bridge Team Contact Form - November 20, 2025
+
+**Date:** November 20, 2025
+**Status:** ✅ COMPLETE
+
+### What Was Changed:
+- **Added New Fields to Bridge Team Follow-Up Form (Section 1)**:
+  - Nickname (Optional)
+  - Full Address (Optional)
+  - How did the participant hear about 7more? (Optional) - with options: I met them in person, Family/friend, Online, Other
+  - What are the critical needs? (Optional) - multi-select with all 8 options
+  - Which of the following apply to this participant? (Optional) - multi-select with 7 options
+- **All new fields are optional** and appear before the "Confirm all information is accurate" button
+- **Critical Needs** and **Legal Status** questions are now separate sections with their own modals
+- **Forms are now synchronized**: Both Intake Form and Bridge Team Follow-Up Form collect the same comprehensive information
+
+---
+
+## Previous Update: Critical Needs Section Moved to Intake Form - November 20, 2025
 
 **Date:** November 20, 2025
 **Status:** ✅ COMPLETE
