@@ -82,25 +82,10 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
   const [noMandatedRestrictions, setNoMandatedRestrictions] = useState(false);
   const [otherLegalRestrictions, setOtherLegalRestrictions] = useState("");
 
-  // Section 3 - Critical Needs
-  const [needsPhoneCall, setNeedsPhoneCall] = useState(false);
-  const [needsEmployment, setNeedsEmployment] = useState(false);
-  const [needsHousing, setNeedsHousing] = useState(false);
-  const [needsClothing, setNeedsClothing] = useState(false);
-  const [needsFood, setNeedsFood] = useState(false);
-  const [needsOther, setNeedsOther] = useState(false);
-  const [needsOtherDescription, setNeedsOtherDescription] = useState("");
-  const [currentHousingSituation, setCurrentHousingSituation] = useState("");
-  const [currentHousingOther, setCurrentHousingOther] = useState("");
-  const [transitionalHomeName, setTransitionalHomeName] = useState("");
-  const [transitionalHomeNameOther, setTransitionalHomeNameOther] = useState("");
-  const [showHousingSituationModal, setShowHousingSituationModal] = useState(false);
-  const [showTransitionalHomeModal, setShowTransitionalHomeModal] = useState(false);
-
-  // Section 4 - Communication Confirmation
+  // Section 3 - Communication Confirmation
   const [weeklyCallExplained, setWeeklyCallExplained] = useState(false);
 
-  // Section 5 - Resources Sent
+  // Section 4 - Resources Sent
   const [resourcesSent, setResourcesSent] = useState(false);
   const [selectedResources, setSelectedResources] = useState<string[]>([]);
   const [resourcesOtherDescription, setResourcesOtherDescription] = useState("");
@@ -183,11 +168,6 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
       return;
     }
 
-    if (needsHousing && currentHousingSituation === "Transitional home" && !transitionalHomeName) {
-      alert("Please select a transitional home name.");
-      return;
-    }
-
     if (resourcesSent && selectedResources.length === 0 && !resourcesOtherDescription.trim()) {
       alert("Please select at least one resource or describe other resources sent.");
       return;
@@ -239,15 +219,15 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
         onSexOffenderRegistry,
         onChildOffenderRegistry,
         otherLegalRestrictions,
-        needsPhoneCall,
-        needsEmployment,
-        needsHousing,
-        needsClothing,
-        needsFood,
-        currentHousingSituation,
-        currentHousingOther,
-        transitionalHomeName,
-        transitionalHomeNameOther,
+        needsPhoneCall: false,
+        needsEmployment: false,
+        needsHousing: false,
+        needsClothing: false,
+        needsFood: false,
+        currentHousingSituation: "",
+        currentHousingOther: "",
+        transitionalHomeName: "",
+        transitionalHomeNameOther: "",
         weeklyCallExplained,
         resourcesSent,
         resourcesSentList: selectedResources,
@@ -614,213 +594,9 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
             </View>
           </View>
 
-          {/* SECTION 3 - Critical Needs */}
+          {/* SECTION 3 - Communication Confirmation */}
           <View className="mb-6">
-            <Text className="text-lg font-bold text-gray-900 mb-1">Section 3: Critical Needs</Text>
-
-            {/* Helper text */}
-            <View className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
-              <View className="flex-row items-start">
-                <Ionicons name="help-circle" size={20} color="#2563EB" />
-                <Text className="text-sm text-blue-800 ml-2 flex-1">
-                  Ask the participant what their most urgent needs are so we can help prioritize next steps.
-                </Text>
-              </View>
-            </View>
-
-            {/* Immediate needs checkboxes */}
-            <View className="gap-3 mb-4">
-              <Pressable
-                onPress={() => setNeedsPhoneCall(!needsPhoneCall)}
-                className="flex-row items-center"
-              >
-                <View
-                  className={`w-6 h-6 rounded border-2 items-center justify-center mr-3 ${
-                    needsPhoneCall ? "bg-slate-700 border-slate-700" : "bg-white border-gray-300"
-                  }`}
-                >
-                  {needsPhoneCall && <Ionicons name="checkmark" size={18} color="white" />}
-                </View>
-                <Text className="text-base text-gray-900">Needs help getting a phone</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={() => setNeedsEmployment(!needsEmployment)}
-                className="flex-row items-center"
-              >
-                <View
-                  className={`w-6 h-6 rounded border-2 items-center justify-center mr-3 ${
-                    needsEmployment ? "bg-slate-700 border-slate-700" : "bg-white border-gray-300"
-                  }`}
-                >
-                  {needsEmployment && <Ionicons name="checkmark" size={18} color="white" />}
-                </View>
-                <Text className="text-base text-gray-900">Employment needed</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={() => setNeedsHousing(!needsHousing)}
-                className="flex-row items-center"
-              >
-                <View
-                  className={`w-6 h-6 rounded border-2 items-center justify-center mr-3 ${
-                    needsHousing ? "bg-slate-700 border-slate-700" : "bg-white border-gray-300"
-                  }`}
-                >
-                  {needsHousing && <Ionicons name="checkmark" size={18} color="white" />}
-                </View>
-                <Text className="text-base text-gray-900">Housing needed</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={() => setNeedsClothing(!needsClothing)}
-                className="flex-row items-center"
-              >
-                <View
-                  className={`w-6 h-6 rounded border-2 items-center justify-center mr-3 ${
-                    needsClothing ? "bg-slate-700 border-slate-700" : "bg-white border-gray-300"
-                  }`}
-                >
-                  {needsClothing && <Ionicons name="checkmark" size={18} color="white" />}
-                </View>
-                <Text className="text-base text-gray-900">Clothing needed</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={() => setNeedsFood(!needsFood)}
-                className="flex-row items-center"
-              >
-                <View
-                  className={`w-6 h-6 rounded border-2 items-center justify-center mr-3 ${
-                    needsFood ? "bg-slate-700 border-slate-700" : "bg-white border-gray-300"
-                  }`}
-                >
-                  {needsFood && <Ionicons name="checkmark" size={18} color="white" />}
-                </View>
-                <Text className="text-base text-gray-900">Food needed</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={() => setNeedsOther(!needsOther)}
-                className="flex-row items-center"
-              >
-                <View
-                  className={`w-6 h-6 rounded border-2 items-center justify-center mr-3 ${
-                    needsOther ? "bg-slate-700 border-slate-700" : "bg-white border-gray-300"
-                  }`}
-                >
-                  {needsOther && <Ionicons name="checkmark" size={18} color="white" />}
-                </View>
-                <Text className="text-base text-gray-900">Other</Text>
-              </Pressable>
-            </View>
-
-            {/* Other need description - conditional */}
-            {needsOther && (
-              <View className="mt-4 bg-gray-50 rounded-xl p-4 border border-gray-200">
-                <Text className="text-sm font-semibold text-gray-700 mb-2">Please specify other need</Text>
-                <TextInput
-                  className="bg-white border border-gray-200 rounded-xl px-4 py-3 text-base"
-                  placeholder="Describe other need..."
-                  value={needsOtherDescription}
-                  onChangeText={setNeedsOtherDescription}
-                  multiline
-                  numberOfLines={3}
-                  textAlignVertical="top"
-                />
-              </View>
-            )}
-
-            {/* Housing details - conditional */}
-            {needsHousing && (
-              <View className="mt-4 bg-gray-50 rounded-xl p-4 border border-gray-200">
-                <Text className="text-sm font-semibold text-gray-700 mb-3">Housing Details</Text>
-
-                {/* Current housing situation */}
-                <View className="mb-4">
-                  <Text className="text-sm font-medium text-gray-700 mb-2">
-                    Current Housing Situation <Text className="text-red-500">*</Text>
-                  </Text>
-                  <Pressable
-                    onPress={() => setShowHousingSituationModal(true)}
-                    className="bg-white border border-gray-200 rounded-xl px-4 py-3"
-                  >
-                    <View className="flex-row items-center justify-between">
-                      <Text className={`text-base ${currentHousingSituation ? "text-gray-900" : "text-gray-400"}`}>
-                        {currentHousingSituation || "Select situation..."}
-                      </Text>
-                      <Ionicons name="chevron-down" size={20} color="#6B7280" />
-                    </View>
-                  </Pressable>
-                </View>
-
-                {/* Other housing situation - conditional */}
-                {currentHousingSituation === "Other" && (
-                  <View className="mb-4">
-                    <Text className="text-sm font-medium text-gray-700 mb-2">Please specify</Text>
-                    <TextInput
-                      className="bg-white border border-gray-200 rounded-xl px-4 py-3 text-base"
-                      placeholder="Describe housing situation..."
-                      value={currentHousingOther}
-                      onChangeText={setCurrentHousingOther}
-                    />
-                  </View>
-                )}
-
-                {/* Transitional home - conditional */}
-                {currentHousingSituation === "Transitional home" && (
-                  <View className="mb-4">
-                    <Text className="text-sm font-medium text-gray-700 mb-2">
-                      Transitional Home Name <Text className="text-red-500">*</Text>
-                    </Text>
-                    <Pressable
-                      onPress={() => setShowTransitionalHomeModal(true)}
-                      className="bg-white border border-gray-200 rounded-xl px-4 py-3"
-                    >
-                      <View className="flex-row items-center justify-between">
-                        <Text className={`text-base ${transitionalHomeName ? "text-gray-900" : "text-gray-400"}`}>
-                          {transitionalHomeName || "Select home..."}
-                        </Text>
-                        <Ionicons name="chevron-down" size={20} color="#6B7280" />
-                      </View>
-                    </Pressable>
-
-                    {/* High priority badge if Ben Reid selected */}
-                    {transitionalHomeName === "Ben Reid / Southeast Texas Transitional Center" && (
-                      <View className="bg-red-50 border border-red-200 rounded-xl p-3 mt-3">
-                        <View className="flex-row items-center">
-                          <Ionicons name="flag" size={18} color="#DC2626" />
-                          <Text className="text-sm text-red-800 font-semibold ml-2">
-                            HIGH PRIORITY - Ben Reid Housing
-                          </Text>
-                        </View>
-                        <Text className="text-xs text-red-700 mt-1">
-                          This participant will be flagged as high priority for housing assistance.
-                        </Text>
-                      </View>
-                    )}
-
-                    {/* Other transitional home - conditional */}
-                    {transitionalHomeName === "Other transitional home (not listed)" && (
-                      <View className="mt-3">
-                        <Text className="text-sm font-medium text-gray-700 mb-2">Home name</Text>
-                        <TextInput
-                          className="bg-white border border-gray-200 rounded-xl px-4 py-3 text-base"
-                          placeholder="Enter transitional home name..."
-                          value={transitionalHomeNameOther}
-                          onChangeText={setTransitionalHomeNameOther}
-                        />
-                      </View>
-                    )}
-                  </View>
-                )}
-              </View>
-            )}
-          </View>
-
-          {/* SECTION 4 - Communication Confirmation */}
-          <View className="mb-6">
-            <Text className="text-lg font-bold text-gray-900 mb-1">Section 4: Communication Confirmation</Text>
+            <Text className="text-lg font-bold text-gray-900 mb-1">Section 3: Communication Confirmation</Text>
             <Text className="text-sm text-gray-600 mb-4">
               Confirm participant expectations for follow-up
             </Text>
@@ -844,9 +620,9 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
             </Pressable>
           </View>
 
-          {/* SECTION 5 - Resources Sent */}
+          {/* SECTION 4 - Resources Sent */}
           <View className="mb-6">
-            <Text className="text-lg font-bold text-gray-900 mb-1">Section 5: Resources Sent</Text>
+            <Text className="text-lg font-bold text-gray-900 mb-1">Section 4: Resources Sent</Text>
             <Text className="text-sm text-gray-600 mb-4">
               Track resources shared with the participant
             </Text>
@@ -1151,123 +927,6 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
           </Pressable>
         </View>
       </ScrollView>
-
-      {/* Housing Situation Modal */}
-      <Modal
-        visible={showHousingSituationModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowHousingSituationModal(false)}
-      >
-        <Pressable
-          className="flex-1 bg-black/50 justify-center items-center"
-          onPress={() => setShowHousingSituationModal(false)}
-        >
-          <View className="bg-white rounded-2xl p-6 mx-6 w-80">
-            <Text className="text-lg font-bold text-gray-900 mb-4">Current Housing Situation</Text>
-            {["Unhoused", "Transitional home", "With family/friends", "Other"].map((option) => (
-              <Pressable
-                key={option}
-                onPress={() => {
-                  setCurrentHousingSituation(option);
-                  if (option !== "Transitional home") {
-                    setTransitionalHomeName("");
-                    setTransitionalHomeNameOther("");
-                  }
-                  if (option !== "Other") {
-                    setCurrentHousingOther("");
-                  }
-                  setShowHousingSituationModal(false);
-                }}
-                className={`border-2 rounded-xl p-4 mb-3 ${
-                  currentHousingSituation === option
-                    ? "bg-slate-100 border-slate-700"
-                    : "bg-white border-gray-200"
-                }`}
-              >
-                <Text
-                  className={`text-base font-semibold ${
-                    currentHousingSituation === option ? "text-slate-900" : "text-gray-900"
-                  }`}
-                >
-                  {option}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        </Pressable>
-      </Modal>
-
-      {/* Transitional Home Modal */}
-      <Modal
-        visible={showTransitionalHomeModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowTransitionalHomeModal(false)}
-      >
-        <Pressable
-          className="flex-1 bg-black/50 justify-center items-center"
-          onPress={() => setShowTransitionalHomeModal(false)}
-        >
-          <View className="bg-white rounded-2xl p-6 mx-6 w-80 max-h-96">
-            <Text className="text-lg font-bold text-gray-900 mb-4">Select Transitional Home</Text>
-            <ScrollView>
-              {transitionalHomes.map((home: TransitionalHome) => (
-                <Pressable
-                  key={home.id}
-                  onPress={() => {
-                    setTransitionalHomeName(home.name);
-                    setTransitionalHomeNameOther("");
-                    setShowTransitionalHomeModal(false);
-                  }}
-                  className={`border-2 rounded-xl p-4 mb-3 ${
-                    transitionalHomeName === home.name
-                      ? "bg-slate-100 border-slate-700"
-                      : "bg-white border-gray-200"
-                  }`}
-                >
-                  <Text
-                    className={`text-base font-semibold ${
-                      transitionalHomeName === home.name ? "text-slate-900" : "text-gray-900"
-                    }`}
-                  >
-                    {home.name}
-                  </Text>
-                  {home.name === "Ben Reid / Southeast Texas Transitional Center" && (
-                    <View className="flex-row items-center mt-2">
-                      <Ionicons name="flag" size={14} color="#DC2626" />
-                      <Text className="text-xs text-red-600 font-medium ml-1">High Priority</Text>
-                    </View>
-                  )}
-                </Pressable>
-              ))}
-
-              {/* Other option */}
-              <Pressable
-                onPress={() => {
-                  setTransitionalHomeName("Other transitional home (not listed)");
-                  setShowTransitionalHomeModal(false);
-                }}
-                className={`border-2 rounded-xl p-4 mb-3 ${
-                  transitionalHomeName === "Other transitional home (not listed)"
-                    ? "bg-slate-100 border-slate-700"
-                    : "bg-white border-gray-200"
-                }`}
-              >
-                <Text
-                  className={`text-base font-semibold ${
-                    transitionalHomeName === "Other transitional home (not listed)"
-                      ? "text-slate-900"
-                      : "text-gray-900"
-                  }`}
-                >
-                  Other transitional home (not listed)
-                </Text>
-              </Pressable>
-            </ScrollView>
-          </View>
-        </Pressable>
-      </Modal>
 
       {/* Resources Selection Modal */}
       <Modal

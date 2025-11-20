@@ -39,6 +39,12 @@ const REFERRAL_SOURCE_OPTIONS = [
   "Other",
 ];
 
+const CRITICAL_NEEDS_OPTIONS = [
+  "Building",
+  "Healthy relationships",
+  "Managing finances",
+];
+
 export default function ManualIntakeFormScreen({ navigation, route }: any) {
   const intakeType = route?.params?.intakeType || "full_form_entry"; // Default to full form entry
   const [participantNumber, setParticipantNumber] = useState("");
@@ -58,9 +64,11 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
   const [legalStatus, setLegalStatus] = useState<string[]>([]);
   const [referralSource, setReferralSource] = useState("");
   const [otherReferralSource, setOtherReferralSource] = useState("");
+  const [criticalNeeds, setCriticalNeeds] = useState<string[]>([]);
   const [showLegalStatusModal, setShowLegalStatusModal] = useState(false);
   const [showReleaseLocationModal, setShowReleaseLocationModal] = useState(false);
   const [showReferralSourceModal, setShowReferralSourceModal] = useState(false);
+  const [showCriticalNeedsModal, setShowCriticalNeedsModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -116,6 +124,14 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
       setLegalStatus(legalStatus.filter((item) => item !== option));
     } else {
       setLegalStatus([...legalStatus, option]);
+    }
+  };
+
+  const toggleCriticalNeed = (option: string) => {
+    if (criticalNeeds.includes(option)) {
+      setCriticalNeeds(criticalNeeds.filter((item) => item !== option));
+    } else {
+      setCriticalNeeds([...criticalNeeds, option]);
     }
   };
 
@@ -176,6 +192,9 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
       if (referralSource) {
         const finalReferral = referralSource === "Other" ? otherReferralSource : referralSource;
         noteContent += `\nHow they heard about 7more: ${finalReferral}`;
+      }
+      if (criticalNeeds.length > 0) {
+        noteContent += `\n\nCritical Needs:\n${criticalNeeds.map(n => `- ${n}`).join("\n")}`;
       }
 
       // Add note to existing participant
@@ -674,6 +693,30 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
             </View>
           )}
 
+          {/* Critical Needs */}
+          <View className="mb-8">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              What are the critical needs?
+            </Text>
+            <Text className="text-xs text-gray-500 mb-3">
+              (Select all that apply)
+            </Text>
+            <Pressable
+              onPress={() => {
+                Keyboard.dismiss();
+                setShowCriticalNeedsModal(true);
+              }}
+              className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 flex-row items-center justify-between"
+            >
+              <Text className={`text-base ${criticalNeeds.length > 0 ? "text-gray-900" : "text-gray-400"}`}>
+                {criticalNeeds.length > 0
+                  ? `${criticalNeeds.length} selected`
+                  : "Select critical needs"}
+              </Text>
+              <Ionicons name="chevron-down" size={20} color="#9CA3AF" />
+            </Pressable>
+          </View>
+
           {/* Submit Button */}
           <Pressable
             onPress={handleSubmit}
@@ -814,6 +857,72 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
 
             <Pressable
               onPress={() => setShowReferralSourceModal(false)}
+              className="bg-gray-600 rounded-xl py-4 items-center active:opacity-80"
+            >
+              <Text className="text-white text-base font-bold">Done</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Critical Needs Modal */}
+      <Modal
+        visible={showCriticalNeedsModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowCriticalNeedsModal(false)}
+      >
+        <View className="flex-1 bg-black/50 justify-end">
+          <View className="bg-white rounded-t-3xl pt-6 pb-10 px-6">
+            <View className="flex-row items-center justify-between mb-6">
+              <View className="flex-1">
+                <Text className="text-xl font-bold text-gray-900">
+                  What are the critical needs?
+                </Text>
+                <Text className="text-sm text-gray-500 mt-1">
+                  (Select all that apply)
+                </Text>
+              </View>
+              <Pressable
+                onPress={() => setShowCriticalNeedsModal(false)}
+                className="w-8 h-8 items-center justify-center"
+              >
+                <Ionicons name="close" size={24} color="#374151" />
+              </Pressable>
+            </View>
+
+            <ScrollView className="mb-4">
+              {CRITICAL_NEEDS_OPTIONS.map((option) => {
+                const isSelected = criticalNeeds.includes(option);
+                return (
+                  <Pressable
+                    key={option}
+                    onPress={() => toggleCriticalNeed(option)}
+                    className={`border-2 rounded-xl p-4 mb-3 flex-row items-center justify-between ${
+                      isSelected
+                        ? "bg-yellow-50 border-yellow-600"
+                        : "bg-white border-gray-200"
+                    }`}
+                  >
+                    <Text
+                      className={`text-sm flex-1 ${
+                        isSelected ? "text-yellow-900 font-semibold" : "text-gray-700"
+                      }`}
+                    >
+                      {option}
+                    </Text>
+                    {isSelected && (
+                      <View className="w-6 h-6 bg-yellow-600 rounded-full items-center justify-center ml-3">
+                        <Ionicons name="checkmark" size={16} color="white" />
+                      </View>
+                    )}
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+
+            <Pressable
+              onPress={() => setShowCriticalNeedsModal(false)}
               className="bg-gray-600 rounded-xl py-4 items-center active:opacity-80"
             >
               <Text className="text-white text-base font-bold">Done</Text>

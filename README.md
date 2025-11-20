@@ -2,7 +2,25 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Enhanced Participant Intake Form - November 20, 2025
+## 🔥 LATEST UPDATE: Critical Needs Section Moved to Intake Form - November 20, 2025
+
+**Date:** November 20, 2025
+**Status:** ✅ COMPLETE
+
+### What Was Changed:
+- **Moved Critical Needs Section**: Relocated "Critical Needs" section from Bridge Team Follow-Up Form to Participant Intake Form
+- **Updated Critical Needs Options**: Changed options to:
+  - Building
+  - Healthy relationships
+  - Managing finances
+- **Form Reorganization**:
+  - Bridge Team Follow-Up Form now has 4 sections (was 5)
+  - Renumbered sections after removing Section 3
+  - Critical needs data now collected earlier in the participant journey
+
+---
+
+## Previous Update: Enhanced Participant Intake Form - November 20, 2025
 
 **Date:** November 20, 2025
 **Status:** ✅ COMPLETE
