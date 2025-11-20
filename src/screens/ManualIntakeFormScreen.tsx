@@ -78,8 +78,6 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
-  const [showLiveCallOptionsModal, setShowLiveCallOptionsModal] = useState(false);
-  const [justAddedParticipantId, setJustAddedParticipantId] = useState<string | null>(null);
   const [duplicateParticipants, setDuplicateParticipants] = useState<any[]>([]);
   const [duplicateType, setDuplicateType] = useState<"phone" | "email" | null>(null);
 
@@ -328,35 +326,34 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
 
       console.log("✅ Participant added successfully via form");
 
-      // If this is a Live Call Intake, show options modal
-      if (intakeType === "live_call_intake") {
-        // Need to get the participant ID - we'll show options after a brief delay to ensure Firebase sync
-        setTimeout(() => {
-          const participants = useParticipantStore.getState().participants;
-          const justAdded = participants.find(
-            p => p.participantNumber === participantNumber &&
-            p.firstName === firstName &&
-            p.lastName === lastName
-          );
-
-          if (justAdded) {
-            // Store the participant ID for the options modal
-            setJustAddedParticipantId(justAdded.id);
-            setShowLiveCallOptionsModal(true);
-          } else {
-            // Fallback - show success and go back
-            setShowSuccessModal(true);
-          }
-        }, 500);
-      } else {
-        // For full form entry, just show success
-        setShowSuccessModal(true);
-      }
+      // Show success modal for all intake types (no automatic navigation)
+      setShowSuccessModal(true);
     } catch (error) {
       console.error("❌ Error adding participant:", error);
       setErrorMessage(`Failed to add participant: ${error}`);
       setShowErrorModal(true);
     }
+  };
+
+  // Handler for Live Call Intake - Complete Contact Form Now
+  const handleCompleteContactFormNow = async () => {
+    await handleSubmit();
+    // After submission, wait for Firebase sync and navigate
+    setTimeout(() => {
+      const participants = useParticipantStore.getState().participants;
+      const justAdded = participants.find(
+        p => p.participantNumber === (tdcjNotAvailable ? "Not Available" : participantNumber) &&
+        p.firstName === firstName &&
+        p.lastName === lastName
+      );
+
+      if (justAdded) {
+        navigation.replace("BridgeTeamFollowUpForm", {
+          participantId: justAdded.id,
+          fromLiveCallIntake: true
+        });
+      }
+    }, 1000);
   };
 
   const handleDateInput = (text: string, setter: (val: string) => void) => {
@@ -729,13 +726,49 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
             </Pressable>
           </View>
 
-          {/* Submit Button */}
-          <Pressable
-            onPress={handleSubmit}
-            className="bg-gray-600 rounded-xl py-4 items-center mb-4 active:opacity-80"
-          >
-            <Text className="text-white text-base font-bold">Add Participant</Text>
-          </Pressable>
+          {/* Submit Buttons - Conditional based on intake type */}
+          {intakeType === "live_call_intake" ? (
+            <>
+              {/* Live Call Intake: Two button choices */}
+              <Pressable
+                onPress={handleCompleteContactFormNow}
+                className="bg-green-600 rounded-xl py-4 px-4 items-center mb-3 active:opacity-80"
+              >
+                <View className="flex-row items-center">
+                  <Ionicons name="document-text" size={20} color="white" />
+                  <Text className="text-white text-base font-bold ml-2">
+                    Complete Contact Form Now
+                  </Text>
+                </View>
+                <Text className="text-white text-xs mt-1 opacity-90">
+                  Continue with follow-up and move to mentorship
+                </Text>
+              </Pressable>
+
+              <Pressable
+                onPress={handleSubmit}
+                className="bg-gray-600 rounded-xl py-4 px-4 items-center mb-4 active:opacity-80"
+              >
+                <View className="flex-row items-center">
+                  <Ionicons name="time" size={20} color="white" />
+                  <Text className="text-white text-base font-bold ml-2">
+                    Add to Pending Bridge Team
+                  </Text>
+                </View>
+                <Text className="text-white text-xs mt-1 opacity-90">
+                  Complete follow-up later
+                </Text>
+              </Pressable>
+            </>
+          ) : (
+            /* Regular intake: Single submit button */
+            <Pressable
+              onPress={handleSubmit}
+              className="bg-gray-600 rounded-xl py-4 items-center mb-4 active:opacity-80"
+            >
+              <Text className="text-white text-base font-bold">Add Participant</Text>
+            </Pressable>
+          )}
 
           {/* Cancel Button */}
           <Pressable
@@ -1006,71 +1039,6 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
               className="bg-gray-600 rounded-xl py-4 items-center active:opacity-80"
             >
               <Text className="text-white text-base font-bold">Done</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Live Call Options Modal */}
-      <Modal
-        visible={showLiveCallOptionsModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => {}}
-      >
-        <View className="flex-1 bg-black/50 justify-center items-center px-6">
-          <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
-            <View className="items-center mb-4">
-              <View className="w-16 h-16 bg-green-100 rounded-full items-center justify-center mb-3">
-                <Ionicons name="call" size={40} color="#16A34A" />
-              </View>
-              <Text className="text-xl font-bold text-gray-900 mb-2">Live Call Intake Complete</Text>
-              <Text className="text-center text-gray-600 mb-4">
-                Participant {firstName} {lastName} has been added. What would you like to do next?
-              </Text>
-            </View>
-
-            {/* Option 1: Complete Contact Form Now */}
-            <Pressable
-              onPress={() => {
-                setShowLiveCallOptionsModal(false);
-                if (justAddedParticipantId) {
-                  navigation.replace("BridgeTeamFollowUpForm", {
-                    participantId: justAddedParticipantId,
-                    fromLiveCallIntake: true
-                  });
-                }
-              }}
-              className="bg-green-600 rounded-xl py-4 px-4 items-center active:opacity-80 mb-3"
-            >
-              <View className="flex-row items-center">
-                <Ionicons name="document-text" size={20} color="white" />
-                <Text className="text-white font-semibold text-base ml-2">
-                  Complete Contact Form Now
-                </Text>
-              </View>
-              <Text className="text-white text-xs mt-1 opacity-90">
-                Continue with follow-up and move to mentorship
-              </Text>
-            </Pressable>
-
-            {/* Option 2: Add to Pending Bridge Team */}
-            <Pressable
-              onPress={() => {
-                setShowLiveCallOptionsModal(false);
-                navigation.goBack();
-              }}
-              className="bg-gray-600 rounded-xl py-4 px-4 items-center active:opacity-80"
-            >
-              <View className="flex-row items-center">
-                <Ionicons name="time" size={20} color="white" />
-                <Text className="text-white font-semibold text-base ml-2">
-                  Add to Pending Bridge Team
-                </Text>
-              </View>
-              <Text className="text-white text-xs mt-1 opacity-90">
-                Complete follow-up later
-              </Text>
             </Pressable>
           </View>
         </View>

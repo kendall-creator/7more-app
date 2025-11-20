@@ -33,19 +33,21 @@ A comprehensive mobile application built with Expo and React Native to help nonp
     - `/src/screens/ResourcesScreen.tsx` - Added link buttons and open link handler
     - `/src/screens/EditResourceScreen.tsx` - Added link input fields
 
-#### Live Call Intake Choice Modal
-- **Added choice modal at end of Live Call Intake form**
-  - After completing the participant intake form, users now see two options:
+#### Live Call Intake Choice Buttons
+- **Added two submit button choices at end of Live Call Intake form**
+  - When using "Live Call Intake", the form shows two buttons instead of one:
     1. **"Complete Contact Form Now"** (Green button with document icon)
-       - Immediately navigates to Bridge Team Follow-Up Form
+       - Submits intake form and automatically navigates to Bridge Team Follow-Up Form
        - Complete everything in one call while participant is on the phone
-       - Automatically moves participant to mentorship queue when done
+       - When follow-up submitted, automatically moves participant to mentorship queue
        - Subtitle: "Continue with follow-up and move to mentorship"
     2. **"Add to Pending Bridge Team"** (Gray button with clock icon)
-       - Adds participant to pending_bridge queue
+       - Submits intake form and adds participant to pending_bridge queue
        - Follow-up can be completed later
+       - Returns to previous screen after submission
        - Subtitle: "Complete follow-up later"
        - Useful for interrupted calls or when more info is needed
+  - **Regular intake types** (full_form_entry, etc.) still show single "Add Participant" button
 
 #### Live Call Intake Workflow Streamlined
 - **Live Call Intake now moves directly to mentorship** after completing the follow-up form
