@@ -2,7 +2,36 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Mentor Contact Tracking Statistics - November 19, 2025
+## 🔥 LATEST UPDATE: Enhanced Participant Intake Form - November 20, 2025
+
+**Date:** November 20, 2025
+**Status:** ✅ COMPLETE
+
+### What Was Changed:
+- **Legal Status Section**: Changed title to "Which of the following apply to this participant? (Select all that apply)" with updated options:
+  - The participant is on parole
+  - The participant is on probation
+  - The participant is on an ankle monitor
+  - The participant has an SA conviction
+  - The participant has an SA–Minor conviction
+  - The participant has barriers that prevent them from working right now
+  - None of these apply
+- **New Field - Nickname**: Added optional nickname field directly under first and last name
+- **New Field - Full Address**: Added optional full address field under email
+- **Field Reordering**: Moved TDCJ Number to after the address field
+- **Enhanced DOB Validation**:
+  - Birthdate must be year 2007 or earlier
+  - Added "Birthdate not currently available" toggle option
+  - Clear error messaging for invalid birthdates
+- **New Field - Referral Source**: Added "How did the participant hear about 7more?" question with options:
+  - I met them in person
+  - Family/friend
+  - Online
+  - Other (with custom text input)
+
+---
+
+## Previous Update: Mentor Contact Tracking Statistics - November 19, 2025
 
 **Date:** November 19, 2025
 **Status:** ✅ COMPLETE

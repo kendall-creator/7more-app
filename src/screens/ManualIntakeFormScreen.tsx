@@ -15,11 +15,13 @@ import { ParticipantStatus } from "../types";
 import { Ionicons } from "@expo/vector-icons";
 
 const LEGAL_STATUS_OPTIONS = [
-  "I am currently on parole",
-  "I am currently on probation",
-  "I have an ankle monitor",
-  "I was convicted of sexual assault",
-  "I was convicted of sexual assault involving a minor",
+  "The participant is on parole",
+  "The participant is on probation",
+  "The participant is on an ankle monitor",
+  "The participant has an SA conviction",
+  "The participant has an SA–Minor conviction",
+  "The participant has barriers that prevent them from working right now",
+  "None of these apply",
 ];
 
 const RELEASE_LOCATION_OPTIONS = [
@@ -30,22 +32,35 @@ const RELEASE_LOCATION_OPTIONS = [
   "Other",
 ];
 
+const REFERRAL_SOURCE_OPTIONS = [
+  "I met them in person",
+  "Family/friend",
+  "Online",
+  "Other",
+];
+
 export default function ManualIntakeFormScreen({ navigation, route }: any) {
   const intakeType = route?.params?.intakeType || "full_form_entry"; // Default to full form entry
   const [participantNumber, setParticipantNumber] = useState("");
   const [tdcjNotAvailable, setTdcjNotAvailable] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [nickname, setNickname] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
+  const [dobNotAvailable, setDobNotAvailable] = useState(false);
   const [gender, setGender] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
   const [releaseDate, setReleaseDate] = useState("");
   const [releasedFrom, setReleasedFrom] = useState("");
   const [otherReleaseLocation, setOtherReleaseLocation] = useState("");
   const [legalStatus, setLegalStatus] = useState<string[]>([]);
+  const [referralSource, setReferralSource] = useState("");
+  const [otherReferralSource, setOtherReferralSource] = useState("");
   const [showLegalStatusModal, setShowLegalStatusModal] = useState(false);
   const [showReleaseLocationModal, setShowReleaseLocationModal] = useState(false);
+  const [showReferralSourceModal, setShowReferralSourceModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -72,6 +87,11 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
     if (year < 1900 || year > new Date().getFullYear()) return null;
 
     return new Date(year, month - 1, day);
+  };
+
+  const validateBirthDate = (dobDate: Date): boolean => {
+    const year = dobDate.getFullYear();
+    return year <= 2007;
   };
 
   const calculateAge = (dob: Date) => {
@@ -134,12 +154,16 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
       if (firstName || lastName) {
         noteContent += `Name provided: ${firstName} ${lastName}\n`;
       }
+      if (nickname) {
+        noteContent += `Nickname: ${nickname}\n`;
+      }
       if (participantNumber && !tdcjNotAvailable) {
         noteContent += `TDCJ Number: ${participantNumber}\n`;
       }
       if (phoneNumber) noteContent += `Phone: ${phoneNumber}\n`;
       if (email) noteContent += `Email: ${email}\n`;
-      if (dateOfBirth) noteContent += `DOB: ${dateOfBirth}\n`;
+      if (address) noteContent += `Address: ${address}\n`;
+      if (dateOfBirth && !dobNotAvailable) noteContent += `DOB: ${dateOfBirth}\n`;
       if (gender) noteContent += `Gender: ${gender}\n`;
       if (releaseDate) noteContent += `Release Date: ${releaseDate}\n`;
       if (releasedFrom) {
@@ -148,6 +172,10 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
       }
       if (legalStatus.length > 0) {
         noteContent += `\nLegal Status:\n${legalStatus.map(s => `- ${s}`).join("\n")}`;
+      }
+      if (referralSource) {
+        const finalReferral = referralSource === "Other" ? otherReferralSource : referralSource;
+        noteContent += `\nHow they heard about 7more: ${finalReferral}`;
       }
 
       // Add note to existing participant
@@ -176,8 +204,11 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
     // Use "Not Available" if TDCJ toggle is enabled
     const finalParticipantNumber = tdcjNotAvailable ? "Not Available" : participantNumber;
 
+    // Use "Not Available" if DOB toggle is enabled
+    const finalDateOfBirth = dobNotAvailable ? "Not Available" : dateOfBirth;
+
     // Validation
-    if ((!tdcjNotAvailable && !participantNumber) || !firstName || !lastName || !gender || !releasedFrom || !dateOfBirth || !releaseDate) {
+    if ((!tdcjNotAvailable && !participantNumber) || !firstName || !lastName || !gender || !releasedFrom || (!dobNotAvailable && !dateOfBirth) || !releaseDate) {
       setErrorMessage("Please fill in all required fields.");
       setShowErrorModal(true);
       return;
@@ -197,15 +228,32 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
       return;
     }
 
-    // Validate date formats
-    const dobDate = parseDate(dateOfBirth);
-    const relDate = parseDate(releaseDate);
-
-    if (!dobDate) {
-      setErrorMessage("Please enter a valid date of birth in MM/DD/YYYY format.");
+    // If "Other" is selected for referral, validate that they entered a custom source
+    if (referralSource === "Other" && !otherReferralSource.trim()) {
+      setErrorMessage("Please specify how the participant heard about 7more.");
       setShowErrorModal(true);
       return;
     }
+
+    // Validate date formats only if DOB is not marked as "Not Available"
+    let dobDate: Date | null = null;
+    if (!dobNotAvailable) {
+      dobDate = parseDate(dateOfBirth);
+      if (!dobDate) {
+        setErrorMessage("Please enter a valid date of birth in MM/DD/YYYY format.");
+        setShowErrorModal(true);
+        return;
+      }
+
+      // Validate birthdate is 2007 or earlier
+      if (!validateBirthDate(dobDate)) {
+        setErrorMessage("Participant must be born in 2007 or earlier. If the birthdate is not available, please use the 'Birthdate not currently available' option.");
+        setShowErrorModal(true);
+        return;
+      }
+    }
+
+    const relDate = parseDate(releaseDate);
 
     if (!relDate) {
       setErrorMessage("Please enter a valid release date in MM/DD/YYYY format.");
@@ -213,13 +261,14 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
       return;
     }
 
-    const age = calculateAge(dobDate);
+    const age = dobDate ? calculateAge(dobDate) : 0;
     const timeOut = calculateTimeOut(relDate);
 
     console.log("📝 Manual intake form submitting:", {
       participantNumber: finalParticipantNumber,
       firstName,
       lastName,
+      nickname,
       age,
       gender,
       intakeType
@@ -232,7 +281,7 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
         participantNumber: finalParticipantNumber,
         firstName,
         lastName,
-        dateOfBirth: dobDate.toISOString(),
+        dateOfBirth: dobDate ? dobDate.toISOString() : "Not Available",
         age,
         gender,
         ...(phoneNumber ? { phoneNumber } : {}),
@@ -342,6 +391,65 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
             />
           </View>
 
+          {/* Nickname */}
+          <View className="mb-5">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              Nickname <Text className="text-gray-400 text-xs">(Optional)</Text>
+            </Text>
+            <TextInput
+              className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base"
+              placeholder="Enter nickname"
+              value={nickname}
+              onChangeText={setNickname}
+            />
+          </View>
+
+          {/* Phone Number */}
+          <View className="mb-5">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              Phone Number <Text className="text-yellow-600 text-xs">(Email or Phone required)</Text>
+            </Text>
+            <TextInput
+              className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base"
+              placeholder="(555) 123-4567"
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+              onBlur={handlePhoneBlur}
+              keyboardType="phone-pad"
+            />
+          </View>
+
+          {/* Email Address */}
+          <View className="mb-5">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              Email Address <Text className="text-yellow-600 text-xs">(Email or Phone required)</Text>
+            </Text>
+            <TextInput
+              className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base"
+              placeholder="email@example.com"
+              value={email}
+              onChangeText={setEmail}
+              onBlur={handleEmailBlur}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
+
+          {/* Full Address */}
+          <View className="mb-5">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              Full Address <Text className="text-gray-400 text-xs">(Optional)</Text>
+            </Text>
+            <TextInput
+              className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base"
+              placeholder="Street address, City, State, ZIP"
+              value={address}
+              onChangeText={setAddress}
+              multiline
+              numberOfLines={2}
+            />
+          </View>
+
           {/* TDCJ Number */}
           <View className="mb-5">
             <Text className="text-sm font-semibold text-gray-700 mb-2">
@@ -384,50 +492,51 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
             )}
           </View>
 
-          {/* Phone Number */}
-          <View className="mb-5">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">
-              Phone Number <Text className="text-yellow-600 text-xs">(Email or Phone required)</Text>
-            </Text>
-            <TextInput
-              className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base"
-              placeholder="(555) 123-4567"
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-              onBlur={handlePhoneBlur}
-              keyboardType="phone-pad"
-            />
-          </View>
-
-          {/* Email Address */}
-          <View className="mb-5">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">
-              Email Address <Text className="text-yellow-600 text-xs">(Email or Phone required)</Text>
-            </Text>
-            <TextInput
-              className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base"
-              placeholder="email@example.com"
-              value={email}
-              onChangeText={setEmail}
-              onBlur={handleEmailBlur}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </View>
-
           {/* Date of Birth */}
           <View className="mb-5">
             <Text className="text-sm font-semibold text-gray-700 mb-2">
               Date of Birth <Text className="text-red-500">*</Text>
             </Text>
-            <TextInput
-              className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base"
-              placeholder="MM/DD/YYYY"
-              value={dateOfBirth}
-              onChangeText={(text) => handleDateInput(text, setDateOfBirth)}
-              keyboardType="numeric"
-              maxLength={10}
-            />
+            {!dobNotAvailable ? (
+              <>
+                <TextInput
+                  className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base"
+                  placeholder="MM/DD/YYYY"
+                  value={dateOfBirth}
+                  onChangeText={(text) => handleDateInput(text, setDateOfBirth)}
+                  keyboardType="numeric"
+                  maxLength={10}
+                />
+                <Text className="text-xs text-gray-500 mt-1 mb-2">
+                  Must be born in 2007 or earlier
+                </Text>
+                <Pressable
+                  onPress={() => {
+                    setDobNotAvailable(true);
+                    setDateOfBirth("");
+                  }}
+                  className="mt-1 bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 active:opacity-70"
+                >
+                  <Text className="text-gray-700 text-sm font-medium text-center">
+                    Birthdate Not Currently Available
+                  </Text>
+                </Pressable>
+              </>
+            ) : (
+              <View className="bg-amber-50 border border-amber-300 rounded-xl px-4 py-3">
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-amber-800 text-sm font-medium">
+                    Date of Birth: Not Available
+                  </Text>
+                  <Pressable
+                    onPress={() => setDobNotAvailable(false)}
+                    className="active:opacity-70"
+                  >
+                    <Ionicons name="close-circle" size={24} color="#92400e" />
+                  </Pressable>
+                </View>
+              </View>
+            )}
           </View>
 
           {/* Gender */}
@@ -508,12 +617,12 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
           )}
 
           {/* Legal Status */}
-          <View className="mb-8">
+          <View className="mb-5">
             <Text className="text-sm font-semibold text-gray-700 mb-2">
-              Legal Status
+              Which of the following apply to this participant?
             </Text>
             <Text className="text-xs text-gray-500 mb-3">
-              We are not here to judge. We simply want to be able to get the best resources to you and we do not want to waste your time if you would not qualify for one of our resources.
+              (Select all that apply)
             </Text>
             <Pressable
               onPress={() => {
@@ -530,6 +639,40 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
               <Ionicons name="chevron-down" size={20} color="#9CA3AF" />
             </Pressable>
           </View>
+
+          {/* How did they hear about 7more */}
+          <View className="mb-8">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              How did the participant hear about 7more?
+            </Text>
+            <Pressable
+              onPress={() => {
+                Keyboard.dismiss();
+                setShowReferralSourceModal(true);
+              }}
+              className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 flex-row items-center justify-between"
+            >
+              <Text className={`text-base ${referralSource ? "text-gray-900" : "text-gray-400"}`}>
+                {referralSource || "Select referral source"}
+              </Text>
+              <Ionicons name="chevron-down" size={20} color="#9CA3AF" />
+            </Pressable>
+          </View>
+
+          {/* Other Referral Source - Conditional */}
+          {referralSource === "Other" && (
+            <View className="mb-8">
+              <Text className="text-sm font-semibold text-gray-700 mb-2">
+                Please Specify <Text className="text-red-500">*</Text>
+              </Text>
+              <TextInput
+                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base"
+                placeholder="Enter how they heard about 7more"
+                value={otherReferralSource}
+                onChangeText={setOtherReferralSource}
+              />
+            </View>
+          )}
 
           {/* Submit Button */}
           <Pressable
@@ -559,7 +702,14 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
         <View className="flex-1 bg-black/50 justify-end">
           <View className="bg-white rounded-t-3xl pt-6 pb-10 px-6 max-h-[80%]">
             <View className="flex-row items-center justify-between mb-6">
-              <Text className="text-xl font-bold text-gray-900">Legal Status</Text>
+              <View className="flex-1">
+                <Text className="text-xl font-bold text-gray-900">
+                  Which of the following apply to this participant?
+                </Text>
+                <Text className="text-sm text-gray-500 mt-1">
+                  (Select all that apply)
+                </Text>
+              </View>
               <Pressable
                 onPress={() => setShowLegalStatusModal(false)}
                 className="w-8 h-8 items-center justify-center"
@@ -567,10 +717,6 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
                 <Ionicons name="close" size={24} color="#374151" />
               </Pressable>
             </View>
-
-            <Text className="text-xs text-gray-500 mb-4">
-              We are not here to judge. We simply want to be able to get the best resources to you and we do not want to waste your time if you would not qualify for one of our resources.
-            </Text>
 
             <ScrollView className="mb-4">
               {LEGAL_STATUS_OPTIONS.map((option) => {
@@ -604,6 +750,70 @@ export default function ManualIntakeFormScreen({ navigation, route }: any) {
 
             <Pressable
               onPress={() => setShowLegalStatusModal(false)}
+              className="bg-gray-600 rounded-xl py-4 items-center active:opacity-80"
+            >
+              <Text className="text-white text-base font-bold">Done</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Referral Source Modal */}
+      <Modal
+        visible={showReferralSourceModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowReferralSourceModal(false)}
+      >
+        <View className="flex-1 bg-black/50 justify-end">
+          <View className="bg-white rounded-t-3xl pt-6 pb-10 px-6">
+            <View className="flex-row items-center justify-between mb-6">
+              <Text className="text-xl font-bold text-gray-900">How did they hear about 7more?</Text>
+              <Pressable
+                onPress={() => setShowReferralSourceModal(false)}
+                className="w-8 h-8 items-center justify-center"
+              >
+                <Ionicons name="close" size={24} color="#374151" />
+              </Pressable>
+            </View>
+
+            <ScrollView className="mb-4">
+              {REFERRAL_SOURCE_OPTIONS.map((option) => {
+                const isSelected = referralSource === option;
+                return (
+                  <Pressable
+                    key={option}
+                    onPress={() => {
+                      setReferralSource(option);
+                      if (option !== "Other") {
+                        setOtherReferralSource(""); // Clear other field if not selecting "Other"
+                      }
+                    }}
+                    className={`border-2 rounded-xl p-4 mb-3 flex-row items-center justify-between ${
+                      isSelected
+                        ? "bg-yellow-50 border-yellow-600"
+                        : "bg-white border-gray-200"
+                    }`}
+                  >
+                    <Text
+                      className={`text-base flex-1 ${
+                        isSelected ? "text-yellow-900 font-semibold" : "text-gray-700"
+                      }`}
+                    >
+                      {option}
+                    </Text>
+                    {isSelected && (
+                      <View className="w-6 h-6 bg-yellow-600 rounded-full items-center justify-center ml-3">
+                        <Ionicons name="checkmark" size={16} color="white" />
+                      </View>
+                    )}
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+
+            <Pressable
+              onPress={() => setShowReferralSourceModal(false)}
               className="bg-gray-600 rounded-xl py-4 items-center active:opacity-80"
             >
               <Text className="text-white text-base font-bold">Done</Text>
