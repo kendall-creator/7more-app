@@ -113,6 +113,9 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
   const [showCriticalNeedsModal, setShowCriticalNeedsModal] = useState(false);
   const [showLegalStatusModal, setShowLegalStatusModal] = useState(false);
 
+  // Section 2 confirmation
+  const [previousAnswersConfirmed, setPreviousAnswersConfirmed] = useState(false);
+
   // Section 3 - Communication Confirmation
   const [weeklyCallExplained, setWeeklyCallExplained] = useState(false);
 
@@ -601,14 +604,24 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
             {/* Additional Confirmation for "Which of the following apply" */}
             <View className="gap-3">
               <Pressable
-                onPress={() => {
-                  // This is just for UI confirmation, data is already editable above
-                }}
-                className="border-2 rounded-xl py-4 px-4 bg-white border-gray-200"
+                onPress={() => setPreviousAnswersConfirmed(true)}
+                className={`border-2 rounded-xl py-4 px-4 ${
+                  previousAnswersConfirmed
+                    ? "bg-green-50 border-green-600"
+                    : "bg-white border-gray-200"
+                }`}
               >
                 <View className="flex-row items-center">
-                  <Ionicons name="checkmark-circle" size={24} color="#9CA3AF" />
-                  <Text className="text-base font-semibold ml-3 text-gray-900">
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={24}
+                    color={previousAnswersConfirmed ? "#16A34A" : "#9CA3AF"}
+                  />
+                  <Text
+                    className={`text-base font-semibold ml-3 ${
+                      previousAnswersConfirmed ? "text-green-900" : "text-gray-900"
+                    }`}
+                  >
                     Confirm &ldquo;Which of the following apply to this participant&rdquo; is accurate
                   </Text>
                 </View>
