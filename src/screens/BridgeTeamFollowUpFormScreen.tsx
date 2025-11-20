@@ -113,14 +113,6 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
   const [showCriticalNeedsModal, setShowCriticalNeedsModal] = useState(false);
   const [showLegalStatusModal, setShowLegalStatusModal] = useState(false);
 
-  // Section 2 - Mandated Restrictions
-  const [onParole, setOnParole] = useState(false);
-  const [onProbation, setOnProbation] = useState(false);
-  const [onSexOffenderRegistry, setOnSexOffenderRegistry] = useState(false);
-  const [onChildOffenderRegistry, setOnChildOffenderRegistry] = useState(false);
-  const [noMandatedRestrictions, setNoMandatedRestrictions] = useState(false);
-  const [otherLegalRestrictions, setOtherLegalRestrictions] = useState("");
-
   // Section 3 - Communication Confirmation
   const [weeklyCallExplained, setWeeklyCallExplained] = useState(false);
 
@@ -269,11 +261,11 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
       const formData: BridgeTeamFollowUpFormData = {
         participantId: participant.id,
         participantInfoConfirmed,
-        onParole,
-        onProbation,
-        onSexOffenderRegistry,
-        onChildOffenderRegistry,
-        otherLegalRestrictions,
+        onParole: false,
+        onProbation: false,
+        onSexOffenderRegistry: false,
+        onChildOffenderRegistry: false,
+        otherLegalRestrictions: "",
         needsPhoneCall: false,
         needsEmployment: false,
         needsHousing: false,
@@ -515,11 +507,16 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
 
             <View className="bg-gray-50 rounded-xl p-4 mb-4 border border-gray-200">
               {/* Which of the following apply to this participant */}
-              <View className="mb-3">
-                <Text className="text-xs text-gray-500 mb-1">Which of the following apply to this participant?</Text>
+              <View className="mb-4">
+                <Text className="text-sm font-semibold text-gray-700 mb-2">
+                  Which of the following apply to this participant?
+                </Text>
+                <Text className="text-xs text-gray-500 mb-3">
+                  (Select all that apply)
+                </Text>
                 <Pressable
                   onPress={() => setShowLegalStatusModal(true)}
-                  className="bg-white border border-gray-200 rounded-lg px-3 py-2"
+                  className="bg-white border border-gray-200 rounded-xl px-4 py-3"
                 >
                   <View className="flex-row items-center justify-between">
                     <Text className={`text-base ${legalStatus.length > 0 ? "text-gray-900" : "text-gray-400"}`}>
@@ -531,20 +528,56 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
                   </View>
                 </Pressable>
                 {legalStatus.length > 0 && (
-                  <View className="mt-2">
+                  <View className="mt-2 ml-4">
                     {legalStatus.map((status) => (
-                      <Text key={status} className="text-xs text-gray-600 ml-2">• {status}</Text>
+                      <Text key={status} className="text-sm text-gray-700 mb-1">• {status}</Text>
                     ))}
                   </View>
                 )}
               </View>
 
+              {/* How did they hear about 7more */}
+              <View className="mb-4">
+                <Text className="text-sm font-semibold text-gray-700 mb-2">
+                  How did the participant hear about 7more?
+                </Text>
+                <Pressable
+                  onPress={() => setShowReferralSourceModal(true)}
+                  className="bg-white border border-gray-200 rounded-xl px-4 py-3"
+                >
+                  <View className="flex-row items-center justify-between">
+                    <Text className={`text-base ${referralSource ? "text-gray-900" : "text-gray-400"}`}>
+                      {referralSource || "Not specified"}
+                    </Text>
+                    <Ionicons name="chevron-down" size={20} color="#6B7280" />
+                  </View>
+                </Pressable>
+
+                {/* Other Referral Source - Conditional */}
+                {referralSource === "Other" && (
+                  <View className="mt-3">
+                    <Text className="text-xs text-gray-500 mb-2">Please Specify</Text>
+                    <TextInput
+                      className="bg-white border border-gray-200 rounded-xl px-4 py-3 text-base text-gray-900"
+                      value={otherReferralSource}
+                      onChangeText={setOtherReferralSource}
+                      placeholder="Enter how they heard about 7more"
+                    />
+                  </View>
+                )}
+              </View>
+
               {/* Critical Needs */}
-              <View className="mb-3">
-                <Text className="text-xs text-gray-500 mb-1">What are the critical needs?</Text>
+              <View>
+                <Text className="text-sm font-semibold text-gray-700 mb-2">
+                  What are the critical needs?
+                </Text>
+                <Text className="text-xs text-gray-500 mb-3">
+                  (Select all that apply)
+                </Text>
                 <Pressable
                   onPress={() => setShowCriticalNeedsModal(true)}
-                  className="bg-white border border-gray-200 rounded-lg px-3 py-2"
+                  className="bg-white border border-gray-200 rounded-xl px-4 py-3"
                 >
                   <View className="flex-row items-center justify-between">
                     <Text className={`text-base ${criticalNeeds.length > 0 ? "text-gray-900" : "text-gray-400"}`}>
@@ -556,191 +589,36 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
                   </View>
                 </Pressable>
                 {criticalNeeds.length > 0 && (
-                  <View className="mt-2">
+                  <View className="mt-2 ml-4">
                     {criticalNeeds.map((need) => (
-                      <Text key={need} className="text-xs text-gray-600 ml-2">• {need}</Text>
+                      <Text key={need} className="text-sm text-gray-700 mb-1">• {need}</Text>
                     ))}
                   </View>
                 )}
               </View>
+            </View>
 
-              {/* How did they hear about 7more */}
-              <View>
-                <Text className="text-xs text-gray-500 mb-1">How did the participant hear about 7more?</Text>
-                <Pressable
-                  onPress={() => setShowReferralSourceModal(true)}
-                  className="bg-white border border-gray-200 rounded-lg px-3 py-2"
-                >
-                  <View className="flex-row items-center justify-between">
-                    <Text className={`text-base ${referralSource ? "text-gray-900" : "text-gray-400"}`}>
-                      {referralSource || "Not specified"}
-                    </Text>
-                    <Ionicons name="chevron-down" size={20} color="#6B7280" />
-                  </View>
-                </Pressable>
-              </View>
-
-              {/* Other Referral Source - Conditional */}
-              {referralSource === "Other" && (
-                <View className="mt-3">
-                  <Text className="text-xs text-gray-500 mb-1">Please Specify</Text>
-                  <TextInput
-                    className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-base text-gray-900"
-                    value={otherReferralSource}
-                    onChangeText={setOtherReferralSource}
-                    placeholder="Enter how they heard about 7more"
-                  />
+            {/* Additional Confirmation for "Which of the following apply" */}
+            <View className="gap-3">
+              <Pressable
+                onPress={() => {
+                  // This is just for UI confirmation, data is already editable above
+                }}
+                className="border-2 rounded-xl py-4 px-4 bg-white border-gray-200"
+              >
+                <View className="flex-row items-center">
+                  <Ionicons name="checkmark-circle" size={24} color="#9CA3AF" />
+                  <Text className="text-base font-semibold ml-3 text-gray-900">
+                    Confirm &ldquo;Which of the following apply to this participant&rdquo; is accurate
+                  </Text>
                 </View>
-              )}
+              </Pressable>
             </View>
           </View>
 
-          {/* SECTION 3 - Mandated Restrictions */}
+          {/* SECTION 3 - Communication Confirmation */}
           <View className="mb-6">
-            <Text className="text-lg font-bold text-gray-900 mb-1">Section 3: Mandated Restrictions</Text>
-
-            {/* Helper text for Bridge Team */}
-            <View className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
-              <View className="flex-row items-start">
-                <Ionicons name="information-circle" size={20} color="#CA8A04" />
-                <Text className="text-sm text-yellow-800 ml-2 flex-1">
-                  Before asking these questions, remind the participant that we are not here to judge. We
-                  simply want to connect them with the best resources and support for their situation.
-                </Text>
-              </View>
-            </View>
-
-            {/* Checkboxes */}
-            <View className="gap-4">
-              <Pressable
-                onPress={() => {
-                  setNoMandatedRestrictions(!noMandatedRestrictions);
-                  if (!noMandatedRestrictions) {
-                    // If checking "no restrictions", uncheck all others
-                    setOnParole(false);
-                    setOnProbation(false);
-                    setOnSexOffenderRegistry(false);
-                    setOnChildOffenderRegistry(false);
-                  }
-                }}
-                className="flex-row items-start"
-              >
-                <View
-                  className={`w-6 h-6 rounded border-2 items-center justify-center mr-3 mt-0.5 ${
-                    noMandatedRestrictions ? "bg-green-600 border-green-600" : "bg-white border-gray-300"
-                  }`}
-                >
-                  {noMandatedRestrictions && <Ionicons name="checkmark" size={18} color="white" />}
-                </View>
-                <View className="flex-1">
-                  <Text className="text-base text-gray-900 font-medium">No Mandated Restrictions</Text>
-                  <Text className="text-sm text-gray-600 mt-1">
-                    Participant has no legal restrictions
-                  </Text>
-                </View>
-              </Pressable>
-
-              <Pressable
-                onPress={() => {
-                  setOnParole(!onParole);
-                  if (!onParole) setNoMandatedRestrictions(false);
-                }}
-                className="flex-row items-start"
-              >
-                <View
-                  className={`w-6 h-6 rounded border-2 items-center justify-center mr-3 mt-0.5 ${
-                    onParole ? "bg-slate-700 border-slate-700" : "bg-white border-gray-300"
-                  }`}
-                >
-                  {onParole && <Ionicons name="checkmark" size={18} color="white" />}
-                </View>
-                <View className="flex-1">
-                  <Text className="text-base text-gray-900 font-medium">On Parole</Text>
-                  <Text className="text-sm text-gray-600 mt-1">
-                    Currently under supervised release after incarceration
-                  </Text>
-                </View>
-              </Pressable>
-
-              <Pressable
-                onPress={() => {
-                  setOnProbation(!onProbation);
-                  if (!onProbation) setNoMandatedRestrictions(false);
-                }}
-                className="flex-row items-start"
-              >
-                <View
-                  className={`w-6 h-6 rounded border-2 items-center justify-center mr-3 mt-0.5 ${
-                    onProbation ? "bg-slate-700 border-slate-700" : "bg-white border-gray-300"
-                  }`}
-                >
-                  {onProbation && <Ionicons name="checkmark" size={18} color="white" />}
-                </View>
-                <View className="flex-1">
-                  <Text className="text-base text-gray-900 font-medium">On Probation</Text>
-                  <Text className="text-sm text-gray-600 mt-1">
-                    Serving a sentence within the community under supervision
-                  </Text>
-                </View>
-              </Pressable>
-
-              <Pressable
-                onPress={() => {
-                  setOnSexOffenderRegistry(!onSexOffenderRegistry);
-                  if (!onSexOffenderRegistry) setNoMandatedRestrictions(false);
-                }}
-                className="flex-row items-start"
-              >
-                <View
-                  className={`w-6 h-6 rounded border-2 items-center justify-center mr-3 mt-0.5 ${
-                    onSexOffenderRegistry ? "bg-slate-700 border-slate-700" : "bg-white border-gray-300"
-                  }`}
-                >
-                  {onSexOffenderRegistry && <Ionicons name="checkmark" size={18} color="white" />}
-                </View>
-                <View className="flex-1">
-                  <Text className="text-base text-gray-900 font-medium">On Sex Offender Registry (SA)</Text>
-                </View>
-              </Pressable>
-
-              <Pressable
-                onPress={() => {
-                  setOnChildOffenderRegistry(!onChildOffenderRegistry);
-                  if (!onChildOffenderRegistry) setNoMandatedRestrictions(false);
-                }}
-                className="flex-row items-start"
-              >
-                <View
-                  className={`w-6 h-6 rounded border-2 items-center justify-center mr-3 mt-0.5 ${
-                    onChildOffenderRegistry ? "bg-slate-700 border-slate-700" : "bg-white border-gray-300"
-                  }`}
-                >
-                  {onChildOffenderRegistry && <Ionicons name="checkmark" size={18} color="white" />}
-                </View>
-                <View className="flex-1">
-                  <Text className="text-base text-gray-900 font-medium">On Child Offender Registry</Text>
-                </View>
-              </Pressable>
-            </View>
-
-            {/* Other legal restrictions */}
-            <View className="mt-4">
-              <Text className="text-sm font-semibold text-gray-700 mb-2">Other Legal Restrictions</Text>
-              <TextInput
-                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-base"
-                placeholder="Any other legal restrictions or notes..."
-                value={otherLegalRestrictions}
-                onChangeText={setOtherLegalRestrictions}
-                multiline
-                numberOfLines={3}
-                textAlignVertical="top"
-              />
-            </View>
-          </View>
-
-          {/* SECTION 4 - Communication Confirmation */}
-          <View className="mb-6">
-            <Text className="text-lg font-bold text-gray-900 mb-1">Section 4: Communication Confirmation</Text>
+            <Text className="text-lg font-bold text-gray-900 mb-1">Section 3: Communication Confirmation</Text>
             <Text className="text-sm text-gray-600 mb-4">
               Confirm participant expectations for follow-up
             </Text>
@@ -764,9 +642,9 @@ export default function BridgeTeamFollowUpFormScreen({ route, navigation }: any)
             </Pressable>
           </View>
 
-          {/* SECTION 5 - Resources Sent */}
+          {/* SECTION 4 - Resources Sent */}
           <View className="mb-6">
-            <Text className="text-lg font-bold text-gray-900 mb-1">Section 5: Resources Sent</Text>
+            <Text className="text-lg font-bold text-gray-900 mb-1">Section 4: Resources Sent</Text>
             <Text className="text-sm text-gray-600 mb-4">
               Track resources shared with the participant
             </Text>

@@ -2,7 +2,7 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Bridge Team Follow-Up Form Restructured - November 20, 2025
+## 🔥 LATEST UPDATE: Bridge Team Follow-Up Form Simplified - November 20, 2025
 
 **Date:** November 20, 2025
 **Status:** ✅ COMPLETE
@@ -20,26 +20,39 @@ A comprehensive mobile application built with Expo and React Native to help nonp
   - Nickname, address, referral source, critical needs, and legal status are now persisted
   - Data flows from intake form to Bridge Team Follow-Up Form automatically
 
-- **Bridge Team Follow-Up Form Restructure**:
-  - **Section 1: Participant Information** - Now only shows basic participant data from intake (pre-filled and editable)
+- **Bridge Team Follow-Up Form Simplified - Now 4 Sections**:
+
+  - **Section 1: Participant Information** - Basic participant data from intake (pre-filled and editable)
     - First Name, Last Name, Participant Number, DOB, Gender, Phone, Email, Release Date, Released From
-    - "Confirm all information is accurate" button remains in Section 1
+    - "Confirm all information is accurate" button
 
-  - **NEW Section 2: Confirm Previous Answers** - Shows intake form responses (all editable)
-    - Which of the following apply to this participant? (shows selected legal status items from intake)
-    - What are the critical needs? (shows selected needs from intake)
-    - How did the participant hear about 7more? (shows referral source from intake)
-    - All answers are pre-filled from intake form and can be edited if needed
+  - **Section 2: Confirm Previous Answers** - Mirrors intake form exactly (all editable)
+    - Which of the following apply to this participant? (Select all that apply)
+      - Shows legal status items selected during intake
+    - How did the participant hear about 7more?
+      - Shows referral source from intake
+    - What are the critical needs? (Select all that apply)
+      - Shows critical needs selected during intake
+    - Additional confirmation button for "Which of the following apply to this participant"
+    - **This section replaces the old Mandated Restrictions section**
 
-  - **Section 3: Mandated Restrictions** (renumbered from Section 2)
-  - **Section 4: Communication Confirmation** (renumbered from Section 3)
-  - **Section 5: Resources Sent** (renumbered from Section 4)
+  - **Section 3: Communication Confirmation** (renumbered from Section 4)
+    - Did you inform the participant that someone will call them within the week?
 
-- **Data Flow**: Bridge Team can now review and confirm answers given during intake, with the ability to edit if information has changed
+  - **Section 4: Resources Sent** (renumbered from Section 5)
+    - Select and send resources via email/SMS
+    - Track which resources were shared
+
+### Key Improvements:
+- **Mandated Restrictions section removed** - replaced by Section 2 which shows intake responses
+- **Cleaner workflow** - Bridge Team reviews what participant said during intake
+- **All intake answers pre-filled** - legal status, critical needs, and referral source are shown from the original intake form
+- **Full editability** - Bridge Team can update any answers if information has changed
+- **Better data consistency** - Single source of truth from intake form
 
 ---
 
-## Previous Update: Intake Form Fields Added to Bridge Team Contact Form - November 20, 2025
+## Previous Update: Bridge Team Follow-Up Form Restructured - November 20, 2025
 
 **Date:** November 20, 2025
 **Status:** ✅ COMPLETE
