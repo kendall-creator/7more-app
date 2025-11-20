@@ -701,13 +701,15 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
     const mentorshipFollowupDue = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days for follow-up
     const mentorshipStart = new Date(now.getTime() + 37 * 24 * 60 * 60 * 1000).toISOString(); // 7 days follow-up + 30 days = 37 days
 
+    console.log("✅ Setting menteeStatus to contacted_initial for participant:", participant.firstName, participant.lastName);
+
     const updatedParticipant = {
       ...participant,
       status: "active_mentorship" as ParticipantStatus,
       initialContactCompletedAt: now.toISOString(),
       nextWeeklyUpdateDue: nextWeeklyDue,
       nextMonthlyCheckInDue: nextMonthlyDue,
-      // Mentee status tracking
+      // Mentee status tracking - ALWAYS set this to contacted_initial when completing initial contact form
       menteeStatus: "contacted_initial" as Participant["menteeStatus"],
       initialContactCompletedDate: formData.contactDate,
       mentorshipFollowupDueDate: mentorshipFollowupDue,
@@ -720,7 +722,7 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
         {
           id: `history_${Date.now()}`,
           type: "form_submitted",
-          description: "Initial contact form completed - weekly updates and monthly check-ins scheduled",
+          description: "Initial contact form completed - moved to Contacted (Initial) status",
           details: formData.additionalNotes,
           createdBy: userId,
           createdByName: userName,
@@ -740,13 +742,18 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
             guidanceNotes: formData.guidanceNotes,
             nextWeeklyUpdateDue: nextWeeklyDue,
             nextMonthlyCheckInDue: nextMonthlyDue,
+            menteeStatus: "contacted_initial",
           },
         },
       ],
     };
 
+    console.log("✅ Saving participant with menteeStatus:", updatedParticipant.menteeStatus);
+
     const participantRef = ref(database, `participants/${formData.participantId}`);
     await firebaseSet(participantRef, updatedParticipant);
+
+    console.log("✅ Firebase save complete - participant should now show in Contacted (Initial) filter");
 
     // If guidance is needed, create a guidance task
     if (formData.guidanceNeeded && formData.guidanceNotes && formData.guidanceNotes.trim()) {
