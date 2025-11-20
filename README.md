@@ -2,12 +2,26 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Live Call Intake Auto-Moves to Mentorship + API Key Persistence - November 20, 2025
+## 🔥 LATEST UPDATE: Live Call Intake Choice Modal + Workflow Improvements - November 20, 2025
 
 **Date:** November 20, 2025
 **Status:** ✅ COMPLETE
 
 ### What Was Changed:
+
+#### Live Call Intake Choice Modal (NEW)
+- **Added choice modal at end of Live Call Intake form**
+  - After completing the participant intake form, users now see two options:
+    1. **"Complete Contact Form Now"** (Green button with document icon)
+       - Immediately navigates to Bridge Team Follow-Up Form
+       - Complete everything in one call while participant is on the phone
+       - Automatically moves participant to mentorship queue when done
+       - Subtitle: "Continue with follow-up and move to mentorship"
+    2. **"Add to Pending Bridge Team"** (Gray button with clock icon)
+       - Adds participant to pending_bridge queue
+       - Follow-up can be completed later
+       - Subtitle: "Complete follow-up later"
+       - Useful for interrupted calls or when more info is needed
 
 #### Live Call Intake Workflow Streamlined
 - **Live Call Intake now moves directly to mentorship** after completing the follow-up form
