@@ -2,25 +2,31 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Bridge Team Follow-Up Form Simplified - November 20, 2025
+## 🔥 LATEST UPDATE: Persistent API Key Storage + Form Enhancements - November 20, 2025
 
 **Date:** November 20, 2025
 **Status:** ✅ COMPLETE
 
 ### What Was Changed:
-- **Participant Interface Updated**: Added new fields to store intake form data
-  - nickname (optional)
-  - address (optional)
-  - referralSource (optional)
-  - otherReferralSource (optional)
-  - criticalNeeds (array, optional)
-  - legalStatus (array, optional)
 
-- **Intake Form Enhancement**: ManualIntakeFormScreen now saves all new fields to participant object
-  - Nickname, address, referral source, critical needs, and legal status are now persisted
-  - Data flows from intake form to Bridge Team Follow-Up Form automatically
+#### API Key Persistence (CRITICAL FIX)
+- **Created apiKeysStore**: New Zustand store with AsyncStorage persistence for API keys
+  - Resend API key now persists in local storage even if environment variable is cleared
+  - Automatic fallback: checks persistent storage first, then environment variable
+  - Auto-saves environment variable to storage on first use
+  - **No more losing email functionality when env vars reset!**
 
-- **Bridge Team Follow-Up Form Simplified - Now 4 Sections**:
+#### Form Enhancements
+- **Section 2 Confirmation Button**: Added working confirmation for "Which of the following apply to this participant"
+  - Button turns green when tapped
+  - Tracks confirmation state properly
+
+- **Mandatory No-Resources Explanation**:
+  - When Bridge Team selects "No" for resources sent, they must explain why
+  - Yellow highlighted text box appears with required field validation
+  - Cannot submit form without providing explanation
+
+#### Bridge Team Follow-Up Form Structure - 4 Sections:
 
   - **Section 1: Participant Information** - Basic participant data from intake (pre-filled and editable)
     - First Name, Last Name, Participant Number, DOB, Gender, Phone, Email, Release Date, Released From
@@ -33,26 +39,27 @@ A comprehensive mobile application built with Expo and React Native to help nonp
       - Shows referral source from intake
     - What are the critical needs? (Select all that apply)
       - Shows critical needs selected during intake
-    - Additional confirmation button for "Which of the following apply to this participant"
+    - Confirmation button for "Which of the following apply to this participant"
     - **This section replaces the old Mandated Restrictions section**
 
-  - **Section 3: Communication Confirmation** (renumbered from Section 4)
+  - **Section 3: Communication Confirmation**
     - Did you inform the participant that someone will call them within the week?
 
-  - **Section 4: Resources Sent** (renumbered from Section 5)
+  - **Section 4: Resources Sent**
     - Select and send resources via email/SMS
     - Track which resources were shared
+    - **NEW**: Mandatory explanation required when "No" is selected
 
-### Key Improvements:
-- **Mandated Restrictions section removed** - replaced by Section 2 which shows intake responses
-- **Cleaner workflow** - Bridge Team reviews what participant said during intake
-- **All intake answers pre-filled** - legal status, critical needs, and referral source are shown from the original intake form
-- **Full editability** - Bridge Team can update any answers if information has changed
-- **Better data consistency** - Single source of truth from intake form
+### Technical Details:
+- **Files Created**:
+  - `/src/state/apiKeysStore.ts` - Persistent storage for API keys
+- **Files Modified**:
+  - `/src/api/resend-email.ts` - Now uses persistent storage for Resend API key
+  - `/src/screens/BridgeTeamFollowUpFormScreen.tsx` - Added confirmation button state and no-resources validation
 
 ---
 
-## Previous Update: Bridge Team Follow-Up Form Restructured - November 20, 2025
+## Previous Update: Bridge Team Follow-Up Form Simplified - November 20, 2025
 
 **Date:** November 20, 2025
 **Status:** ✅ COMPLETE

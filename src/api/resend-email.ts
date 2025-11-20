@@ -10,6 +10,7 @@
  */
 
 import { Resend } from "resend";
+import { useApiKeysStore } from "../state/apiKeysStore";
 
 interface ResendEmailResult {
   success: boolean;
@@ -89,15 +90,22 @@ export async function sendBridgeTeamResourcesEmail({
   senderName,
 }: BridgeTeamEmailParams): Promise<ResendEmailResult> {
   try {
-    // Get Resend API key from environment
-    const resendApiKey = process.env.EXPO_PUBLIC_RESEND_API_KEY;
+    // Get Resend API key from persistent store (which checks env as fallback)
+    const resendApiKey = useApiKeysStore.getState().getResendApiKey();
 
     if (!resendApiKey) {
       console.log("⚠️  EXPO_PUBLIC_RESEND_API_KEY not configured - email functionality disabled");
+      console.log("   Please add EXPO_PUBLIC_RESEND_API_KEY in the ENV tab");
       return {
         success: false,
         error: "Email service not configured. Please add EXPO_PUBLIC_RESEND_API_KEY to ENV tab.",
       };
+    }
+
+    // If we got the key from env but it's not in store, save it
+    if (!useApiKeysStore.getState().resendApiKey && resendApiKey) {
+      useApiKeysStore.getState().setResendApiKey(resendApiKey);
+      console.log("✅ Resend API key saved to persistent storage");
     }
 
     // Initialize Resend client
