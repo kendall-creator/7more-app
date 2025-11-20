@@ -365,6 +365,8 @@ export interface Resource {
   category: string;
   content: string; // The actual text to copy/paste
   description?: string;
+  resourceLink?: string; // Main resource link (clickable URL)
+  trainingLink?: string; // Optional training link
   createdAt: string;
   updatedAt: string;
 }

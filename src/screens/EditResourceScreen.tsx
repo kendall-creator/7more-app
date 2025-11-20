@@ -36,6 +36,8 @@ export default function EditResourceScreen({ route, navigation }: any) {
   const [category, setCategory] = useState(resource?.category || "");
   const [content, setContent] = useState(resource?.content || "");
   const [description, setDescription] = useState(resource?.description || "");
+  const [resourceLink, setResourceLink] = useState(resource?.resourceLink || "");
+  const [trainingLink, setTrainingLink] = useState(resource?.trainingLink || "");
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [showCustomCategoryInput, setShowCustomCategoryInput] = useState(false);
   const [customCategory, setCustomCategory] = useState("");
@@ -68,6 +70,8 @@ export default function EditResourceScreen({ route, navigation }: any) {
         category: category.trim(),
         content: content.trim(),
         description: description.trim() ? description.trim() : "",
+        resourceLink: resourceLink.trim() ? resourceLink.trim() : "",
+        trainingLink: trainingLink.trim() ? trainingLink.trim() : "",
       };
 
       if (isNewResource) {
@@ -189,7 +193,7 @@ export default function EditResourceScreen({ route, navigation }: any) {
           </View>
 
           {/* Content */}
-          <View className="mb-8">
+          <View className="mb-5">
             <Text className="text-sm font-semibold text-gray-700 mb-2">
               Content <Text className="text-red-500">*</Text>
             </Text>
@@ -202,6 +206,38 @@ export default function EditResourceScreen({ route, navigation }: any) {
               numberOfLines={10}
               textAlignVertical="top"
             />
+          </View>
+
+          {/* Resource Link */}
+          <View className="mb-5">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">Resource Link (Optional)</Text>
+            <TextInput
+              className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base"
+              placeholder="https://example.com/job-resource"
+              value={resourceLink}
+              onChangeText={setResourceLink}
+              autoCapitalize="none"
+              keyboardType="url"
+            />
+            <Text className="text-xs text-gray-500 mt-1">
+              Main clickable link for the resource (e.g., job application page)
+            </Text>
+          </View>
+
+          {/* Training Link */}
+          <View className="mb-8">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">Training Link (Optional)</Text>
+            <TextInput
+              className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base"
+              placeholder="https://example.com/training"
+              value={trainingLink}
+              onChangeText={setTrainingLink}
+              autoCapitalize="none"
+              keyboardType="url"
+            />
+            <Text className="text-xs text-gray-500 mt-1">
+              Optional training or tutorial link related to this resource
+            </Text>
           </View>
 
           {/* Save Button */}

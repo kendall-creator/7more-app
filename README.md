@@ -2,14 +2,38 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Live Call Intake Choice Modal + Workflow Improvements - November 20, 2025
+## 🔥 LATEST UPDATE: Resource Links + Live Call Intake Enhancements - November 20, 2025
 
 **Date:** November 20, 2025
 **Status:** ✅ COMPLETE
 
 ### What Was Changed:
 
-#### Live Call Intake Choice Modal (NEW)
+#### Resource Links Feature (NEW)
+- **Added clickable links to resources**
+  - Resources can now have up to 2 clickable links:
+    1. **Resource Link** (Blue button with link icon)
+       - Main resource URL (e.g., job application page, housing form, etc.)
+       - Opens in default browser when tapped
+       - Helper text: "Main clickable link for the resource"
+    2. **Training Link** (Purple button with school icon)
+       - Optional training or tutorial link
+       - Opens in default browser when tapped
+       - Helper text: "Optional training or tutorial link related to this resource"
+  - **Admin can add/edit links** in Edit Resource screen:
+    - "Resource Link (Optional)" field with URL keyboard
+    - "Training Link (Optional)" field with URL keyboard
+    - Both fields have placeholder examples
+  - **Links display on resource cards** when available
+    - Shows below content text, above copy/edit buttons
+    - Clean button design with icons and external link indicator
+    - Error handling for invalid URLs
+  - **Files Modified**:
+    - `/src/types/index.ts` - Added resourceLink and trainingLink to Resource interface
+    - `/src/screens/ResourcesScreen.tsx` - Added link buttons and open link handler
+    - `/src/screens/EditResourceScreen.tsx` - Added link input fields
+
+#### Live Call Intake Choice Modal
 - **Added choice modal at end of Live Call Intake form**
   - After completing the participant intake form, users now see two options:
     1. **"Complete Contact Form Now"** (Green button with document icon)

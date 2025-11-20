@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, Pressable, TextInput, Alert, Modal } from "react-native";
+import { View, Text, ScrollView, Pressable, TextInput, Alert, Modal, Linking } from "react-native";
 import { useNavigation, CommonActions } from "@react-navigation/native";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { useAllResources, useResourceCategories } from "../state/resourceStore";
@@ -35,6 +35,19 @@ export default function ResourcesScreen() {
   const handleCopyToClipboard = (content: string, title: string) => {
     Clipboard.setString(content);
     // Show a simple feedback - in production, you might want to use a toast
+  };
+
+  const handleOpenLink = async (url: string, linkType: string) => {
+    try {
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert("Error", `Cannot open ${linkType} link. Please check the URL.`);
+      }
+    } catch (error) {
+      Alert.alert("Error", `Failed to open ${linkType} link.`);
+    }
   };
 
   const handleLogout = () => {
@@ -211,6 +224,40 @@ export default function ResourcesScreen() {
               <View className="bg-[#f8f8f8] rounded-xl p-4 mb-4">
                 <Text className="text-sm text-[#3c3832] leading-5">{resource.content}</Text>
               </View>
+
+              {/* Resource Links */}
+              {(resource.resourceLink || resource.trainingLink) && (
+                <View className="mb-4 gap-2">
+                  {resource.resourceLink && (
+                    <Pressable
+                      onPress={() => handleOpenLink(resource.resourceLink!, "resource")}
+                      className="bg-blue-600 rounded-xl py-3 px-4 flex-row items-center justify-between active:opacity-80"
+                    >
+                      <View className="flex-row items-center flex-1">
+                        <Ionicons name="link" size={18} color="white" />
+                        <Text className="text-white text-sm font-semibold ml-2 flex-1" numberOfLines={1}>
+                          Open Resource Link
+                        </Text>
+                      </View>
+                      <Ionicons name="open-outline" size={16} color="white" />
+                    </Pressable>
+                  )}
+                  {resource.trainingLink && (
+                    <Pressable
+                      onPress={() => handleOpenLink(resource.trainingLink!, "training")}
+                      className="bg-purple-600 rounded-xl py-3 px-4 flex-row items-center justify-between active:opacity-80"
+                    >
+                      <View className="flex-row items-center flex-1">
+                        <Ionicons name="school" size={18} color="white" />
+                        <Text className="text-white text-sm font-semibold ml-2 flex-1" numberOfLines={1}>
+                          Open Training Link
+                        </Text>
+                      </View>
+                      <Ionicons name="open-outline" size={16} color="white" />
+                    </Pressable>
+                  )}
+                </View>
+              )}
 
               {/* Copy and Edit Buttons */}
               <View className="flex-row gap-2">
