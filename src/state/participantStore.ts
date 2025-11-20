@@ -286,6 +286,7 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
 
     const now = new Date();
     const firstMonthlyReportDue = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    const initialContactDue = new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000).toISOString(); // 10 days for initial contact
 
     const updatedParticipant = {
       ...participant,
@@ -293,12 +294,16 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
       assignedToMentorAt: now.toISOString(),
       nextMonthlyReportDue: firstMonthlyReportDue,
       status: "initial_contact_pending" as ParticipantStatus,
+      // Set mentee tracking fields
+      menteeStatus: "needs_initial_contact" as Participant["menteeStatus"],
+      initialContactDueDate: initialContactDue,
+      numberOfContactAttempts: 0,
       history: [
         ...participant.history,
         {
           id: `history_${Date.now()}`,
           type: "assignment_change",
-          description: "Assigned to mentor",
+          description: `Assigned to mentor - initial contact due in 10 days`,
           createdBy: leaderId,
           createdByName: leaderName,
           createdAt: now.toISOString(),
@@ -592,10 +597,30 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
       // Determine new status based on context
       const newStatus: ParticipantStatus = isMentorContext ? "mentor_attempted" : "bridge_attempted";
 
+      // Increment contact attempts and update mentee tracking
+      const currentAttempts = participant.numberOfContactAttempts || 0;
+      const newAttempts = currentAttempts + 1;
+
+      // Check if this should move to unable_to_contact (3 attempts + 30 days)
+      let finalStatus: ParticipantStatus = newStatus;
+      let menteeStatus: Participant["menteeStatus"] = "attempt_made";
+
+      if (newAttempts >= 3 && participant.lastAttemptDate) {
+        const firstAttemptDate = new Date(participant.lastAttemptDate);
+        const daysSinceFirstAttempt = Math.floor((now.getTime() - firstAttemptDate.getTime()) / (1000 * 60 * 60 * 24));
+        if (daysSinceFirstAttempt >= 30) {
+          finalStatus = "unable_to_contact";
+          menteeStatus = "unable_to_contact";
+        }
+      }
+
       // Contact was attempted but not successful
       const updatedParticipant = {
         ...participant,
-        status: newStatus,
+        status: finalStatus,
+        numberOfContactAttempts: newAttempts,
+        lastAttemptDate: formData.contactDate,
+        menteeStatus,
         history: [
           ...participant.history,
           {
@@ -610,6 +635,7 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
               contactDate: formData.contactDate,
               attemptType: formData.attemptType,
               attemptNotes: formData.attemptNotes,
+              attemptNumber: newAttempts,
             },
           },
         ],
@@ -617,6 +643,7 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
 
       console.log("✅ Updating participant status to:", updatedParticipant.status);
       console.log("Notes:", formData.attemptNotes);
+      console.log("Attempt number:", newAttempts);
 
       const participantRef = ref(database, `participants/${formData.participantId}`);
       await firebaseSet(participantRef, updatedParticipant);
@@ -637,6 +664,10 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
       const updatedParticipant = {
         ...participant,
         status: newStatus,
+        menteeStatus: "unable_to_contact" as Participant["menteeStatus"],
+        unableToContactDate: formData.contactDate,
+        numberOfContactAttempts: (participant.numberOfContactAttempts || 0) + 1,
+        lastAttemptDate: formData.contactDate,
         history: [
           ...participant.history,
           {
@@ -667,6 +698,8 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
     // Successful contact - proceed with full initial contact setup
     const nextWeeklyDue = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
     const nextMonthlyDue = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    const mentorshipFollowupDue = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days for follow-up
+    const mentorshipStart = new Date(now.getTime() + 37 * 24 * 60 * 60 * 1000).toISOString(); // 7 days follow-up + 30 days = 37 days
 
     const updatedParticipant = {
       ...participant,
@@ -674,6 +707,14 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
       initialContactCompletedAt: now.toISOString(),
       nextWeeklyUpdateDue: nextWeeklyDue,
       nextMonthlyCheckInDue: nextMonthlyDue,
+      // Mentee status tracking
+      menteeStatus: "contacted_initial" as Participant["menteeStatus"],
+      initialContactCompletedDate: formData.contactDate,
+      mentorshipFollowupDueDate: mentorshipFollowupDue,
+      mentorshipStartDate: mentorshipStart,
+      lastMentorshipContactDate: formData.contactDate,
+      numberOfContactAttempts: (participant.numberOfContactAttempts || 0) + 1,
+      lastAttemptDate: formData.contactDate,
       history: [
         ...participant.history,
         {

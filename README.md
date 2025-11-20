@@ -2,7 +2,86 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Resource Links + Live Call Intake Enhancements - November 20, 2025
+## 🔥 LATEST UPDATE: My Mentees Status Tracking System - November 20, 2025
+
+**Date:** November 20, 2025
+**Status:** ✅ COMPLETE
+
+### What Was Changed:
+
+#### My Mentees Status Tracking System (NEW)
+- **Complete status-based filtering and tracking for mentors**
+  - **Clickable Status Filter Tiles** at top of My Mentees screen:
+    1. **Needs Initial Contact** (Yellow) - Default status, due in 10 days from assignment
+    2. **Attempt Made** (Orange) - After any attempted contact without success
+    3. **Unable to Contact** (Red) - After 3 attempts OR manual selection
+    4. **Contacted (Initial)** (Blue) - After successful contact, triggers 7-day follow-up window
+    5. **In Mentorship Program** (Green) - After successful contact + follow-up + 30 days
+    6. **Overdue** (Red warning) - When deadlines are missed (10-day initial, 7-day follow-up)
+  - **"Show All" button** to clear filters and view all mentees
+  - Each tile shows count of mentees in that status
+  - Selected tile highlights with colored background
+
+#### Automated Status Rules & Tracking
+- **Needs Initial Contact**:
+  - Set automatically when mentor is assigned to participant
+  - 10-day deadline from assignment date
+  - Shows as overdue if not completed in 10 days
+- **Attempt Made**:
+  - Set when mentor attempts contact but doesn't reach participant
+  - Tracks number of contact attempts
+  - After 3 attempts + 30 days since first attempt → automatically moves to "Unable to Contact"
+- **Unable to Contact**:
+  - Automatic: After 3 attempts + 30 days elapsed
+  - Manual: Mentor selects "Unable to Contact" on Initial Contact Form
+- **Contacted (Initial)**:
+  - Set when mentor successfully completes Initial Contact Form
+  - Triggers 7-day follow-up window
+  - Shows as overdue if follow-up not done within 7 days
+- **In Mentorship Program**:
+  - Set 30 days after successful initial contact + follow-up
+  - Active mentorship phase begins
+
+#### New Data Fields Tracked Per Mentee
+- `menteeStatus` - Current status (needs_initial_contact, attempt_made, unable_to_contact, contacted_initial, in_mentorship_program)
+- `initialContactDueDate` - ISO date string, 10 days from assignment
+- `initialContactCompletedDate` - ISO date when initial contact succeeded
+- `numberOfContactAttempts` - Integer count of contact attempts
+- `lastAttemptDate` - ISO date of most recent attempt
+- `unableToContactDate` - ISO date when marked unable to contact
+- `mentorshipFollowupDueDate` - ISO date, 7 days after initial contact
+- `mentorshipStartDate` - ISO date when mentorship officially starts (initial contact + 7 days + 30 days)
+- `lastMentorshipContactDate` - ISO date of last mentorship contact
+- `isOverdue` - Boolean flag calculated in real-time
+
+#### Enhanced Mentee Cards
+- **Status Badge**: Color-coded pill showing current mentee status
+- **Past Due Banner**: Red warning banner at top of card for overdue mentees
+- **Contact Attempts Counter**: Shows number of attempts made (if > 0)
+- **Days Since Assignment**: Shows how long mentee has been assigned
+- **Action Button**: "Complete Initial Contact" button for mentees needing contact
+- Cards sorted with overdue mentees at the top, then by oldest assignment first
+
+#### Initial Contact Form Integration
+- **Three Outcome Choices**:
+  1. **Successful Contact**: Sets status to "contacted_initial", records completion date, schedules follow-ups
+  2. **Attempted Contact**: Increments attempt counter, updates last attempt date, sets status to "attempt_made"
+  3. **Unable to Contact**: Sets status to "unable_to_contact", records unable date
+- **Automatic Status Updates** based on outcome selection
+- **Contact Attempt Tracking**: Every attempt (successful or not) increments counter
+- **Date Tracking**: Records contact date, attempt dates, completion dates automatically
+
+#### Files Modified/Created:
+- `/src/types/index.ts` - Added 10 new mentee tracking fields to Participant interface
+- `/src/screens/MyMenteesScreen.tsx` - Complete rewrite with status filtering system
+- `/src/state/participantStore.ts` - Updated recordInitialContact and assignToMentor functions
+  - Tracks contact attempts, dates, and statuses
+  - Auto-calculates status transitions (3 attempts + 30 days → unable to contact)
+  - Sets initial mentee status and due date when mentor is assigned
+
+---
+
+## 📋 PREVIOUS UPDATE: Resource Links + Live Call Intake Enhancements - November 20, 2025
 
 **Date:** November 20, 2025
 **Status:** ✅ COMPLETE

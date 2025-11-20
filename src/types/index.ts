@@ -170,6 +170,18 @@ export interface Participant {
   lastMonthlyCheckInAt?: string;
   lastMonthlyReportAt?: string;
 
+  // Mentee status tracking fields (for My Mentees screen)
+  menteeStatus?: "needs_initial_contact" | "attempt_made" | "unable_to_contact" | "contacted_initial" | "in_mentorship_program";
+  initialContactDueDate?: string; // ISO date - 10 days from assignment
+  initialContactCompletedDate?: string; // ISO date when initial contact was successful
+  numberOfContactAttempts?: number; // Track contact attempts
+  lastAttemptDate?: string; // ISO date of last attempt
+  unableToContactDate?: string; // ISO date when marked unable to contact
+  mentorshipFollowupDueDate?: string; // ISO date - 7 days after initial contact
+  mentorshipStartDate?: string; // ISO date when mentorship officially starts (after follow-up + 30 days)
+  lastMentorshipContactDate?: string; // ISO date of last mentorship contact
+  isOverdue?: boolean; // Flag for overdue status
+
   // Graduation tracking
   completedGraduationSteps: string[]; // Array of completed step IDs
   graduationApproval?: GraduationApproval;
