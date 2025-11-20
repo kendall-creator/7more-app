@@ -40,6 +40,11 @@ const REFERRAL_SOURCE_OPTIONS = [
 ];
 
 const CRITICAL_NEEDS_OPTIONS = [
+  "Needs help getting a phone",
+  "Employment needed",
+  "Housing needed",
+  "Clothing needed",
+  "Food needed",
   "Building",
   "Healthy relationships",
   "Managing finances",

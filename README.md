@@ -9,10 +9,15 @@ A comprehensive mobile application built with Expo and React Native to help nonp
 
 ### What Was Changed:
 - **Moved Critical Needs Section**: Relocated "Critical Needs" section from Bridge Team Follow-Up Form to Participant Intake Form
-- **Updated Critical Needs Options**: Changed options to:
-  - Building
-  - Healthy relationships
-  - Managing finances
+- **Expanded Critical Needs Options**: All original options retained PLUS new options added:
+  - Needs help getting a phone
+  - Employment needed
+  - Housing needed
+  - Clothing needed
+  - Food needed
+  - **Building** (NEW)
+  - **Healthy relationships** (NEW)
+  - **Managing finances** (NEW)
 - **Form Reorganization**:
   - Bridge Team Follow-Up Form now has 4 sections (was 5)
   - Renumbered sections after removing Section 3
