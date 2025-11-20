@@ -93,7 +93,7 @@ export async function sendBridgeTeamResourcesEmail({
     const resendApiKey = process.env.EXPO_PUBLIC_RESEND_API_KEY;
 
     if (!resendApiKey) {
-      console.error("❌ EXPO_PUBLIC_RESEND_API_KEY not found in environment");
+      console.log("⚠️  EXPO_PUBLIC_RESEND_API_KEY not configured - email functionality disabled");
       return {
         success: false,
         error: "Email service not configured. Please add EXPO_PUBLIC_RESEND_API_KEY to ENV tab.",
