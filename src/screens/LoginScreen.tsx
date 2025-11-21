@@ -19,7 +19,7 @@ export default function LoginScreen({ navigation }: any) {
 
   // Access code to user mapping
   const accessCodeMap: { [key: string]: string } = {
-    "12345": "madi@7more.net",
+    "12345": "debs@7more.net",
   };
 
   const handleCodeLogin = async () => {
