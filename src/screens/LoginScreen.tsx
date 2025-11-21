@@ -206,6 +206,14 @@ export default function LoginScreen({ navigation }: any) {
           >
             <Text className="text-center text-xs text-gray-400">Debug: View All Users</Text>
           </Pressable>
+
+          {/* Diagnostics Button */}
+          <Pressable
+            onPress={() => navigation.navigate("Diagnostics")}
+            className="py-2"
+          >
+            <Text className="text-center text-xs text-gray-400">Run Connection Diagnostics</Text>
+          </Pressable>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
