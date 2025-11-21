@@ -48,12 +48,21 @@ let app: FirebaseApp | null = null;
 let database: Database | null = null;
 
 try {
+  console.log("🔥 Starting Firebase initialization...");
+  console.log(`   Using config: ${isUsingFallbackConfig() ? "FALLBACK" : "ENV VARS"}`);
+
   if (getApps().length === 0) {
+    console.log("   No existing Firebase app, creating new one...");
     app = initializeApp(firebaseConfig);
+    console.log("   ✅ Firebase app initialized");
   } else {
+    console.log("   Existing Firebase app found, reusing...");
     app = getApps()[0];
   }
+
+  console.log("   Getting database instance...");
   database = getDatabase(app);
+  console.log("   ✅ Database instance created");
 
   // Log status for debugging
   if (isUsingFallbackConfig()) {
@@ -61,8 +70,12 @@ try {
   } else {
     console.log("✅ Firebase initialized with environment variables");
   }
-} catch (error) {
-  console.error("❌ Failed to initialize Firebase:", error);
+} catch (error: any) {
+  console.error("❌ Failed to initialize Firebase:");
+  console.error("   Error message:", error?.message || String(error));
+  console.error("   Error code:", error?.code || "no code");
+  console.error("   Error stack:", error?.stack || "no stack");
+  console.error("   Firebase config being used:", JSON.stringify(firebaseConfig, null, 2));
 }
 
 export { database };
