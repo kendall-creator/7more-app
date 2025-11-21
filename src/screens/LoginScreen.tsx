@@ -46,86 +46,102 @@ export default function LoginScreen({ navigation }: any) {
 
   const handleLogin = async () => {
     if (email && password) {
-      setIsLoading(true);
+      try {
+        setIsLoading(true);
 
-      console.log("===========================================");
-      console.log("🔐 LOGIN ATTEMPT");
-      console.log("===========================================");
-      console.log(`Email entered: "${email}"`);
-      console.log(`Password entered: "${password}"`);
+        console.log("===========================================");
+        console.log("🔐 LOGIN ATTEMPT");
+        console.log("===========================================");
+        console.log(`Email entered: "${email}"`);
+        console.log(`Password entered: "${password}"`);
 
-      let currentUsers = useUsersStore.getState().invitedUsers;
-      console.log(`Users loaded: ${currentUsers.length}`);
+        let currentUsers = useUsersStore.getState().invitedUsers;
+        console.log(`Users loaded: ${currentUsers.length}`);
 
-      // Wait for users to load if needed
-      let attempts = 0;
-      while (currentUsers.length === 0 && attempts < 20) {
-        console.log(`⏳ Waiting for users to load... attempt ${attempts + 1}`);
-        await new Promise(resolve => setTimeout(resolve, 500));
-        currentUsers = useUsersStore.getState().invitedUsers;
-        attempts++;
-      }
-
-      console.log(`✅ Final user count after wait: ${currentUsers.length}`);
-
-      // If still no users, try direct fetch as last resort
-      if (currentUsers.length === 0) {
-        console.log("⚠️  Users still not loaded, attempting direct fetch as last resort...");
-        try {
-          await useUsersStore.getState().fetchUsersDirectly();
+        // Wait for users to load if needed
+        let attempts = 0;
+        while (currentUsers.length === 0 && attempts < 20) {
+          console.log(`⏳ Waiting for users to load... attempt ${attempts + 1}`);
+          await new Promise(resolve => setTimeout(resolve, 500));
           currentUsers = useUsersStore.getState().invitedUsers;
-          console.log(`✅ Direct fetch result: ${currentUsers.length} users`);
-        } catch (error) {
-          console.error("❌ Direct fetch failed:", error);
+          attempts++;
         }
-      }
 
-      if (currentUsers.length === 0) {
-        console.log("❌ CRITICAL: Users failed to load after all attempts");
-        console.log("❌ This indicates Firebase connection is not working on this device");
-        console.log("❌ Possible causes:");
-        console.log("   1. App cache is corrupted - user needs to clear app data");
-        console.log("   2. Old version of app cached - user needs to force refresh");
-        console.log("   3. Firebase connection is blocked");
+        console.log(`✅ Final user count after wait: ${currentUsers.length}`);
 
-        setIsLoading(false);
-        useAuthStore.getState().loginError = "Unable to load user data. Please close the app completely and reopen it. If issue persists, clear app cache.";
-        return;
-      }
+        // If still no users, try direct fetch as last resort
+        if (currentUsers.length === 0) {
+          console.log("⚠️  Users still not loaded, attempting direct fetch as last resort...");
+          try {
+            await useUsersStore.getState().fetchUsersDirectly();
+            currentUsers = useUsersStore.getState().invitedUsers;
+            console.log(`✅ Direct fetch result: ${currentUsers.length} users`);
+          } catch (error) {
+            console.error("❌ Direct fetch failed:", error);
+          }
+        }
 
-      console.log("Available users:");
-      currentUsers.forEach(u => console.log(`  - ${u.email} (${u.name})`));
+        if (currentUsers.length === 0) {
+          console.log("❌ CRITICAL: Users failed to load after all attempts");
+          console.log("❌ This indicates Firebase connection is not working on this device");
+          console.log("❌ Possible causes:");
+          console.log("   1. App cache is corrupted - user needs to clear app data");
+          console.log("   2. Old version of app cached - user needs to force refresh");
+          console.log("   3. Firebase connection is blocked");
 
-      const result = await login(email, password);
-      console.log(`Login result: ${result ? "SUCCESS" : "FAILED"}`);
-
-      if (!result) {
-        // Login failed - error message was already set by auth store
-        setIsLoading(false);
-      } else {
-        // Login succeeded - verify the state was actually set
-        console.log("⏳ Verifying login state was set...");
-
-        // Give Zustand time to propagate the state change
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        const authUser = useAuthStore.getState().currentUser;
-        const isAuth = useAuthStore.getState().isAuthenticated;
-
-        console.log(`✅ Auth state after login:`);
-        console.log(`   - isAuthenticated: ${isAuth}`);
-        console.log(`   - currentUser: ${authUser ? authUser.name : "NULL"}`);
-
-        if (!authUser || !isAuth) {
-          console.log("❌ CRITICAL: Login succeeded but auth state was not set!");
-          console.log("❌ This indicates a Zustand store synchronization issue");
+          // Use the actual login function to set the error (it will return false and set the error)
+          await login("", ""); // This will set the appropriate error
           setIsLoading(false);
-          useAuthStore.getState().loginError = "Login state error. Please force-close the app and clear cache, then try again.";
           return;
         }
 
-        console.log("✅ Login complete - navigation should happen automatically");
+        console.log("Available users:");
+        currentUsers.forEach(u => console.log(`  - ${u.email} (${u.name})`));
+
+        console.log("📞 Calling login function...");
+        const result = await login(email, password);
+        console.log(`Login result: ${result ? "SUCCESS" : "FAILED"}`);
+
+        if (!result) {
+          // Login failed - error message was already set by auth store
+          console.log("❌ Login failed, stopping loading indicator");
+          setIsLoading(false);
+        } else {
+          // Login succeeded - verify the state was actually set
+          console.log("⏳ Verifying login state was set...");
+
+          // Give Zustand time to propagate the state change
+          await new Promise(resolve => setTimeout(resolve, 100));
+
+          const authUser = useAuthStore.getState().currentUser;
+          const isAuth = useAuthStore.getState().isAuthenticated;
+
+          console.log(`✅ Auth state after login:`);
+          console.log(`   - isAuthenticated: ${isAuth}`);
+          console.log(`   - currentUser: ${authUser ? authUser.name : "NULL"}`);
+
+          if (!authUser || !isAuth) {
+            console.log("❌ CRITICAL: Login succeeded but auth state was not set!");
+            console.log("❌ This indicates a Zustand store synchronization issue");
+
+            // Log out and show error through the auth store properly
+            useAuthStore.getState().logout();
+            await login("", ""); // This will set error through proper channels
+            setIsLoading(false);
+            return;
+          }
+
+          console.log("✅ Login complete - navigation should happen automatically");
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("❌❌❌ EXCEPTION IN handleLogin:", error);
+        console.error("❌ Error stack:", error instanceof Error ? error.stack : "No stack trace");
         setIsLoading(false);
+        clearError();
+        // Force show an error
+        useAuthStore.getState().logout();
+        await login("", "");
       }
     }
   };
