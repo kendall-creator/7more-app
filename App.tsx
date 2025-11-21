@@ -15,6 +15,7 @@ import { useTaskStore } from "./src/state/taskStore";
 import { useReportingStore } from "./src/state/reportingStore";
 import { useVolunteerStore } from "./src/state/volunteerStore";
 import { fixAdminPasswordFlag } from "./src/utils/fixAdminPassword";
+import { fixMenteeStatusesOnce } from "./src/utils/fixMenteeStatuses";
 
 /*
 IMPORTANT NOTICE: DO NOT REMOVE
@@ -74,6 +75,9 @@ export default function App() {
 
     // Fix admin password flag (one-time fix)
     fixAdminPasswordFlag();
+
+    // Fix mentee statuses for existing participants (one-time fix)
+    fixMenteeStatusesOnce();
 
     console.log("✅ App.tsx: All initialization complete");
   }, []); // Empty dependency array - only run once on mount

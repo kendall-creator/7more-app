@@ -2,30 +2,49 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Initial Contact Form Status Fix - November 20, 2025
+## 🔥 LATEST UPDATE: Initial Contact Form Status Fix + Data Migration - November 20, 2025
 
 **Date:** November 20, 2025
 **Status:** ✅ COMPLETE
 
 ### What Was Changed:
 
-#### Fixed Initial Contact Form Status Update (BUGFIX)
+#### Fixed Initial Contact Form Status Update (BUGFIX) + Automatic Data Migration
 - **Issue**: When initial contact forms were completed, mentees were not automatically moving to "Contacted (Initial)" status on My Mentees screen
-- **Root Cause**: The `menteeStatus` field was being set correctly during form submission, but existing data needed proper status assignment
-- **Fix Applied**: Enhanced `recordInitialContact` function to explicitly set `menteeStatus` to "contacted_initial" when a successful contact is recorded
-- **Improvements**:
+- **Root Cause**: The `menteeStatus` field was being set correctly for NEW submissions, but EXISTING participants who already completed initial contact forms before the fix did not have this field set
+- **Fix Applied**:
+  1. Enhanced `recordInitialContact` function to explicitly set `menteeStatus` to "contacted_initial" when a successful contact is recorded (for new submissions)
+  2. Created automatic data migration function `fixMenteeStatuses()` that runs once on app launch to fix existing participants
+  3. Added one-time migration utility that updates all participants with completed initial contact forms
+
+#### How the Fix Works:
+1. **For New Submissions**: When any mentor completes an Initial Contact Form with "Successful Contact", the `menteeStatus` is immediately set to `"contacted_initial"`
+2. **For Existing Data**: On app launch, the migration function:
+   - Scans all participants with assigned mentors
+   - Checks if initial contact was completed (by looking at history or initialContactCompletedAt field)
+   - If status is "active_mentorship" but menteeStatus is not "contacted_initial", it updates the record
+   - Runs only once per app installation (stores flag in AsyncStorage)
+
+#### Improvements:
   - Added detailed console logging to track status updates during form submission
   - Updated history entry description to clarify status change: "Initial contact form completed - moved to Contacted (Initial) status"
   - Added metadata tracking for menteeStatus in form submission history
-  - Ensured Firebase updates include the menteeStatus field for proper filtering on My Mentees screen
+  - Created `fixMenteeStatusesOnce()` utility function that runs automatically on app startup
+  - Migration only runs once per installation and skips if already applied
 
-#### Files Modified:
-- `/src/state/participantStore.ts` - Enhanced recordInitialContact function with better logging and explicit status assignment
+#### Files Modified/Created:
+- `/src/state/participantStore.ts` - Enhanced recordInitialContact function + added fixMenteeStatuses() function
+- `/src/utils/fixMenteeStatuses.ts` - NEW: One-time migration utility
+- `/App.tsx` - Added call to fixMenteeStatusesOnce() on app initialization
 
 #### Testing Notes:
-- When Paul or any mentor completes the Initial Contact Form with "Successful Contact" outcome, the mentee should now immediately appear in the "Contacted (Initial)" filter on My Mentees screen
-- Check the logs (expo.log) to verify status updates are being applied correctly
-- All existing mentees with completed initial contacts should now show in proper status category
+- **For Existing Participants** (like Derain Johnson): Close and reopen the Vibecode app. The migration will run automatically and update all participants who had initial contact completed but were missing the menteeStatus field.
+- **For New Participants**: When Paul or any mentor completes the Initial Contact Form with "Successful Contact" outcome, the mentee will immediately appear in the "Contacted (Initial)" filter on My Mentees screen
+- Check the LOGS tab to verify:
+  - `🔧 Starting mentee status fix for existing participants...`
+  - `🔧 Fixing menteeStatus for: [Name]`
+  - `✅ Fixed: [Name] - set to contacted_initial`
+  - `✅ Mentee status fix complete. Fixed X participants.`
 
 ---
 

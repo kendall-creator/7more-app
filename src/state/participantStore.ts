@@ -53,6 +53,7 @@ interface ParticipantActions {
   findDuplicatesByEmail: (email: string) => Participant[];
   deleteParticipant: (participantId: string) => Promise<void>;
   mergeParticipants: (sourceId: string, targetId: string, userId: string, userName: string) => Promise<void>;
+  fixMenteeStatuses: () => Promise<number>;
   initializeFirebaseListener: () => void;
 }
 
@@ -1118,6 +1119,52 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
     await get().deleteParticipant(sourceId);
 
     console.log("✅ MERGE COMPLETE:", source.firstName, source.lastName, "→", target.firstName, target.lastName);
+  },
+
+  // Fix mentee status for participants with completed initial contact
+  fixMenteeStatuses: async () => {
+    if (!database) {
+      throw new Error("Firebase not configured. Please add Firebase credentials in ENV tab.");
+    }
+
+    console.log("🔧 Starting mentee status fix for existing participants...");
+
+    const participants = get().participants;
+    let fixedCount = 0;
+
+    for (const participant of participants) {
+      // Skip if participant doesn't have a mentor assigned
+      if (!participant.assignedMentor) continue;
+
+      // Check if initial contact was completed but menteeStatus is not set correctly
+      const hasInitialContactCompleted = participant.initialContactCompletedAt ||
+        participant.history.some(h =>
+          h.type === "form_submitted" &&
+          (h.description?.includes("Initial contact form completed") ||
+           h.description?.includes("initial contact form completed"))
+        );
+
+      // If initial contact is completed but menteeStatus is not "contacted_initial"
+      if (hasInitialContactCompleted && participant.menteeStatus !== "contacted_initial" && participant.status === "active_mentorship") {
+        console.log(`🔧 Fixing menteeStatus for: ${participant.firstName} ${participant.lastName}`);
+
+        const updatedParticipant = {
+          ...participant,
+          menteeStatus: "contacted_initial" as Participant["menteeStatus"],
+          // Set initialContactCompletedDate if not set
+          initialContactCompletedDate: participant.initialContactCompletedDate || participant.initialContactCompletedAt || new Date().toISOString(),
+        };
+
+        const participantRef = ref(database, `participants/${participant.id}`);
+        await firebaseSet(participantRef, updatedParticipant);
+        fixedCount++;
+
+        console.log(`✅ Fixed: ${participant.firstName} ${participant.lastName} - set to contacted_initial`);
+      }
+    }
+
+    console.log(`✅ Mentee status fix complete. Fixed ${fixedCount} participants.`);
+    return fixedCount;
   },
 }));
 
