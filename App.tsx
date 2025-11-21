@@ -2,7 +2,8 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useEffect } from "react";
+import React, { useEffect, Component, ReactNode } from "react";
+import { View, Text } from "react-native";
 import RootNavigator from "./src/navigation/RootNavigator";
 import { useUsersStore } from "./src/state/usersStore";
 import { useParticipantStore } from "./src/state/participantStore";
@@ -16,6 +17,48 @@ import { useReportingStore } from "./src/state/reportingStore";
 import { useVolunteerStore } from "./src/state/volunteerStore";
 import { fixAdminPasswordFlag } from "./src/utils/fixAdminPassword";
 import { fixMenteeStatusesOnce } from "./src/utils/fixMenteeStatuses";
+
+// Custom Error Boundary to catch crashes
+class ErrorBoundary extends Component<
+  { children: ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: any) {
+    console.error("🔴 FATAL APP ERROR:", error);
+    console.error("   Error message:", error.message);
+    console.error("   Error stack:", error.stack);
+    console.error("   Component stack:", errorInfo.componentStack);
+  }
+
+  render() {
+    if (this.state.hasError && this.state.error) {
+      return (
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 20 }}>
+          <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}>
+            App Error
+          </Text>
+          <Text style={{ fontSize: 14, textAlign: "center", marginBottom: 20 }}>
+            {this.state.error.message}
+          </Text>
+          <Text style={{ fontSize: 12, color: "#666", textAlign: "center" }}>
+            Check LOGS tab for details
+          </Text>
+        </View>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 /*
 IMPORTANT NOTICE: DO NOT REMOVE
@@ -101,13 +144,15 @@ export default function App() {
   }, []); // Empty dependency array - only run once on mount
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <NavigationContainer>
-          <RootNavigator />
-          <StatusBar style="auto" />
-        </NavigationContainer>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <ErrorBoundary>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <NavigationContainer>
+            <RootNavigator />
+            <StatusBar style="auto" />
+          </NavigationContainer>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }
