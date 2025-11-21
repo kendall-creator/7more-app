@@ -31,35 +31,45 @@ export const useAuthStore = create<AuthStore>()((set) => ({
     console.log(`  Email: "${email}"`);
     console.log(`  Password: "${password}"`);
 
-    // Clear previous error
-    set({ loginError: null });
+    try {
+      // Clear previous error
+      set({ loginError: null });
 
-    // Validate credentials against invited users
-    console.log("  Calling validateCredentials...");
-    const validatedUser = useUsersStore.getState().validateCredentials(email, password);
+      // Validate credentials against invited users
+      console.log("  Calling validateCredentials...");
+      const validatedUser = useUsersStore.getState().validateCredentials(email, password);
 
-    console.log("  validateCredentials returned:");
-    console.log(`  Result: ${validatedUser ? "User object" : "null/undefined"}`);
-    console.log(`  Result type: ${typeof validatedUser}`);
-    console.log(`  Result value:`, validatedUser);
+      console.log("  validateCredentials returned:");
+      console.log(`  Result: ${validatedUser ? "User object" : "null/undefined"}`);
+      console.log(`  Result type: ${typeof validatedUser}`);
+      console.log(`  Result value:`, validatedUser);
 
-    if (!validatedUser) {
-      console.log("  ❌ Login FAILED - validatedUser is falsy");
+      if (!validatedUser) {
+        console.log("  ❌ Login FAILED - validatedUser is falsy");
+        set({
+          loginError: "Invalid email or password. Please check your credentials or contact an admin for access.",
+          isAuthenticated: false,
+          currentUser: null
+        });
+        return false;
+      }
+
+      console.log("  ✅ Login SUCCESS - setting user state");
       set({
-        loginError: "Invalid email or password. Please check your credentials or contact an admin for access.",
+        currentUser: validatedUser,
+        isAuthenticated: true,
+        loginError: null
+      });
+      return true;
+    } catch (error) {
+      console.error("❌ EXCEPTION in AuthStore.login:", error);
+      set({
+        loginError: "Login error. Please try again.",
         isAuthenticated: false,
         currentUser: null
       });
       return false;
     }
-
-    console.log("  ✅ Login SUCCESS - setting user state");
-    set({
-      currentUser: validatedUser,
-      isAuthenticated: true,
-      loginError: null
-    });
-    return true;
   },
 
   logout: () => {

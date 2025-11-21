@@ -2,7 +2,50 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Added Direct Firebase Fetch as Listener Fallback - November 21, 2025
+## 🔥 LATEST UPDATE: Fixed Infinite Spinning Login Issue - November 21, 2025
+
+**Date:** November 21, 2025
+**Status:** ✅ COMPLETE
+
+### What Was Changed:
+
+#### Fixed Infinite Spinning on Login (CRITICAL BUGFIX)
+- **Issue**: Some user accounts (specifically Madi's) were experiencing infinite spinning on the login screen with no error message displayed.
+- **Root Cause**: The login flow lacked proper error handling and timeouts, causing the loading spinner to continue indefinitely if any step failed or hung.
+- **Fix Applied**:
+  1. **Simplified Login Flow**: Removed complex user-loading logic from LoginScreen and made it call the login function directly
+  2. **Added 15-Second Timeout**: Login process now has a hard 15-second timeout that will always stop the spinner and show an error
+  3. **Comprehensive Error Handling**: Added try-catch blocks to both LoginScreen.handleLogin and AuthStore.login to catch any exceptions
+  4. **Better State Management**: Fixed direct state mutation issues that prevented error messages from displaying
+
+#### Technical Details:
+- **LoginScreen.tsx Changes**:
+  - Simplified `handleLogin` to directly call the login function without pre-checking users
+  - Added `setTimeout` with 15-second timeout that guarantees spinner stops
+  - Added try-catch to handle any exceptions during login
+  - Properly uses `useAuthStore.setState()` instead of direct property mutation
+
+- **authStore.ts Changes**:
+  - Wrapped entire login function in try-catch block
+  - Ensures function always returns true/false (never hangs)
+  - Guarantees error state is set if anything goes wrong
+
+#### Files Modified:
+- `/src/screens/LoginScreen.tsx`:
+  - Simplified handleLogin function
+  - Added 15-second timeout protection
+  - Added comprehensive error handling
+
+- `/src/state/authStore.ts`:
+  - Added try-catch wrapper to login function
+  - Improved error handling and logging
+
+#### Expected Behavior Now:
+- **Successful Login**: User sees spinner briefly, then navigates to their dashboard automatically
+- **Failed Login**: User sees error message explaining why login failed
+- **Hung/Timeout Login**: After 15 seconds, spinner stops and user sees timeout error message
+
+### Previous Update: Added Direct Firebase Fetch as Listener Fallback - November 21, 2025
 
 **Date:** November 21, 2025
 **Status:** ✅ COMPLETE

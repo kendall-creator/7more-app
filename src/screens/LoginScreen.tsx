@@ -45,104 +45,59 @@ export default function LoginScreen({ navigation }: any) {
   }, []);
 
   const handleLogin = async () => {
-    if (email && password) {
-      try {
-        setIsLoading(true);
+    if (!email || !password) {
+      return;
+    }
 
-        console.log("===========================================");
-        console.log("🔐 LOGIN ATTEMPT");
-        console.log("===========================================");
-        console.log(`Email entered: "${email}"`);
-        console.log(`Password entered: "${password}"`);
+    console.log("🚀 handleLogin CALLED");
+    console.log(`   Email: ${email}`);
+    console.log(`   Password: ${password}`);
 
-        let currentUsers = useUsersStore.getState().invitedUsers;
-        console.log(`Users loaded: ${currentUsers.length}`);
+    // Wrap entire login in a timeout to prevent infinite spinning
+    const loginTimeout = setTimeout(() => {
+      console.error("❌ LOGIN TIMEOUT - 15 seconds elapsed");
+      setIsLoading(false);
+      clearError();
+      useAuthStore.setState({
+        loginError: "Login timeout. Please try again or contact support.",
+        isAuthenticated: false,
+        currentUser: null
+      });
+    }, 15000); // 15 second timeout
 
-        // Wait for users to load if needed
-        let attempts = 0;
-        while (currentUsers.length === 0 && attempts < 20) {
-          console.log(`⏳ Waiting for users to load... attempt ${attempts + 1}`);
-          await new Promise(resolve => setTimeout(resolve, 500));
-          currentUsers = useUsersStore.getState().invitedUsers;
-          attempts++;
-        }
+    try {
+      setIsLoading(true);
 
-        console.log(`✅ Final user count after wait: ${currentUsers.length}`);
+      console.log("===========================================");
+      console.log("🔐 LOGIN ATTEMPT STARTED");
+      console.log("===========================================");
 
-        // If still no users, try direct fetch as last resort
-        if (currentUsers.length === 0) {
-          console.log("⚠️  Users still not loaded, attempting direct fetch as last resort...");
-          try {
-            await useUsersStore.getState().fetchUsersDirectly();
-            currentUsers = useUsersStore.getState().invitedUsers;
-            console.log(`✅ Direct fetch result: ${currentUsers.length} users`);
-          } catch (error) {
-            console.error("❌ Direct fetch failed:", error);
-          }
-        }
+      // Simple approach: just call login directly
+      const result = await login(email, password);
 
-        if (currentUsers.length === 0) {
-          console.log("❌ CRITICAL: Users failed to load after all attempts");
-          console.log("❌ This indicates Firebase connection is not working on this device");
-          console.log("❌ Possible causes:");
-          console.log("   1. App cache is corrupted - user needs to clear app data");
-          console.log("   2. Old version of app cached - user needs to force refresh");
-          console.log("   3. Firebase connection is blocked");
+      console.log(`✅ Login function returned: ${result ? "SUCCESS" : "FAILED"}`);
 
-          // Use the actual login function to set the error (it will return false and set the error)
-          await login("", ""); // This will set the appropriate error
-          setIsLoading(false);
-          return;
-        }
+      // Clear the timeout since we got a result
+      clearTimeout(loginTimeout);
 
-        console.log("Available users:");
-        currentUsers.forEach(u => console.log(`  - ${u.email} (${u.name})`));
+      setIsLoading(false);
 
-        console.log("📞 Calling login function...");
-        const result = await login(email, password);
-        console.log(`Login result: ${result ? "SUCCESS" : "FAILED"}`);
-
-        if (!result) {
-          // Login failed - error message was already set by auth store
-          console.log("❌ Login failed, stopping loading indicator");
-          setIsLoading(false);
-        } else {
-          // Login succeeded - verify the state was actually set
-          console.log("⏳ Verifying login state was set...");
-
-          // Give Zustand time to propagate the state change
-          await new Promise(resolve => setTimeout(resolve, 100));
-
-          const authUser = useAuthStore.getState().currentUser;
-          const isAuth = useAuthStore.getState().isAuthenticated;
-
-          console.log(`✅ Auth state after login:`);
-          console.log(`   - isAuthenticated: ${isAuth}`);
-          console.log(`   - currentUser: ${authUser ? authUser.name : "NULL"}`);
-
-          if (!authUser || !isAuth) {
-            console.log("❌ CRITICAL: Login succeeded but auth state was not set!");
-            console.log("❌ This indicates a Zustand store synchronization issue");
-
-            // Log out and show error through the auth store properly
-            useAuthStore.getState().logout();
-            await login("", ""); // This will set error through proper channels
-            setIsLoading(false);
-            return;
-          }
-
-          console.log("✅ Login complete - navigation should happen automatically");
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.error("❌❌❌ EXCEPTION IN handleLogin:", error);
-        console.error("❌ Error stack:", error instanceof Error ? error.stack : "No stack trace");
-        setIsLoading(false);
-        clearError();
-        // Force show an error
-        useAuthStore.getState().logout();
-        await login("", "");
+      // If successful, navigation will happen automatically via RootNavigator
+      if (result) {
+        console.log("✅ Login successful - RootNavigator should redirect now");
+      } else {
+        console.log("❌ Login failed - error message should be visible");
       }
+
+    } catch (error) {
+      clearTimeout(loginTimeout);
+      console.error("❌ EXCEPTION in handleLogin:", error);
+      setIsLoading(false);
+      useAuthStore.setState({
+        loginError: "An error occurred during login. Please try again.",
+        isAuthenticated: false,
+        currentUser: null
+      });
     }
   };
 
