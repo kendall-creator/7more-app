@@ -30,26 +30,38 @@ export default function LoginScreen({ navigation }: any) {
       console.log("⏳ Waiting for users to load...");
       setDebugMessage("Loading user data...");
 
-      // Set a timeout to try direct fetch if users don't load within 3 seconds
+      // Set a timeout to try direct fetch if users don't load within 2 seconds
       const timeout = setTimeout(async () => {
         if (invitedUsers.length === 0) {
-          console.log("⚠️ Users still not loaded after 3s, trying direct fetch...");
+          console.log("⚠️ Users still not loaded after 2s, trying direct fetch...");
           setDebugMessage("Fetching user data...");
           try {
-            await useUsersStore.getState().fetchUsersDirectly();
+            // Create a timeout promise (5 seconds max)
+            const timeoutPromise = new Promise((_, reject) =>
+              setTimeout(() => reject(new Error("Timeout")), 5000)
+            );
+
+            // Race between fetch and timeout
+            await Promise.race([
+              useUsersStore.getState().fetchUsersDirectly(),
+              timeoutPromise
+            ]);
+
             const users = useUsersStore.getState().invitedUsers;
             if (users.length > 0) {
               setUsersReady(true);
               setDebugMessage(`Ready! ${users.length} users loaded.`);
             } else {
-              setDebugMessage("Unable to load users. Check connection.");
+              setDebugMessage("Firebase unavailable. Tap retry or Sign In to use backup.");
+              setUsersReady(true); // Allow fallback login
             }
           } catch (error) {
             console.error("❌ Direct fetch failed:", error);
-            setDebugMessage("Connection error. Please retry.");
+            setDebugMessage("Firebase unavailable. Tap retry or Sign In to use backup.");
+            setUsersReady(true); // Allow fallback login
           }
         }
-      }, 3000);
+      }, 2000);
 
       return () => clearTimeout(timeout);
     }
@@ -101,8 +113,18 @@ export default function LoginScreen({ navigation }: any) {
       setDebugMessage("Loading users from server...");
       console.log("⚠️ No users loaded, fetching directly...");
       try {
-        await useUsersStore.getState().fetchUsersDirectly();
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Create a timeout promise (3 seconds max)
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Firebase timeout")), 3000)
+        );
+
+        // Race between fetch and timeout
+        await Promise.race([
+          useUsersStore.getState().fetchUsersDirectly(),
+          timeoutPromise
+        ]);
+
+        await new Promise(resolve => setTimeout(resolve, 500));
         currentUsers = useUsersStore.getState().invitedUsers;
         console.log(`  Users after fetch: ${currentUsers.length}`);
 
@@ -114,7 +136,7 @@ export default function LoginScreen({ navigation }: any) {
           setDebugMessage(`Loaded ${currentUsers.length} users`);
         }
       } catch (fetchError) {
-        console.error("❌ Direct fetch failed:", fetchError);
+        console.error("❌ Direct fetch failed or timed out:", fetchError);
         console.log("⚠️ Using fallback users due to error");
         setDebugMessage("Using emergency backup login...");
         currentUsers = fallbackUsers as any;
@@ -255,16 +277,28 @@ export default function LoginScreen({ navigation }: any) {
                       onPress={async () => {
                         setDebugMessage("Manually refreshing...");
                         try {
-                          await useUsersStore.getState().fetchUsersDirectly();
+                          // Create a timeout promise
+                          const timeoutPromise = new Promise((_, reject) =>
+                            setTimeout(() => reject(new Error("Timeout")), 3000)
+                          );
+
+                          // Race between fetch and timeout
+                          await Promise.race([
+                            useUsersStore.getState().fetchUsersDirectly(),
+                            timeoutPromise
+                          ]);
+
                           const users = useUsersStore.getState().invitedUsers;
                           if (users.length > 0) {
                             setUsersReady(true);
                             setDebugMessage(`Ready! ${users.length} users loaded.`);
                           } else {
-                            setDebugMessage("Still no users. Firebase may not be connected.");
+                            setDebugMessage("Firebase failed. Using backup login - tap Sign In.");
+                            setUsersReady(true); // Allow login with fallback
                           }
                         } catch (error) {
-                          setDebugMessage(`Refresh failed: ${error}`);
+                          setDebugMessage("Firebase failed. Using backup login - tap Sign In.");
+                          setUsersReady(true); // Allow login with fallback
                         }
                       }}
                       className="mt-2 bg-yellow-600 rounded-lg py-2 px-3 active:opacity-70"
