@@ -52,7 +52,7 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
   isLoading: false,
 
   // Initialize Firebase real-time listener
-  initializeFirebaseListener: () => {
+  initializeFirebaseListener: async () => {
     // Prevent multiple listener initializations
     if (isListenerInitialized) {
       console.log("⚠️ Users listener already initialized, skipping...");
@@ -71,29 +71,38 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
 
     const usersRef = ref(database, "users");
 
-    // Set a timeout in case Firebase never responds
-    const timeout = setTimeout(() => {
-      console.error("❌ Firebase listener timeout - no response after 10 seconds");
-      console.log("⚠️ Firebase may be blocked on this network. App will continue with empty data.");
+    // FIRST: Try direct fetch immediately (more reliable on problematic devices)
+    try {
+      console.log("   Attempting direct fetch first...");
+      const snapshot = await firebaseGet(usersRef);
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const usersArray = Object.values(data) as InvitedUser[];
+        console.log(`✅ Direct fetch successful: ${usersArray.length} users loaded`);
+        set({ invitedUsers: usersArray, isLoading: false });
+      } else {
+        console.log("✅ Direct fetch: No users in Firebase");
+        set({ invitedUsers: [], isLoading: false });
+      }
+    } catch (directError) {
+      console.error("❌ Direct fetch failed:", directError);
       set({ isLoading: false, invitedUsers: [] });
-    }, 10000); // 10 second timeout
+    }
 
+    // SECOND: Set up real-time listener for updates (optional, but nice to have)
     onValue(usersRef, (snapshot) => {
-      clearTimeout(timeout); // Clear timeout if we get data
       const data = snapshot.val();
       if (data) {
         const usersArray = Object.values(data) as InvitedUser[];
-        console.log(`✅ Loaded ${usersArray.length} users from Firebase`);
+        console.log(`🔄 Real-time update: ${usersArray.length} users`);
         set({ invitedUsers: usersArray, isLoading: false });
       } else {
-        console.log("✅ No users in Firebase, setting empty array");
+        console.log("🔄 Real-time update: No users");
         set({ invitedUsers: [], isLoading: false });
       }
     }, (error) => {
-      clearTimeout(timeout); // Clear timeout on error
-      console.error("❌ Error in users listener:", error);
-      console.log("⚠️ Firebase connection failed. App will continue with empty data.");
-      set({ isLoading: false, invitedUsers: [] });
+      console.error("❌ Real-time listener error:", error);
+      // Don't clear users on listener error - keep the direct fetch data
     });
   },
 
