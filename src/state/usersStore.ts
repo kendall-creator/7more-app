@@ -76,10 +76,10 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
     try {
       console.log("   Attempting direct fetch first...");
 
-      // Add a manual timeout to catch hanging requests
+      // Add a manual timeout to catch hanging requests (15 seconds for slow connections)
       const fetchPromise = firebaseGet(usersRef);
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Firebase fetch timeout after 5 seconds")), 5000)
+        setTimeout(() => reject(new Error("Firebase fetch timeout after 15 seconds")), 15000)
       );
 
       const snapshot = await Promise.race([fetchPromise, timeoutPromise]) as any;

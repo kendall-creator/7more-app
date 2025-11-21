@@ -30,9 +30,9 @@ export default function LoginScreen({ navigation }: any) {
     // Get users directly from store
     let currentUsers = useUsersStore.getState().invitedUsers;
 
-    // Wait up to 5 seconds for users to load
+    // Wait up to 15 seconds for users to load (slower networks)
     let attempts = 0;
-    while (currentUsers.length === 0 && attempts < 10) {
+    while (currentUsers.length === 0 && attempts < 30) {
       await new Promise(resolve => setTimeout(resolve, 500));
       currentUsers = useUsersStore.getState().invitedUsers;
       attempts++;
