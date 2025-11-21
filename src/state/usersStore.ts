@@ -178,20 +178,55 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
 
   validateCredentials: (email, password) => {
     const user = get().getUserByEmail(email);
-    if (!user || user.password !== password) {
+
+    // Debug logging for troubleshooting
+    console.log("\n🔐 Validating Credentials:");
+    console.log(`  Email: "${email}"`);
+    console.log(`  User found: ${user ? "YES" : "NO"}`);
+
+    if (!user) {
+      console.log(`  ❌ No user found with email: ${email}`);
       return null;
     }
 
-    // Return User object without password
-    return {
-      id: user.id,
-      name: user.name,
-      nickname: user.nickname,
-      email: user.email,
-      role: user.role, // Primary role (required)
-      roles: user.roles, // Optional roles array
-      requiresPasswordChange: user.requiresPasswordChange,
-    };
+    console.log(`  User: ${user.name}`);
+    console.log(`  Stored password: "${user.password}"`);
+    console.log(`  Provided password: "${password}"`);
+    console.log(`  Exact match: ${user.password === password ? "YES" : "NO"}`);
+
+    // Try exact match first
+    if (user.password === password) {
+      console.log(`  ✅ Login successful (exact match)`);
+      return {
+        id: user.id,
+        name: user.name,
+        nickname: user.nickname,
+        email: user.email,
+        role: user.role,
+        roles: user.roles,
+        requiresPasswordChange: user.requiresPasswordChange,
+      };
+    }
+
+    // Try trimmed comparison (to handle whitespace issues)
+    if (user.password.trim() === password.trim()) {
+      console.log(`  ✅ Login successful (trimmed match)`);
+      console.log(`  ⚠️  WARNING: Password has whitespace issues. Consider fixing.`);
+      return {
+        id: user.id,
+        name: user.name,
+        nickname: user.nickname,
+        email: user.email,
+        role: user.role,
+        roles: user.roles,
+        requiresPasswordChange: user.requiresPasswordChange,
+      };
+    }
+
+    console.log(`  ❌ Password mismatch`);
+    console.log(`  Stored length: ${user.password.length}`);
+    console.log(`  Provided length: ${password.length}`);
+    return null;
   },
 
   initializeDefaultAdmin: async () => {

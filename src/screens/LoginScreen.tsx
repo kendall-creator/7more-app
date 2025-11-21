@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, Pressable, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from "react-native";
 import { useAuthStore, useCurrentUser } from "../state/authStore";
+import { testLogin } from "../utils/debugUsers";
+import { listAllUsers, fixUserLoginIssue } from "../utils/fixUserLogin";
 
 export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState("");
@@ -11,9 +13,34 @@ export default function LoginScreen({ navigation }: any) {
   const clearError = useAuthStore((s) => s.clearError);
   const currentUser = useCurrentUser();
 
+  // Debug: List all users when component mounts
+  useEffect(() => {
+    setTimeout(() => {
+      listAllUsers();
+
+      // Check Madi's account specifically
+      console.log("\n🔍 CHECKING MADI LOWRY ACCOUNT:");
+      fixUserLoginIssue("madi");
+    }, 1000);
+  }, []);
+
   const handleLogin = async () => {
     if (email && password) {
       setIsLoading(true);
+
+      // Debug logging
+      console.log("===========================================");
+      console.log("🔐 LOGIN ATTEMPT");
+      console.log("===========================================");
+      console.log(`Email entered: "${email}"`);
+      console.log(`Password entered: "${password}"`);
+      console.log(`Email length: ${email.length}`);
+      console.log(`Password length: ${password.length}`);
+      console.log("===========================================");
+
+      // Test credentials for debugging
+      testLogin(email, password);
+
       await login(email, password);
       setIsLoading(false);
     }
