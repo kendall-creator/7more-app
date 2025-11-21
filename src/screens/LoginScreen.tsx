@@ -279,6 +279,7 @@ export default function LoginScreen({ navigation }: any) {
                       try {
                         // Import Firebase to test connection
                         const { database } = await import("../config/firebase");
+                        const { FIREBASE_FALLBACK_CONFIG } = await import("../config/firebase-fallback");
 
                         if (!database) {
                           setDebugMessage("ERROR: Firebase database is null. Check Firebase config.");
@@ -286,11 +287,11 @@ export default function LoginScreen({ navigation }: any) {
                           return;
                         }
 
-                        setDebugMessage("Firebase initialized. Fetching users...");
+                        setDebugMessage(`Testing connection to: ${FIREBASE_FALLBACK_CONFIG.databaseURL}`);
 
-                        // Create a timeout promise
+                        // Create a timeout promise (10 seconds to be sure)
                         const timeoutPromise = new Promise((_, reject) =>
-                          setTimeout(() => reject(new Error("Firebase connection timeout after 5 seconds")), 5000)
+                          setTimeout(() => reject(new Error("Connection timeout - Firebase servers unreachable from this device. Check network/firewall.")), 10000)
                         );
 
                         // Race between fetch and timeout
@@ -304,13 +305,22 @@ export default function LoginScreen({ navigation }: any) {
                           setUsersReady(true);
                           setDebugMessage(`SUCCESS! ${users.length} users loaded from Firebase.`);
                         } else {
-                          setDebugMessage("ERROR: Firebase connected but returned 0 users. Database may be empty or read permission denied. Check Firebase Console → Database → Rules.");
+                          setDebugMessage("ERROR: Connected but 0 users returned. Database empty or read permission denied. Firebase URL: " + FIREBASE_FALLBACK_CONFIG.databaseURL);
                           setUsersReady(false);
                         }
                       } catch (error: any) {
                         const errorMsg = error?.message || String(error);
                         const errorCode = error?.code || "";
-                        setDebugMessage(`ERROR: ${errorCode ? errorCode + " - " : ""}${errorMsg}`);
+
+                        // Provide specific troubleshooting
+                        let troubleshooting = "\n\nPossible causes:\n";
+                        if (errorMsg.includes("timeout") || errorMsg.includes("unreachable")) {
+                          troubleshooting += "• Device network is blocking Firebase\n• Firewall blocking *.firebaseio.com\n• Try different WiFi/cellular network";
+                        } else if (errorCode === "PERMISSION_DENIED") {
+                          troubleshooting += "• Firebase database rules blocking read access\n• Check Firebase Console → Rules";
+                        }
+
+                        setDebugMessage(`ERROR: ${errorCode ? errorCode + " - " : ""}${errorMsg}${troubleshooting}`);
                         setUsersReady(false);
                       }
                     }}
