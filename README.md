@@ -2,7 +2,49 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Crash Fix & Stability Improvements - November 21, 2025
+## 🔥 LATEST UPDATE: System Diagnostics Tool - November 21, 2025
+
+**Date:** November 21, 2025
+**Status:** ✅ DIAGNOSTIC TOOL DEPLOYED
+
+### New Diagnostic Screen:
+
+For devices experiencing crashes or connection issues, there is now a **System Diagnostics** screen that automatically tests:
+- Current app build version (2025-01-22T00:05:00Z)
+- Zustand store state (number of users loaded)
+- Firebase database connection status
+- Direct Firebase data fetch capability
+- Verification that debs@7more.net user exists
+
+**How to Access Diagnostics:**
+1. On the login screen (email/password view)
+2. Scroll down to the bottom
+3. Click the small gray text "Run system diagnostics"
+4. The diagnostic screen will auto-run tests and show results
+
+**What the Results Mean:**
+- **"✅ SUCCESS: Loaded 15 users from Firebase"** → Firebase is working perfectly
+- **"❌ Firebase fetch FAILED: Timeout"** → Device cannot reach Firebase servers
+- **"❌ NOT FOUND: debs@7more.net"** → User data is corrupted or not loaded
+
+This will identify EXACTLY why specific devices are failing.
+
+### Access Code Login:
+
+**Current Access Code:**
+- **Code: 12345** → Maps to debs@7more.net (Deborah Walker)
+
+### Files Modified:
+- `App.tsx`: Updated BUILD_TIMESTAMP to "2025-01-22T00:05:00Z" at App.tsx:43
+- `src/screens/DiagnosticScreen.tsx`: **NEW FILE** - Complete diagnostic tool with auto-run tests
+- `src/screens/LoginScreen.tsx`: Added diagnostic button at LoginScreen.tsx:249
+- `src/navigation/RootNavigator.tsx`: Registered Diagnostic screen at RootNavigator.tsx:518
+
+---
+
+## Previous Updates
+
+### Crash Fix & Stability Improvements (November 21, 2025)
 
 **Date:** November 21, 2025
 **Status:** ✅ CRITICAL CRASH FIXES DEPLOYED

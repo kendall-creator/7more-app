@@ -245,6 +245,13 @@ export default function LoginScreen({ navigation }: any) {
                 </Text>
               </Pressable>
 
+              {/* Diagnostic Button */}
+              <Pressable onPress={() => navigation.navigate("Diagnostic")} className="py-2 mb-4">
+                <Text className="text-center text-xs text-gray-400 underline">
+                  Run system diagnostics
+                </Text>
+              </Pressable>
+
               {/* Help Text */}
               <Text className="text-center text-sm text-[#99896c]">
                 {"Don't have an account? Contact your admin to get invited."}

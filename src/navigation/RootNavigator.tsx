@@ -6,6 +6,7 @@ import { useCurrentUser, useUserRole } from "../state/authStore";
 
 // Screens
 import LoginScreen from "../screens/LoginScreen";
+import DiagnosticScreen from "../screens/DiagnosticScreen";
 import ChangePasswordScreen from "../screens/ChangePasswordScreen";
 import IntakeFormScreen from "../screens/IntakeFormScreen";
 import IntakeFormLinkScreen from "../screens/IntakeFormLinkScreen";
@@ -514,6 +515,7 @@ export default function RootNavigator() {
         // Auth flow - only login for staff
         <>
           <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Diagnostic" component={DiagnosticScreen} />
         </>
       ) : (
         // Authenticated flow
