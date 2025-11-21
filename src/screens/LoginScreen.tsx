@@ -99,7 +99,34 @@ export default function LoginScreen({ navigation }: any) {
       const result = await login(email, password);
       console.log(`Login result: ${result ? "SUCCESS" : "FAILED"}`);
 
-      setIsLoading(false);
+      if (!result) {
+        // Login failed - error message was already set by auth store
+        setIsLoading(false);
+      } else {
+        // Login succeeded - verify the state was actually set
+        console.log("⏳ Verifying login state was set...");
+
+        // Give Zustand time to propagate the state change
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        const authUser = useAuthStore.getState().currentUser;
+        const isAuth = useAuthStore.getState().isAuthenticated;
+
+        console.log(`✅ Auth state after login:`);
+        console.log(`   - isAuthenticated: ${isAuth}`);
+        console.log(`   - currentUser: ${authUser ? authUser.name : "NULL"}`);
+
+        if (!authUser || !isAuth) {
+          console.log("❌ CRITICAL: Login succeeded but auth state was not set!");
+          console.log("❌ This indicates a Zustand store synchronization issue");
+          setIsLoading(false);
+          useAuthStore.getState().loginError = "Login state error. Please force-close the app and clear cache, then try again.";
+          return;
+        }
+
+        console.log("✅ Login complete - navigation should happen automatically");
+        setIsLoading(false);
+      }
     }
   };
 

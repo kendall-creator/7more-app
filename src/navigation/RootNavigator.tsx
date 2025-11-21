@@ -501,6 +501,13 @@ function MainTabs() {
 export default function RootNavigator() {
   const currentUser = useCurrentUser();
 
+  // Debug logging for navigation state
+  React.useEffect(() => {
+    console.log("🔄 RootNavigator: currentUser changed");
+    console.log(`   - currentUser: ${currentUser ? currentUser.name : "NULL"}`);
+    console.log(`   - Will show: ${currentUser ? "MainTabs (authenticated)" : "Login screen"}`);
+  }, [currentUser]);
+
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {!currentUser ? (
