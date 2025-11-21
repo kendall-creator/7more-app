@@ -2,12 +2,55 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 CRITICAL: Firebase Connection Required - November 21, 2025
+## 🔥 LATEST UPDATE: Crash Fix & Stability Improvements - November 21, 2025
 
 **Date:** November 21, 2025
-**Status:** ⚠️ FIREBASE CONNECTIVITY ISSUE IDENTIFIED
+**Status:** ✅ CRITICAL CRASH FIXES DEPLOYED
 
-### Critical Issue:
+### What Was Fixed:
+
+After extensive debugging of device-specific crashes ("there were some issues rendering your app reload to try again"), the following improvements were made:
+
+1. **Extended User Load Timeout**: Increased from 15 to 20 seconds for slow network connections
+2. **Better Error Handling**: Wrapped code login in try-catch to prevent crashes
+3. **Improved Logging**: Added detailed console logs to track user loading progress
+4. **Cache Busting**: Added BUILD_TIMESTAMP to force fresh JavaScript bundles
+5. **Disabled New Architecture**: Set `newArchEnabled: false` in app.json for stability
+6. **Removed Firebase Writes on Startup**: Commented out all Firebase write operations during app initialization
+
+### Access Code Login:
+
+**Current Access Code:**
+- **Code: 12345** → Maps to debs@7more.net (Deborah Walker)
+
+**How to Use:**
+1. On login screen, click "Have an access code? Click here"
+2. Enter the 5-digit code: 12345
+3. Click "Sign In with Code"
+4. Wait up to 20 seconds for user data to load
+5. You will be logged in as Debs
+
+### For Devices Still Having Issues:
+
+If a device continues to crash with "there were some issues rendering your app", try:
+1. **Complete app reload**: Swipe away the app completely and reopen
+2. **Clear browser cache**: If using web, clear all browser data
+3. **Different browser**: Try Safari incognito mode or Chrome
+4. **Different device**: Test on another phone/tablet
+5. **Different network**: Switch from WiFi to cellular data or vice versa
+
+### Files Modified:
+- `App.tsx`: Added BUILD_TIMESTAMP "2025-01-21T23:52:00Z", removed Firebase writes on startup
+- `src/screens/LoginScreen.tsx`: Extended timeout to 20s, added try-catch error handling, improved logging
+- `app.json`: Set `newArchEnabled: false`, incremented version to "1.0.2"
+- `src/state/usersStore.ts`: Extended Firebase timeout to 15s, added fallback users
+- `src/state/fallbackUsers.ts`: Created emergency fallback users (debs, kendall)
+
+---
+
+## 🔥 Previous Updates
+
+### Firebase Connection (November 21, 2025)
 Some devices **cannot connect to Firebase Realtime Database**, causing the app to be completely non-functional on those devices. Even with the access code login working, users have no data (participants, shifts, resources) because Firebase is blocked.
 
 ### Symptoms:

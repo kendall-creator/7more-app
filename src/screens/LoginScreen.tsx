@@ -26,45 +26,79 @@ export default function LoginScreen({ navigation }: any) {
     setIsLoading(true);
     clearError();
 
-    // Get users directly from store
-    let currentUsers = useUsersStore.getState().invitedUsers;
+    try {
+      // Check if access code is valid first
+      const userEmail = accessCodeMap[accessCode];
+      if (!userEmail) {
+        useAuthStore.setState({ loginError: "Invalid access code. Please check and try again." });
+        setIsLoading(false);
+        return;
+      }
 
-    // Wait up to 15 seconds for users to load (slower networks)
-    let attempts = 0;
-    while (currentUsers.length === 0 && attempts < 30) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      currentUsers = useUsersStore.getState().invitedUsers;
-      attempts++;
-    }
+      // Get users directly from store
+      let currentUsers = useUsersStore.getState().invitedUsers;
+      console.log(`🔑 Code login: Starting with ${currentUsers.length} users loaded`);
 
-    // Check if access code is valid
-    const userEmail = accessCodeMap[accessCode];
-    if (!userEmail) {
-      useAuthStore.setState({ loginError: "Invalid access code." });
+      // Wait up to 20 seconds for users to load (extended for slow networks)
+      let attempts = 0;
+      const maxAttempts = 40; // 40 * 500ms = 20 seconds
+      while (currentUsers.length === 0 && attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        currentUsers = useUsersStore.getState().invitedUsers;
+        attempts++;
+
+        if (attempts % 10 === 0) {
+          console.log(`   Still waiting... (${attempts * 0.5}s elapsed)`);
+        }
+      }
+
+      console.log(`🔑 After waiting: ${currentUsers.length} users loaded`);
+
+      if (currentUsers.length === 0) {
+        useAuthStore.setState({
+          loginError: "Unable to load user data. Please check your connection and try again."
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Find user by email (case-insensitive)
+      const user = currentUsers.find(u =>
+        u.email.toLowerCase().trim() === userEmail.toLowerCase().trim()
+      );
+
+      if (!user) {
+        console.error(`❌ User not found: ${userEmail}`);
+        console.error(`   Available users:`, currentUsers.map(u => u.email));
+        useAuthStore.setState({
+          loginError: `Unable to find user account for ${userEmail}. ${currentUsers.length} users available. Please contact support.`
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      console.log(`✅ User found: ${user.name} (${user.email})`);
+
+      // Login user
+      setUser({
+        id: user.id,
+        name: user.name,
+        nickname: user.nickname,
+        email: user.email,
+        role: user.role,
+        roles: user.roles,
+        requiresPasswordChange: user.requiresPasswordChange,
+      });
+
+      console.log("✅ Code login successful!");
       setIsLoading(false);
-      return;
-    }
-
-    // Find user by email
-    const user = currentUsers.find(u => u.email.toLowerCase() === userEmail.toLowerCase());
-    if (!user) {
-      useAuthStore.setState({ loginError: `Unable to find user account. ${currentUsers.length} users loaded. Please try again.` });
+    } catch (error: any) {
+      console.error("❌ Error during code login:", error);
+      useAuthStore.setState({
+        loginError: "An error occurred during login. Please try again."
+      });
       setIsLoading(false);
-      return;
     }
-
-    // Login user
-    setUser({
-      id: user.id,
-      name: user.name,
-      nickname: user.nickname,
-      email: user.email,
-      role: user.role,
-      roles: user.roles,
-      requiresPasswordChange: user.requiresPasswordChange,
-    });
-
-    setIsLoading(false);
   };
 
   const handleLogin = async () => {
