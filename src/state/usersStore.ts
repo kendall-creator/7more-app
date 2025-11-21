@@ -318,68 +318,75 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
 
   initializeDefaultAdmin: async () => {
     if (!database) {
-      throw new Error("Firebase not configured. Please add Firebase credentials in ENV tab.");
+      console.warn("Firebase not configured. Skipping default admin initialization.");
+      return;
     }
 
-    const state = get();
-    const adminEmail = "kendall@7more.net";
+    try {
+      const state = get();
+      const adminEmail = "kendall@7more.net";
 
-    // Always check if default admin exists, regardless of initialization state
-    const existingAdmin = state.getUserByEmail(adminEmail);
+      // Always check if default admin exists, regardless of initialization state
+      const existingAdmin = state.getUserByEmail(adminEmail);
 
-    if (!existingAdmin) {
-      const defaultAdmin: InvitedUser = {
-        id: "admin_default",
-        name: "Kendall",
-        email: adminEmail,
-        role: "admin", // Primary role (required)
-        roles: ["admin"], // Initialize roles array
-        password: "7moreHouston!",
-        invitedAt: new Date().toISOString(),
-        invitedBy: "system",
-        requiresPasswordChange: false, // Default admin doesn't need to change password
-      };
+      if (!existingAdmin) {
+        const defaultAdmin: InvitedUser = {
+          id: "admin_default",
+          name: "Kendall",
+          email: adminEmail,
+          role: "admin", // Primary role (required)
+          roles: ["admin"], // Initialize roles array
+          password: "7moreHouston!",
+          invitedAt: new Date().toISOString(),
+          invitedBy: "system",
+          requiresPasswordChange: false, // Default admin doesn't need to change password
+        };
 
-      const adminRef = ref(database, `users/${defaultAdmin.id}`);
-      await firebaseSet(adminRef, defaultAdmin);
-      console.log("Default admin account restored:", adminEmail);
-    } else if (existingAdmin.id === "admin_default" && existingAdmin.requiresPasswordChange !== false) {
-      // Update existing default admin to not require password change
-      const adminRef = ref(database, `users/${existingAdmin.id}`);
-      await firebaseUpdate(adminRef, {
-        requiresPasswordChange: false,
-      });
-      console.log("Updated default admin to not require password change");
-    }
+        const adminRef = ref(database, `users/${defaultAdmin.id}`);
+        await firebaseSet(adminRef, defaultAdmin);
+        console.log("Default admin account restored:", adminEmail);
+      } else if (existingAdmin.id === "admin_default" && existingAdmin.requiresPasswordChange !== false) {
+        // Update existing default admin to not require password change
+        const adminRef = ref(database, `users/${existingAdmin.id}`);
+        await firebaseUpdate(adminRef, {
+          requiresPasswordChange: false,
+        });
+        console.log("Updated default admin to not require password change");
+      }
 
-    // Check if Deborah Walker (Debs) account exists
-    const debsEmail = "debs@7more.net";
-    const existingDebs = state.getUserByEmail(debsEmail);
+      // Check if Deborah Walker (Debs) account exists
+      const debsEmail = "debs@7more.net";
+      const existingDebs = state.getUserByEmail(debsEmail);
 
-    if (!existingDebs) {
-      const debsUser: InvitedUser = {
-        id: "user_debs_default",
-        name: "Deborah Walker",
-        nickname: "Debs",
-        email: debsEmail,
-        role: "admin", // Give Debs admin access for volunteer management
-        roles: ["admin"],
-        password: "dwalker", // Simple password: dwalker
-        invitedAt: new Date().toISOString(),
-        invitedBy: "system",
-        requiresPasswordChange: false,
-      };
+      if (!existingDebs) {
+        const debsUser: InvitedUser = {
+          id: "user_debs_default",
+          name: "Deborah Walker",
+          nickname: "Debs",
+          email: debsEmail,
+          role: "admin", // Give Debs admin access for volunteer management
+          roles: ["admin"],
+          password: "dwalker", // Simple password: dwalker
+          invitedAt: new Date().toISOString(),
+          invitedBy: "system",
+          requiresPasswordChange: false,
+        };
 
-      const debsRef = ref(database, `users/${debsUser.id}`);
-      await firebaseSet(debsRef, debsUser);
-      console.log("Default Debs account created:", debsEmail);
-    }
+        const debsRef = ref(database, `users/${debsUser.id}`);
+        await firebaseSet(debsRef, debsUser);
+        console.log("Default Debs account created:", debsEmail);
+      }
 
-    // Update isInitialized flag in Firebase
-    if (!state.isInitialized) {
-      const initRef = ref(database, "usersInitialized");
-      await firebaseSet(initRef, true);
-      set({ isInitialized: true });
+      // Update isInitialized flag in Firebase
+      if (!state.isInitialized) {
+        const initRef = ref(database, "usersInitialized");
+        await firebaseSet(initRef, true);
+        set({ isInitialized: true });
+      }
+    } catch (error) {
+      console.error("❌ Error initializing default admin:", error);
+      console.log("⚠️ Continuing without default admin initialization");
+      // Don't throw - just log and continue
     }
   },
 }));

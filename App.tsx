@@ -55,27 +55,43 @@ export default function App() {
   useEffect(() => {
     console.log("🚀 App.tsx: Initializing all Firebase listeners and stores...");
 
-    // Initialize users first (now returns Promise)
-    initUsersListener();
+    // Wrap all initialization in try-catch to prevent crashes
+    try {
+      // Initialize users first (async function)
+      Promise.resolve(initUsersListener()).catch((err: any) =>
+        console.error("Users listener error:", err)
+      );
 
-    // Initialize other Firebase listeners
-    initParticipantsListener();
-    initSchedulerListener();
-    initResourcesListener();
-    initTransitionalHomesListener();
-    initMentorshipListener();
-    initGuidanceListener();
-    initTasksListener();
-    initReportingListener();
-    initVolunteerListener();
+      // Initialize other Firebase listeners
+      initParticipantsListener();
+      initSchedulerListener();
+      initResourcesListener();
+      initTransitionalHomesListener();
+      initMentorshipListener();
+      initGuidanceListener();
+      initTasksListener();
+      initReportingListener();
+      initVolunteerListener();
 
-    // Initialize defaults and fixes
-    initializeDefaultAdmin();
-    initDefaultHomes();
-    fixAdminPasswordFlag();
-    fixMenteeStatusesOnce();
+      // Initialize defaults and fixes (wrap each in try-catch)
+      Promise.resolve(initializeDefaultAdmin()).catch((err: any) =>
+        console.error("Default admin error:", err)
+      );
+      Promise.resolve(initDefaultHomes()).catch((err: any) =>
+        console.error("Default homes error:", err)
+      );
+      Promise.resolve(fixAdminPasswordFlag()).catch((err: any) =>
+        console.error("Admin password fix error:", err)
+      );
+      Promise.resolve(fixMenteeStatusesOnce()).catch((err: any) =>
+        console.error("Mentee status fix error:", err)
+      );
 
-    console.log("✅ App.tsx: All initialization complete");
+      console.log("✅ App.tsx: All initialization complete");
+    } catch (error) {
+      console.error("❌ Critical error during app initialization:", error);
+      console.log("⚠️ App will continue with limited functionality");
+    }
   }, []); // Empty dependency array - only run once on mount
 
   return (
