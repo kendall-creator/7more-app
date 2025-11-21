@@ -9,6 +9,7 @@ export default function LoginScreen({ navigation }: any) {
   const [accessCode, setAccessCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showCodeLogin, setShowCodeLogin] = useState(false);
+  const [debugMessage, setDebugMessage] = useState("");
   const login = useAuthStore((s) => s.login);
   const loginError = useAuthStore((s) => s.loginError);
   const clearError = useAuthStore((s) => s.clearError);
@@ -22,14 +23,17 @@ export default function LoginScreen({ navigation }: any) {
   };
 
   const handleCodeLogin = async () => {
+    setDebugMessage("Button pressed! Starting login...");
     console.log("\n🔐 CODE LOGIN ATTEMPT:");
     console.log(`  Access Code: ${accessCode}`);
 
     if (!accessCode) {
       console.log("❌ Missing access code");
+      setDebugMessage("Error: No access code entered");
       return;
     }
 
+    setDebugMessage(`Checking code: ${accessCode}`);
     setIsLoading(true);
 
     try {
@@ -37,26 +41,32 @@ export default function LoginScreen({ navigation }: any) {
       const userEmail = accessCodeMap[accessCode];
       if (!userEmail) {
         console.log("❌ Invalid access code");
+        setDebugMessage("Invalid code!");
         useAuthStore.setState({ loginError: "Invalid access code. Please try again." });
         setIsLoading(false);
         return;
       }
 
+      setDebugMessage(`Valid code! Loading user: ${userEmail}`);
       console.log(`✅ Valid code for: ${userEmail}`);
 
       // Wait for users to load if needed
       let currentUsers = useUsersStore.getState().invitedUsers;
+      setDebugMessage(`Users loaded: ${currentUsers.length}`);
       console.log(`  Current users loaded: ${currentUsers.length}`);
 
       if (currentUsers.length === 0) {
+        setDebugMessage("No users loaded, fetching from server...");
         console.log("⚠️ No users loaded, fetching directly...");
         try {
           await useUsersStore.getState().fetchUsersDirectly();
           await new Promise(resolve => setTimeout(resolve, 500));
           currentUsers = useUsersStore.getState().invitedUsers;
+          setDebugMessage(`Fetched ${currentUsers.length} users`);
           console.log(`  Users after fetch: ${currentUsers.length}`);
         } catch (fetchError) {
           console.error("❌ Direct fetch failed:", fetchError);
+          setDebugMessage("Failed to load users!");
           useAuthStore.setState({ loginError: "Unable to load user data. Please try again." });
           setIsLoading(false);
           return;
@@ -64,17 +74,21 @@ export default function LoginScreen({ navigation }: any) {
       }
 
       // Find the user
+      setDebugMessage(`Looking for user: ${userEmail}`);
       const user = currentUsers.find(u => u.email.toLowerCase() === userEmail.toLowerCase());
       if (!user) {
         console.log("❌ User not found in database");
+        setDebugMessage("User not found in database!");
         useAuthStore.setState({ loginError: "User account not found. Please contact admin." });
         setIsLoading(false);
         return;
       }
 
+      setDebugMessage(`Found user: ${user.name}! Logging in...`);
       console.log(`✅ User found: ${user.name}`);
 
       // Log them in directly
+      setDebugMessage("Setting user and logging in...");
       setUser({
         id: user.id,
         name: user.name,
@@ -86,9 +100,11 @@ export default function LoginScreen({ navigation }: any) {
       });
 
       console.log("✅ Code login successful!");
+      setDebugMessage("Login successful! Redirecting...");
       setIsLoading(false);
     } catch (error) {
       console.error("❌ Code login error:", error);
+      setDebugMessage(`Error: ${error}`);
       useAuthStore.setState({ loginError: "Login failed. Please try again." });
       setIsLoading(false);
     }
@@ -167,6 +183,13 @@ export default function LoginScreen({ navigation }: any) {
                   returnKeyType="go"
                 />
               </View>
+
+              {/* Debug Message */}
+              {debugMessage && (
+                <View className="mb-4 bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3">
+                  <Text className="text-yellow-900 text-xs font-mono">{debugMessage}</Text>
+                </View>
+              )}
 
               {/* Error Message */}
               {loginError && (
