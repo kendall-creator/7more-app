@@ -14,33 +14,38 @@ export default function LoginScreen({ navigation }: any) {
   const invitedUsers = useUsersStore((s) => s.invitedUsers);
 
   const handleLogin = async () => {
-    console.log("\n🔐 LOGIN ATTEMPT:");
-    console.log(`  Email: ${email}`);
-    console.log(`  Password length: ${password.length}`);
-    console.log(`  Users loaded: ${invitedUsers.length}`);
+    try {
+      console.log("\n🔐 LOGIN ATTEMPT:");
+      console.log(`  Email: ${email}`);
+      console.log(`  Password length: ${password.length}`);
+      console.log(`  Users loaded: ${invitedUsers.length}`);
 
-    if (!email || !password) {
-      console.log("❌ Missing email or password");
-      return;
-    }
-
-    setIsLoading(true);
-
-    // If no users loaded, try direct fetch immediately
-    if (invitedUsers.length === 0) {
-      console.log("⚠️ No users loaded, fetching directly...");
-      try {
-        await useUsersStore.getState().fetchUsersDirectly();
-        console.log(`  Users after fetch: ${useUsersStore.getState().invitedUsers.length}`);
-      } catch (error) {
-        console.error("❌ Direct fetch failed:", error);
+      if (!email || !password) {
+        console.log("❌ Missing email or password");
+        return;
       }
-    }
 
-    console.log("🔄 Calling login function...");
-    const result = await login(email, password);
-    console.log(`  Login result: ${result ? "SUCCESS" : "FAILED"}`);
-    setIsLoading(false);
+      setIsLoading(true);
+
+      // If no users loaded, try direct fetch immediately
+      if (invitedUsers.length === 0) {
+        console.log("⚠️ No users loaded, fetching directly...");
+        try {
+          await useUsersStore.getState().fetchUsersDirectly();
+          console.log(`  Users after fetch: ${useUsersStore.getState().invitedUsers.length}`);
+        } catch (fetchError) {
+          console.error("❌ Direct fetch failed:", fetchError);
+        }
+      }
+
+      console.log("🔄 Calling login function...");
+      const result = await login(email, password);
+      console.log(`  Login result: ${result ? "SUCCESS" : "FAILED"}`);
+    } catch (error) {
+      console.error("❌ Login error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
