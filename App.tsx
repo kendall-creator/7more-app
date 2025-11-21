@@ -55,37 +55,27 @@ export default function App() {
   useEffect(() => {
     console.log("🚀 App.tsx: Initializing all Firebase listeners and stores...");
 
-    // Initialize Firebase listeners for all stores (some may be async)
-    const initializeAll = async () => {
-      await initUsersListener();
-      initParticipantsListener();
-      initSchedulerListener();
-      initResourcesListener();
-      initTransitionalHomesListener();
-      initMentorshipListener();
-      initGuidanceListener();
-      initTasksListener();
-      initReportingListener();
-      initVolunteerListener();
+    // Initialize users first (now returns Promise)
+    initUsersListener();
 
-      // Initialize default admin account on first launch
-      await initializeDefaultAdmin();
+    // Initialize other Firebase listeners
+    initParticipantsListener();
+    initSchedulerListener();
+    initResourcesListener();
+    initTransitionalHomesListener();
+    initMentorshipListener();
+    initGuidanceListener();
+    initTasksListener();
+    initReportingListener();
+    initVolunteerListener();
 
-      // Initialize default transitional homes
-      await initDefaultHomes();
+    // Initialize defaults and fixes
+    initializeDefaultAdmin();
+    initDefaultHomes();
+    fixAdminPasswordFlag();
+    fixMenteeStatusesOnce();
 
-      // Fix admin password flag (one-time fix)
-      await fixAdminPasswordFlag();
-
-      // Fix mentee statuses for existing participants (one-time fix)
-      await fixMenteeStatusesOnce();
-
-      console.log("✅ App.tsx: All initialization complete");
-    };
-
-    initializeAll().catch(err => {
-      console.error("❌ Error during app initialization:", err);
-    });
+    console.log("✅ App.tsx: All initialization complete");
   }, []); // Empty dependency array - only run once on mount
 
   return (
