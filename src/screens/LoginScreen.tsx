@@ -27,7 +27,6 @@ export default function LoginScreen({ navigation }: any) {
       // Check current users count
       let currentUsers = useUsersStore.getState().invitedUsers;
       console.log(`Users loaded: ${currentUsers.length}`);
-      console.log("===========================================");
 
       // Wait for users to load if needed
       let attempts = 0;
@@ -38,13 +37,22 @@ export default function LoginScreen({ navigation }: any) {
         attempts++;
       }
 
+      console.log(`✅ Final user count: ${currentUsers.length}`);
+
+      // If users still haven't loaded, show a better error
       if (currentUsers.length === 0) {
-        console.log("❌ Users failed to load after 5 seconds");
-        console.log("❌ This means Firebase hasn't synced yet or there's a connection issue");
-      } else {
-        console.log(`✅ Users loaded: ${currentUsers.length} users found`);
+        console.log("❌ Users failed to load - Firebase connection issue");
+        setIsLoading(false);
+        // Set a custom error message
+        useAuthStore.getState().loginError = "Unable to connect to server. Please check your internet connection and try again.";
+        return;
       }
 
+      // Log all available users for debugging
+      console.log("Available users:");
+      currentUsers.forEach(u => console.log(`  - ${u.email} (${u.name})`));
+
+      // Try login
       const result = await login(email, password);
       console.log(`Login result: ${result ? "SUCCESS" : "FAILED"}`);
 
