@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { ref, set as firebaseSet, onValue, update as firebaseUpdate, remove } from "firebase/database";
+import { ref, set as firebaseSet, onValue, update as firebaseUpdate, remove, get as firebaseGet } from "firebase/database";
 import { database } from "../config/firebase";
 import { User, UserRole, ReportingCategory, ReportingPermissions } from "../types";
 
@@ -39,6 +39,7 @@ interface UsersActions {
   initializeDefaultAdmin: () => Promise<void>;
   initializeFirebaseListener: () => void;
   refreshFirebaseListener: () => void;
+  fetchUsersDirectly: () => Promise<void>;
 }
 
 type UsersStore = UsersState & UsersActions;
@@ -103,6 +104,35 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
     get().initializeFirebaseListener();
 
     console.log("✅ Firebase listener refresh initiated");
+  },
+
+  fetchUsersDirectly: async () => {
+    console.log("🔄 Fetching users directly from Firebase (bypassing listener)...");
+
+    if (!database) {
+      console.warn("Firebase not configured. Cannot fetch users.");
+      return;
+    }
+
+    try {
+      set({ isLoading: true });
+      const usersRef = ref(database, "users");
+      const snapshot = await firebaseGet(usersRef);
+
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const usersArray = Object.values(data) as InvitedUser[];
+        console.log(`✅ Direct fetch: Loaded ${usersArray.length} users from Firebase`);
+        set({ invitedUsers: usersArray, isLoading: false });
+      } else {
+        console.log("✅ Direct fetch: No users in Firebase");
+        set({ invitedUsers: [], isLoading: false });
+      }
+    } catch (error) {
+      console.error("❌ Error in direct fetch:", error);
+      set({ isLoading: false });
+      throw error;
+    }
   },
 
   addUser: async (name, email, role, password, invitedBy, phone, nickname) => {

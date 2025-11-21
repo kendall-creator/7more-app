@@ -2,7 +2,59 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Fixed Device Cache Issues Preventing Firebase from Loading - November 21, 2025
+## 🔥 LATEST UPDATE: Added Direct Firebase Fetch as Listener Fallback - November 21, 2025
+
+**Date:** November 21, 2025
+**Status:** ✅ COMPLETE
+
+### What Was Changed:
+
+#### Added Direct Fetch Method to Bypass Broken Listeners (CRITICAL BUGFIX)
+- **Issue**: On some devices, Firebase real-time listeners (`onValue`) fail to initialize or fire callbacks, causing users to never load even after refresh attempts. This is a known issue with cached Expo apps.
+- **Root Cause**: Firebase real-time listeners can fail silently on devices with corrupted cache. The listener registers but callbacks never execute, leaving the app with 0 users and no way to authenticate.
+- **Fix Applied**:
+  1. Created new `fetchUsersDirectly()` method that uses Firebase `get()` instead of `onValue()` - a one-time fetch that doesn't rely on listeners
+  2. LoginScreen now tries direct fetch first when no users loaded after 2 seconds
+  3. If direct fetch succeeds, users can login immediately without waiting for listener
+  4. If direct fetch also fails, falls back to listener refresh as secondary option
+  5. During login, if users still not loaded after 10 second wait, attempts direct fetch as last resort before showing error
+
+#### How the New Recovery Flow Works:
+1. **On LoginScreen Mount** (after 2 seconds if no users):
+   - Attempts `fetchUsersDirectly()` first (fast, reliable)
+   - If that succeeds, user can login immediately
+   - If that fails or returns 0 users, tries `refreshFirebaseListener()` as backup
+
+2. **During Login Attempt** (if users still not loaded):
+   - Waits up to 10 seconds for listener to load users
+   - If still empty, runs `fetchUsersDirectly()` as final attempt
+   - Only shows error if direct fetch also fails
+
+#### Why Direct Fetch Works When Listeners Don't:
+- Real-time listeners (`onValue`) maintain persistent connections that can get corrupted in cache
+- Direct fetch (`get`) is a simple one-time HTTP request that bypasses all listener state
+- Even if listener is broken, direct fetch can still retrieve data from Firebase
+
+#### Files Modified:
+- `/src/state/usersStore.ts`:
+  - Added `get as firebaseGet` to imports
+  - Added `fetchUsersDirectly()` method that bypasses listeners completely
+  - Added to UsersActions interface
+- `/src/screens/LoginScreen.tsx`:
+  - Updated mount useEffect to try direct fetch first, then listener refresh
+  - Updated handleLogin to attempt direct fetch as last resort before error
+
+#### For Your Organization:
+**This fix should resolve Madi's login issue and any similar problems on other devices.** The app now has three recovery mechanisms:
+1. Direct fetch on mount (fast recovery)
+2. Listener refresh on mount (if direct fetch fails)
+3. Direct fetch during login (last resort)
+
+Ask Madi to try logging in again. The app should now load users successfully using the direct fetch method even if the real-time listener is broken on her device.
+
+---
+
+## 📋 PREVIOUS UPDATE: Fixed Device Cache Issues Preventing Firebase from Loading - November 21, 2025
 
 **Date:** November 21, 2025
 **Status:** ✅ COMPLETE

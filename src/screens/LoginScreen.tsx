@@ -19,11 +19,23 @@ export default function LoginScreen({ navigation }: any) {
     console.log(`Current users loaded: ${invitedUsers.length}`);
 
     // If no users loaded after 2 seconds, try to refresh Firebase listener
-    const checkTimer = setTimeout(() => {
+    const checkTimer = setTimeout(async () => {
       const currentCount = useUsersStore.getState().invitedUsers.length;
       if (currentCount === 0) {
-        console.log("⚠️  No users loaded after 2 seconds, forcing Firebase listener refresh...");
-        useUsersStore.getState().refreshFirebaseListener();
+        console.log("⚠️  No users loaded after 2 seconds, trying direct fetch...");
+        try {
+          await useUsersStore.getState().fetchUsersDirectly();
+          const newCount = useUsersStore.getState().invitedUsers.length;
+          if (newCount > 0) {
+            console.log(`✅ Direct fetch successful: ${newCount} users loaded`);
+          } else {
+            console.log("⚠️  Direct fetch returned 0 users - trying listener refresh...");
+            useUsersStore.getState().refreshFirebaseListener();
+          }
+        } catch (error) {
+          console.error("❌ Direct fetch failed, trying listener refresh:", error);
+          useUsersStore.getState().refreshFirebaseListener();
+        }
       } else {
         console.log(`✅ Users successfully loaded: ${currentCount} users`);
       }
@@ -36,14 +48,12 @@ export default function LoginScreen({ navigation }: any) {
     if (email && password) {
       setIsLoading(true);
 
-      // Debug logging
       console.log("===========================================");
       console.log("🔐 LOGIN ATTEMPT");
       console.log("===========================================");
       console.log(`Email entered: "${email}"`);
       console.log(`Password entered: "${password}"`);
 
-      // Check current users count
       let currentUsers = useUsersStore.getState().invitedUsers;
       console.log(`Users loaded: ${currentUsers.length}`);
 
@@ -56,26 +66,36 @@ export default function LoginScreen({ navigation }: any) {
         attempts++;
       }
 
-      console.log(`✅ Final user count: ${currentUsers.length}`);
+      console.log(`✅ Final user count after wait: ${currentUsers.length}`);
+
+      // If still no users, try direct fetch as last resort
+      if (currentUsers.length === 0) {
+        console.log("⚠️  Users still not loaded, attempting direct fetch as last resort...");
+        try {
+          await useUsersStore.getState().fetchUsersDirectly();
+          currentUsers = useUsersStore.getState().invitedUsers;
+          console.log(`✅ Direct fetch result: ${currentUsers.length} users`);
+        } catch (error) {
+          console.error("❌ Direct fetch failed:", error);
+        }
+      }
 
       if (currentUsers.length === 0) {
-        console.log("❌ CRITICAL: Users failed to load after 10 seconds");
-        console.log("❌ This indicates Firebase listener is not working on this device");
+        console.log("❌ CRITICAL: Users failed to load after all attempts");
+        console.log("❌ This indicates Firebase connection is not working on this device");
         console.log("❌ Possible causes:");
         console.log("   1. App cache is corrupted - user needs to clear app data");
         console.log("   2. Old version of app cached - user needs to force refresh");
-        console.log("   3. Firebase listener didn't initialize properly");
+        console.log("   3. Firebase connection is blocked");
 
         setIsLoading(false);
         useAuthStore.getState().loginError = "Unable to load user data. Please close the app completely and reopen it. If issue persists, clear app cache.";
         return;
       }
 
-      // Log all available users for debugging
       console.log("Available users:");
       currentUsers.forEach(u => console.log(`  - ${u.email} (${u.name})`));
 
-      // Try login
       const result = await login(email, password);
       console.log(`Login result: ${result ? "SUCCESS" : "FAILED"}`);
 
