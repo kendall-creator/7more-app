@@ -16,7 +16,6 @@ import { useReportingStore } from "./src/state/reportingStore";
 import { useVolunteerStore } from "./src/state/volunteerStore";
 import { fixAdminPasswordFlag } from "./src/utils/fixAdminPassword";
 import { fixMenteeStatusesOnce } from "./src/utils/fixMenteeStatuses";
-import "./emergencyMadiFix"; // Run emergency diagnostic
 
 /*
 IMPORTANT NOTICE: DO NOT REMOVE

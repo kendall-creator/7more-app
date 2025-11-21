@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, Pressable, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from "react-native";
 import { useAuthStore, useCurrentUser } from "../state/authStore";
-import { testLogin } from "../utils/debugUsers";
-import { listAllUsers, fixUserLoginIssue } from "../utils/fixUserLogin";
+import { useUsersStore } from "../state/usersStore";
 
 export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState("");
@@ -12,17 +11,7 @@ export default function LoginScreen({ navigation }: any) {
   const loginError = useAuthStore((s) => s.loginError);
   const clearError = useAuthStore((s) => s.clearError);
   const currentUser = useCurrentUser();
-
-  // Debug: List all users when component mounts
-  useEffect(() => {
-    setTimeout(() => {
-      listAllUsers();
-
-      // Check Madi's account specifically
-      console.log("\n🔍 CHECKING MADI LOWRY ACCOUNT:");
-      fixUserLoginIssue("madi");
-    }, 1000);
-  }, []);
+  const invitedUsers = useUsersStore((s) => s.invitedUsers);
 
   const handleLogin = async () => {
     if (email && password) {
@@ -34,14 +23,31 @@ export default function LoginScreen({ navigation }: any) {
       console.log("===========================================");
       console.log(`Email entered: "${email}"`);
       console.log(`Password entered: "${password}"`);
-      console.log(`Email length: ${email.length}`);
-      console.log(`Password length: ${password.length}`);
+
+      // Check current users count
+      let currentUsers = useUsersStore.getState().invitedUsers;
+      console.log(`Users loaded: ${currentUsers.length}`);
       console.log("===========================================");
 
-      // Test credentials for debugging
-      testLogin(email, password);
+      // Wait for users to load if needed
+      let attempts = 0;
+      while (currentUsers.length === 0 && attempts < 10) {
+        console.log(`⏳ Waiting for users to load... attempt ${attempts + 1}`);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        currentUsers = useUsersStore.getState().invitedUsers;
+        attempts++;
+      }
 
-      await login(email, password);
+      if (currentUsers.length === 0) {
+        console.log("❌ Users failed to load after 5 seconds");
+        console.log("❌ This means Firebase hasn't synced yet or there's a connection issue");
+      } else {
+        console.log(`✅ Users loaded: ${currentUsers.length} users found`);
+      }
+
+      const result = await login(email, password);
+      console.log(`Login result: ${result ? "SUCCESS" : "FAILED"}`);
+
       setIsLoading(false);
     }
   };

@@ -2,7 +2,45 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Fixed Login Issues + Enhanced Debugging - November 20, 2025
+## 🔥 LATEST UPDATE: Fixed Login Timing Issue for Shared Expo Links - November 20, 2025
+
+**Date:** November 20, 2025
+**Status:** ✅ COMPLETE
+
+### What Was Changed:
+
+#### Fixed Login Timing/Race Condition Issue (BUGFIX)
+- **Issue**: Madi Lowry unable to login when accessing app through shared Expo link, despite credentials being valid
+- **Root Cause**: Race condition where login was attempted before Firebase users list finished loading. When accessing via shared Expo links, Firebase needs time to sync data
+- **Fix Applied**:
+  1. Added automatic wait mechanism that checks if users are loaded before attempting login
+  2. Waits up to 5 seconds (checking every 500ms) for Firebase to sync if needed
+  3. Added comprehensive logging to track user loading status
+  4. Enhanced password validation with trimmed comparison for whitespace tolerance
+
+#### How Login Now Works:
+1. User enters credentials and taps login
+2. System checks if Firebase users have loaded
+3. If not loaded, automatically waits up to 5 seconds for Firebase sync
+4. Once loaded, proceeds with authentication (exact match, then trimmed match)
+5. Detailed logs track the entire process
+
+#### Why This Happened:
+When users access the app via **shared Expo links** on different devices, Firebase needs time to establish connection and sync data. The previous code would attempt login immediately, before users were loaded, causing "Invalid email or password" errors even with correct credentials.
+
+#### Files Modified:
+- `/src/screens/LoginScreen.tsx` - Added automatic user loading check and wait mechanism
+- `/src/state/usersStore.ts` - Enhanced validateCredentials with trimmed password comparison
+- `/src/state/authStore.ts` - Added detailed authentication logging
+
+#### For Your Organization:
+This fix ensures **everyone using the shared Expo link can login reliably**, regardless of device or network speed. The automatic wait handles network variability.
+
+**Madi can now try logging in again** with `mlowry@7more.net` / `mlowry`
+
+---
+
+## 📋 PREVIOUS UPDATE: Fixed Login Issues + Enhanced Debugging - November 20, 2025
 
 **Date:** November 20, 2025
 **Status:** ✅ COMPLETE
