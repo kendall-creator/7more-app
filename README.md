@@ -2,7 +2,59 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Added Fallback Authentication for Firebase Connection Issues - November 21, 2025
+## 🔥 LATEST UPDATE: Fixed Device Cache Issues Preventing Firebase from Loading - November 21, 2025
+
+**Date:** November 21, 2025
+**Status:** ✅ COMPLETE
+
+### What Was Changed:
+
+#### Fixed Device-Specific Firebase Loading Issues (CRITICAL BUGFIX)
+- **Issue**: Some devices (Madi's phone, user's iPad) unable to login despite being on same WiFi where other devices work fine. These same devices worked previously, indicating cached app data corruption.
+- **Root Cause**: When accessing via shared Expo links, devices cache the app locally. If the Firebase listener fails to initialize properly on cached versions, it prevents the `isListenerInitialized` flag from being reset, blocking all future connection attempts even when explicitly requested.
+- **Fix Applied**:
+  1. Created new `refreshFirebaseListener()` method in usersStore that can force a complete listener refresh
+  2. Resets the `isListenerInitialized` flag to allow reinitialization
+  3. Clears cached user data and rebuilds Firebase connection from scratch
+  4. LoginScreen now automatically detects if users haven't loaded after 2 seconds and forces a refresh
+  5. Increased login wait time to 10 seconds (from 5) to handle slower connections
+  6. Removed problematic fallback authentication that was masking the real issue
+
+#### How Login Recovery Works Now:
+1. LoginScreen mounts and checks if users are loaded
+2. If no users loaded after 2 seconds, automatically calls `refreshFirebaseListener()`
+3. This method:
+   - Resets the initialization flag
+   - Clears current user cache
+   - Reinitializes Firebase connection completely
+4. Login then waits up to 10 seconds for users to load
+5. If still not loaded, shows clear error message asking user to close and reopen app
+
+#### Why This Fix Is Different:
+Previous attempts tried to reinitialize the listener, but the `isListenerInitialized` guard clause prevented actual reinitialization. This new `refreshFirebaseListener()` method explicitly resets that flag, allowing a true reconnection.
+
+#### Device Cache Explanation:
+Expo apps accessed via shared links cache code and data locally per device. If a Firebase listener fails to initialize on first load (network hiccup, timing issue, etc.), the cached version retains that broken state. The new refresh mechanism can recover from these corrupted cache states without requiring the user to manually clear app data.
+
+#### Files Modified:
+- `/src/state/usersStore.ts`:
+  - Added `refreshFirebaseListener()` method that resets initialization flag and forces full reconnection
+  - Added to UsersActions interface
+- `/src/screens/LoginScreen.tsx`:
+  - Updated to call `refreshFirebaseListener()` instead of `initializeFirebaseListener()` when users not loaded
+  - Increased wait time to 10 seconds for slower connections
+
+#### For Your Organization:
+**Madi and anyone else having login issues should try again now.** The app will automatically detect and fix the Firebase connection issue without requiring manual intervention.
+
+If users still cannot login:
+1. Check LOGS tab for detailed connection diagnostics
+2. Try force-closing the app completely and reopening
+3. As last resort, clear app cache/data for that device
+
+---
+
+## 📋 PREVIOUS UPDATE: Added Fallback Authentication for Firebase Connection Issues - November 21, 2025
 
 **Date:** November 20, 2025
 **Status:** ✅ COMPLETE

@@ -13,6 +13,25 @@ export default function LoginScreen({ navigation }: any) {
   const currentUser = useCurrentUser();
   const invitedUsers = useUsersStore((s) => s.invitedUsers);
 
+  // Force refresh Firebase listeners when login screen mounts
+  useEffect(() => {
+    console.log("🔄 LoginScreen mounted - checking Firebase connection");
+    console.log(`Current users loaded: ${invitedUsers.length}`);
+
+    // If no users loaded after 2 seconds, try to refresh Firebase listener
+    const checkTimer = setTimeout(() => {
+      const currentCount = useUsersStore.getState().invitedUsers.length;
+      if (currentCount === 0) {
+        console.log("⚠️  No users loaded after 2 seconds, forcing Firebase listener refresh...");
+        useUsersStore.getState().refreshFirebaseListener();
+      } else {
+        console.log(`✅ Users successfully loaded: ${currentCount} users`);
+      }
+    }, 2000);
+
+    return () => clearTimeout(checkTimer);
+  }, []);
+
   const handleLogin = async () => {
     if (email && password) {
       setIsLoading(true);
@@ -30,7 +49,7 @@ export default function LoginScreen({ navigation }: any) {
 
       // Wait for users to load if needed
       let attempts = 0;
-      while (currentUsers.length === 0 && attempts < 10) {
+      while (currentUsers.length === 0 && attempts < 20) {
         console.log(`⏳ Waiting for users to load... attempt ${attempts + 1}`);
         await new Promise(resolve => setTimeout(resolve, 500));
         currentUsers = useUsersStore.getState().invitedUsers;
@@ -39,39 +58,17 @@ export default function LoginScreen({ navigation }: any) {
 
       console.log(`✅ Final user count: ${currentUsers.length}`);
 
-      // FALLBACK: If users failed to load but credentials match known users, allow login
       if (currentUsers.length === 0) {
-        console.log("❌ Users failed to load - attempting fallback authentication");
+        console.log("❌ CRITICAL: Users failed to load after 10 seconds");
+        console.log("❌ This indicates Firebase listener is not working on this device");
+        console.log("❌ Possible causes:");
+        console.log("   1. App cache is corrupted - user needs to clear app data");
+        console.log("   2. Old version of app cached - user needs to force refresh");
+        console.log("   3. Firebase listener didn't initialize properly");
 
-        // Define fallback users for emergency login when Firebase won't connect
-        const fallbackUsers = [
-          { email: "mlowry@7more.net", password: "mlowry", name: "Madi Lowry", role: "bridge_team_leader", id: "user_madi_fallback" },
-          { email: "kendall@7more.net", password: "7moreHouston!", name: "Kendall", role: "admin", id: "admin_default" },
-          { email: "pauljalfaro@hotmail.com", password: "palfaro", name: "Paul Alfaro", role: "mentorship_leader", id: "user_paul" },
-        ];
-
-        const fallbackUser = fallbackUsers.find(
-          u => u.email.toLowerCase() === email.toLowerCase().trim() &&
-               (u.password === password || u.password.trim() === password.trim())
-        );
-
-        if (fallbackUser) {
-          console.log(`✅ Fallback authentication successful for: ${fallbackUser.name}`);
-          // Manually set the user
-          useAuthStore.getState().setUser({
-            id: fallbackUser.id,
-            name: fallbackUser.name,
-            email: fallbackUser.email,
-            role: fallbackUser.role as any,
-          });
-          setIsLoading(false);
-          return;
-        } else {
-          console.log("❌ Fallback authentication failed - credentials don't match any fallback users");
-          setIsLoading(false);
-          useAuthStore.getState().loginError = "Unable to connect to server. Please check your internet connection and try again.";
-          return;
-        }
+        setIsLoading(false);
+        useAuthStore.getState().loginError = "Unable to load user data. Please close the app completely and reopen it. If issue persists, clear app cache.";
+        return;
       }
 
       // Log all available users for debugging

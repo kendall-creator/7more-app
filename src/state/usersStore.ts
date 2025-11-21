@@ -38,6 +38,7 @@ interface UsersActions {
   validateCredentials: (email: string, password: string) => User | null;
   initializeDefaultAdmin: () => Promise<void>;
   initializeFirebaseListener: () => void;
+  refreshFirebaseListener: () => void;
 }
 
 type UsersStore = UsersState & UsersActions;
@@ -82,6 +83,26 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
       console.error("❌ Error in users listener:", error);
       set({ isLoading: false });
     });
+  },
+
+  refreshFirebaseListener: () => {
+    console.log("🔄 Force refreshing Firebase users listener...");
+
+    if (!database) {
+      console.warn("Firebase not configured. Cannot refresh listener.");
+      return;
+    }
+
+    // Reset the initialization flag to allow reinitialization
+    isListenerInitialized = false;
+
+    // Clear current users while reloading
+    set({ isLoading: true, invitedUsers: [] });
+
+    // Call initialize again
+    get().initializeFirebaseListener();
+
+    console.log("✅ Firebase listener refresh initiated");
   },
 
   addUser: async (name, email, role, password, invitedBy, phone, nickname) => {
