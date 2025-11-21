@@ -39,13 +39,39 @@ export default function LoginScreen({ navigation }: any) {
 
       console.log(`✅ Final user count: ${currentUsers.length}`);
 
-      // If users still haven't loaded, show a better error
+      // FALLBACK: If users failed to load but credentials match known users, allow login
       if (currentUsers.length === 0) {
-        console.log("❌ Users failed to load - Firebase connection issue");
-        setIsLoading(false);
-        // Set a custom error message
-        useAuthStore.getState().loginError = "Unable to connect to server. Please check your internet connection and try again.";
-        return;
+        console.log("❌ Users failed to load - attempting fallback authentication");
+
+        // Define fallback users for emergency login when Firebase won't connect
+        const fallbackUsers = [
+          { email: "mlowry@7more.net", password: "mlowry", name: "Madi Lowry", role: "bridge_team_leader", id: "user_madi_fallback" },
+          { email: "kendall@7more.net", password: "7moreHouston!", name: "Kendall", role: "admin", id: "admin_default" },
+          { email: "pauljalfaro@hotmail.com", password: "palfaro", name: "Paul Alfaro", role: "mentorship_leader", id: "user_paul" },
+        ];
+
+        const fallbackUser = fallbackUsers.find(
+          u => u.email.toLowerCase() === email.toLowerCase().trim() &&
+               (u.password === password || u.password.trim() === password.trim())
+        );
+
+        if (fallbackUser) {
+          console.log(`✅ Fallback authentication successful for: ${fallbackUser.name}`);
+          // Manually set the user
+          useAuthStore.getState().setUser({
+            id: fallbackUser.id,
+            name: fallbackUser.name,
+            email: fallbackUser.email,
+            role: fallbackUser.role as any,
+          });
+          setIsLoading(false);
+          return;
+        } else {
+          console.log("❌ Fallback authentication failed - credentials don't match any fallback users");
+          setIsLoading(false);
+          useAuthStore.getState().loginError = "Unable to connect to server. Please check your internet connection and try again.";
+          return;
+        }
       }
 
       // Log all available users for debugging
