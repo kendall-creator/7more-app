@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { ref, set as firebaseSet, onValue, update as firebaseUpdate, remove, get as firebaseGet } from "firebase/database";
 import { database } from "../config/firebase";
 import { User, UserRole, ReportingCategory, ReportingPermissions } from "../types";
+import { FALLBACK_USERS } from "./fallbackUsers";
 
 interface InvitedUser {
   id: string;
@@ -74,7 +75,15 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
     // FIRST: Try direct fetch immediately (more reliable on problematic devices)
     try {
       console.log("   Attempting direct fetch first...");
-      const snapshot = await firebaseGet(usersRef);
+
+      // Add a manual timeout to catch hanging requests
+      const fetchPromise = firebaseGet(usersRef);
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Firebase fetch timeout after 5 seconds")), 5000)
+      );
+
+      const snapshot = await Promise.race([fetchPromise, timeoutPromise]) as any;
+
       if (snapshot.exists()) {
         const data = snapshot.val();
         const usersArray = Object.values(data) as InvitedUser[];
@@ -84,9 +93,16 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
         console.log("✅ Direct fetch: No users in Firebase");
         set({ invitedUsers: [], isLoading: false });
       }
-    } catch (directError) {
-      console.error("❌ Direct fetch failed:", directError);
-      set({ isLoading: false, invitedUsers: [] });
+    } catch (directError: any) {
+      console.error("❌ Direct fetch failed:");
+      console.error("   Error type:", directError?.constructor?.name || "Unknown");
+      console.error("   Error message:", directError?.message || String(directError));
+      console.error("   Error code:", directError?.code || "no code");
+      console.error("   This device cannot connect to Firebase. Using emergency fallback users.");
+
+      // Use fallback users as last resort
+      console.log(`⚠️ Loading ${FALLBACK_USERS.length} emergency fallback users`);
+      set({ isLoading: false, invitedUsers: FALLBACK_USERS as any });
     }
 
     // SECOND: Set up real-time listener for updates (optional, but nice to have)
