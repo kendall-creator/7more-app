@@ -10,6 +10,7 @@ export default function LoginScreen({ navigation }: any) {
   const [isLoading, setIsLoading] = useState(false);
   const [showCodeLogin, setShowCodeLogin] = useState(false);
   const [debugMessage, setDebugMessage] = useState("");
+  const [usersReady, setUsersReady] = useState(false);
   const login = useAuthStore((s) => s.login);
   const loginError = useAuthStore((s) => s.loginError);
   const clearError = useAuthStore((s) => s.clearError);
@@ -17,15 +18,53 @@ export default function LoginScreen({ navigation }: any) {
   const currentUser = useCurrentUser();
   const invitedUsers = useUsersStore((s) => s.invitedUsers);
 
+  // Wait for users to load from Firebase
+  useEffect(() => {
+    console.log(`📊 Users loaded count: ${invitedUsers.length}`);
+
+    if (invitedUsers.length > 0) {
+      console.log("✅ Users are ready for login");
+      setUsersReady(true);
+      setDebugMessage(`Ready! ${invitedUsers.length} users loaded.`);
+    } else {
+      console.log("⏳ Waiting for users to load...");
+      setDebugMessage("Loading user data...");
+
+      // Set a timeout to try direct fetch if users don't load within 3 seconds
+      const timeout = setTimeout(async () => {
+        if (invitedUsers.length === 0) {
+          console.log("⚠️ Users still not loaded after 3s, trying direct fetch...");
+          setDebugMessage("Fetching user data...");
+          try {
+            await useUsersStore.getState().fetchUsersDirectly();
+            const users = useUsersStore.getState().invitedUsers;
+            if (users.length > 0) {
+              setUsersReady(true);
+              setDebugMessage(`Ready! ${users.length} users loaded.`);
+            } else {
+              setDebugMessage("Unable to load users. Check connection.");
+            }
+          } catch (error) {
+            console.error("❌ Direct fetch failed:", error);
+            setDebugMessage("Connection error. Please retry.");
+          }
+        }
+      }, 3000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [invitedUsers.length]);
+
   // Access code to user mapping
   const accessCodeMap: { [key: string]: string } = {
     "12345": "debs@7more.net",
   };
 
   const handleCodeLogin = async () => {
-    setDebugMessage("Button pressed! Starting login...");
     console.log("\n🔐 CODE LOGIN ATTEMPT:");
     console.log(`  Access Code: ${accessCode}`);
+    console.log(`  Users ready: ${usersReady}`);
+    console.log(`  Users count: ${invitedUsers.length}`);
 
     if (!accessCode) {
       console.log("❌ Missing access code");
@@ -33,81 +72,77 @@ export default function LoginScreen({ navigation }: any) {
       return;
     }
 
-    setDebugMessage(`Checking code: ${accessCode}`);
+    // Always ensure we have users before proceeding
     setIsLoading(true);
+    let currentUsers = invitedUsers;
 
-    try {
-      // Check if code is valid
-      const userEmail = accessCodeMap[accessCode];
-      if (!userEmail) {
-        console.log("❌ Invalid access code");
-        setDebugMessage("Invalid code!");
-        useAuthStore.setState({ loginError: "Invalid access code. Please try again." });
-        setIsLoading(false);
-        return;
-      }
+    if (currentUsers.length === 0) {
+      setDebugMessage("Loading users from server...");
+      console.log("⚠️ No users loaded, fetching directly...");
+      try {
+        await useUsersStore.getState().fetchUsersDirectly();
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        currentUsers = useUsersStore.getState().invitedUsers;
+        console.log(`  Users after fetch: ${currentUsers.length}`);
 
-      setDebugMessage(`Valid code! Loading user: ${userEmail}`);
-      console.log(`✅ Valid code for: ${userEmail}`);
-
-      // Wait for users to load if needed
-      let currentUsers = useUsersStore.getState().invitedUsers;
-      setDebugMessage(`Users loaded: ${currentUsers.length}`);
-      console.log(`  Current users loaded: ${currentUsers.length}`);
-
-      if (currentUsers.length === 0) {
-        setDebugMessage("No users loaded, fetching from server...");
-        console.log("⚠️ No users loaded, fetching directly...");
-        try {
-          await useUsersStore.getState().fetchUsersDirectly();
-          await new Promise(resolve => setTimeout(resolve, 500));
-          currentUsers = useUsersStore.getState().invitedUsers;
-          setDebugMessage(`Fetched ${currentUsers.length} users`);
-          console.log(`  Users after fetch: ${currentUsers.length}`);
-        } catch (fetchError) {
-          console.error("❌ Direct fetch failed:", fetchError);
+        if (currentUsers.length === 0) {
           setDebugMessage("Failed to load users!");
-          useAuthStore.setState({ loginError: "Unable to load user data. Please try again." });
+          useAuthStore.setState({ loginError: "Unable to connect to server. Please check your connection and try again." });
           setIsLoading(false);
           return;
         }
-      }
 
-      // Find the user
-      setDebugMessage(`Looking for user: ${userEmail}`);
-      const user = currentUsers.find(u => u.email.toLowerCase() === userEmail.toLowerCase());
-      if (!user) {
-        console.log("❌ User not found in database");
-        setDebugMessage("User not found in database!");
-        useAuthStore.setState({ loginError: "User account not found. Please contact admin." });
+        setDebugMessage(`Loaded ${currentUsers.length} users`);
+      } catch (fetchError) {
+        console.error("❌ Direct fetch failed:", fetchError);
+        setDebugMessage("Connection failed!");
+        useAuthStore.setState({ loginError: "Unable to connect to server. Please check your connection and try again." });
         setIsLoading(false);
         return;
       }
-
-      setDebugMessage(`Found user: ${user.name}! Logging in...`);
-      console.log(`✅ User found: ${user.name}`);
-
-      // Log them in directly
-      setDebugMessage("Setting user and logging in...");
-      setUser({
-        id: user.id,
-        name: user.name,
-        nickname: user.nickname,
-        email: user.email,
-        role: user.role,
-        roles: user.roles,
-        requiresPasswordChange: user.requiresPasswordChange,
-      });
-
-      console.log("✅ Code login successful!");
-      setDebugMessage("Login successful! Redirecting...");
-      setIsLoading(false);
-    } catch (error) {
-      console.error("❌ Code login error:", error);
-      setDebugMessage(`Error: ${error}`);
-      useAuthStore.setState({ loginError: "Login failed. Please try again." });
-      setIsLoading(false);
     }
+
+    // Check if code is valid
+    const userEmail = accessCodeMap[accessCode];
+    if (!userEmail) {
+      console.log("❌ Invalid access code");
+      setDebugMessage("Invalid code!");
+      useAuthStore.setState({ loginError: "Invalid access code. Please try again." });
+      setIsLoading(false);
+      return;
+    }
+
+    setDebugMessage(`Valid code! Looking for: ${userEmail}`);
+    console.log(`✅ Valid code for: ${userEmail}`);
+
+    // Find the user
+    const user = currentUsers.find(u => u.email.toLowerCase() === userEmail.toLowerCase());
+    if (!user) {
+      console.log("❌ User not found in database");
+      console.log(`  Available users: ${currentUsers.map(u => u.email).join(", ")}`);
+      setDebugMessage(`User ${userEmail} not found!`);
+      useAuthStore.setState({ loginError: "User account not found. Please contact admin." });
+      setIsLoading(false);
+      return;
+    }
+
+    setDebugMessage(`Found user: ${user.name}! Logging in...`);
+    console.log(`✅ User found: ${user.name}`);
+
+    // Log them in directly
+    setUser({
+      id: user.id,
+      name: user.name,
+      nickname: user.nickname,
+      email: user.email,
+      role: user.role,
+      roles: user.roles,
+      requiresPasswordChange: user.requiresPasswordChange,
+    });
+
+    console.log("✅ Code login successful!");
+    setDebugMessage("Login successful!");
+    setIsLoading(false);
   };
 
   const handleLogin = async () => {
@@ -184,10 +219,16 @@ export default function LoginScreen({ navigation }: any) {
                 />
               </View>
 
-              {/* Debug Message */}
+              {/* Debug Message - Show loading status */}
               {debugMessage && (
-                <View className="mb-4 bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3">
-                  <Text className="text-yellow-900 text-xs font-mono">{debugMessage}</Text>
+                <View className={`mb-4 border rounded-xl px-4 py-3 ${
+                  usersReady
+                    ? "bg-green-50 border-green-200"
+                    : "bg-yellow-50 border-yellow-200"
+                }`}>
+                  <Text className={`text-xs font-mono ${
+                    usersReady ? "text-green-900" : "text-yellow-900"
+                  }`}>{debugMessage}</Text>
                 </View>
               )}
 
