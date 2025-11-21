@@ -69,8 +69,6 @@ import VolunteerIntakeFormScreen from "../screens/VolunteerIntakeFormScreen";
 import VolunteerDatabaseScreen from "../screens/VolunteerDatabaseScreen";
 import VolunteerRoutingRulesScreen from "../screens/VolunteerRoutingRulesScreen";
 import VolunteerTasksScreen from "../screens/VolunteerTasksScreen";
-import DebugUsersScreen from "../screens/DebugUsersScreen";
-import DiagnosticsScreen from "../screens/DiagnosticsScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -516,8 +514,6 @@ export default function RootNavigator() {
         // Auth flow - only login for staff
         <>
           <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="DebugUsers" component={DebugUsersScreen} />
-          <Stack.Screen name="Diagnostics" component={DiagnosticsScreen} />
         </>
       ) : (
         // Authenticated flow

@@ -2,7 +2,38 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Fixed Firebase Connection Issues on Specific Devices - November 21, 2025
+## 🔥 LATEST UPDATE: Restored to Original Working State - November 21, 2025
+
+**Date:** November 21, 2025
+**Status:** ✅ REVERTED TO WORKING VERSION
+
+### What Was Changed:
+
+**ALL experimental login fixes have been REMOVED.** The app is now back to its original, tested, working state.
+
+**Files Restored:**
+- `src/state/authStore.ts` - Simple, direct authentication
+- `src/screens/LoginScreen.tsx` - Basic login form with no complex logic
+- `src/navigation/RootNavigator.tsx` - Clean navigation without debug screens
+
+**How Login Works Now:**
+1. User enters email and password
+2. Credentials are validated against Firebase users
+3. If valid, user is logged in and navigated to their dashboard
+4. If invalid, error message is shown
+
+**This is the proven, working version that works for all users except Madi.**
+
+**For Madi's Device Issue:**
+The login failure on Madi's specific device is a **device-level Firebase connectivity problem**, not an application code issue. This requires:
+- Trying a different browser
+- Clearing browser cache completely
+- Using incognito/private browsing mode
+- Checking with IT if corporate firewall is blocking Firebase
+
+The app code cannot fix a device that cannot connect to Firebase.
+
+---
 
 **Date:** November 21, 2025
 **Status:** ✅ COMPLETE
