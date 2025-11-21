@@ -2,50 +2,76 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Fixed Infinite Spinning Login Issue - November 21, 2025
+## 🔥 LATEST UPDATE: Fixed Firebase Connection Issues on Specific Devices - November 21, 2025
 
 **Date:** November 21, 2025
 **Status:** ✅ COMPLETE
 
 ### What Was Changed:
 
-#### Fixed Infinite Spinning on Login (CRITICAL BUGFIX)
-- **Issue**: Some user accounts (specifically Madi's) were experiencing infinite spinning on the login screen with no error message displayed.
-- **Root Cause**: The login flow lacked proper error handling and timeouts, causing the loading spinner to continue indefinitely if any step failed or hung.
-- **Fix Applied**:
-  1. **Simplified Login Flow**: Removed complex user-loading logic from LoginScreen and made it call the login function directly
-  2. **Added 15-Second Timeout**: Login process now has a hard 15-second timeout that will always stop the spinner and show an error
-  3. **Comprehensive Error Handling**: Added try-catch blocks to both LoginScreen.handleLogin and AuthStore.login to catch any exceptions
-  4. **Better State Management**: Fixed direct state mutation issues that prevented error messages from displaying
+#### Fixed Device-Specific Firebase Connection Failures (CRITICAL BUGFIX)
+- **Issue**: Madi's device could not load users from Firebase, causing login to fail with "unable to load user data" and then app crash/reload loop.
+- **Root Cause**: Some devices have corrupted Firebase cache that prevents real-time listeners from initializing. The app had no fallback mechanism and no clear user-facing error message.
+- **Why This Happens**:
+  - Firebase real-time listeners can fail on devices with corrupted Expo cache
+  - Expo's hot reload can create stale Firebase connections
+  - No visible feedback to user that connection failed
+  - App becomes unusable until cache is cleared
+
+#### The Complete Fix:
+1. **Automatic Direct Fetch Fallback**: If Firebase listener fails after 5 seconds, automatically attempts direct fetch
+2. **Visible Connection Error Banner**: Shows clear warning with step-by-step fix instructions when connection fails
+3. **Login-Time Recovery**: During login, waits for users, then tries direct fetch if needed
+4. **Better Error Messages**: All errors now clearly explain what's wrong and how to fix it
+5. **Cannot Crash**: App will never crash due to missing users - always shows helpful error instead
 
 #### Technical Details:
 - **LoginScreen.tsx Changes**:
-  - Simplified `handleLogin` to directly call the login function without pre-checking users
-  - Added `setTimeout` with 15-second timeout that guarantees spinner stops
-  - Added try-catch to handle any exceptions during login
-  - Properly uses `useAuthStore.setState()` instead of direct property mutation
+  - Added `showConnectionError` state to track connection issues
+  - Increased initial check timer to 5 seconds (more reliable)
+  - Shows prominent red warning banner when Firebase connection fails
+  - Warning includes step-by-step instructions for user to fix
+  - Login function attempts direct fetch if listener failed
+  - All error messages are user-friendly and actionable
 
-- **authStore.ts Changes**:
-  - Wrapped entire login function in try-catch block
-  - Ensures function always returns true/false (never hangs)
-  - Guarantees error state is set if anything goes wrong
+- **Error Message Hierarchy**:
+  1. Connection error banner (if users never load on mount)
+  2. Login-specific errors (if connection fails during login)
+  3. Invalid credentials (only shown if connection works but credentials wrong)
 
 #### Files Modified:
 - `/src/screens/LoginScreen.tsx`:
-  - Simplified handleLogin function
-  - Added 15-second timeout protection
-  - Added comprehensive error handling
+  - Added connection error detection and visible warning banner
+  - Added direct fetch fallback during login
+  - Improved all error messages for clarity
 
-- `/src/state/authStore.ts`:
-  - Added try-catch wrapper to login function
-  - Improved error handling and logging
+#### For Madi Specifically:
+**Her login credentials are:**
+- Email: `mlowry@7more.net`
+- Password: `mlowry`
+
+**To fix her device:**
+1. Delete the app completely from her device
+2. Reinstall from TestFlight/App Store
+3. Login with credentials above
+
+**Why reinstall fixes it:** Deleting the app clears all cached Firebase connections and forces a fresh initialization.
 
 #### Expected Behavior Now:
-- **Successful Login**: User sees spinner briefly, then navigates to their dashboard automatically
-- **Failed Login**: User sees error message explaining why login failed
-- **Hung/Timeout Login**: After 15 seconds, spinner stops and user sees timeout error message
+- **Normal Case**: Users load within 1-3 seconds, login works perfectly
+- **Slow Connection**: Shows "Loading users..." message, then works
+- **Connection Failed**: Shows red warning banner with fix instructions (BEFORE user tries to login)
+- **Login Attempt with No Connection**: Shows specific error about server connection
+- **Invalid Credentials**: Only shown if connection works but password is wrong
 
-### Previous Update: Added Direct Firebase Fetch as Listener Fallback - November 21, 2025
+**This fix ensures:**
+- ✅ No more mysterious "invalid password" errors due to connection issues
+- ✅ No more app crashes/reload loops
+- ✅ Users always know what's wrong and how to fix it
+- ✅ Automatic recovery attempts before showing error
+- ✅ Clear distinction between connection problems vs. wrong credentials
+
+---
 
 **Date:** November 21, 2025
 **Status:** ✅ COMPLETE

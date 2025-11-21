@@ -7,6 +7,7 @@ export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showConnectionError, setShowConnectionError] = useState(false);
   const login = useAuthStore((s) => s.login);
   const loginError = useAuthStore((s) => s.loginError);
   const clearError = useAuthStore((s) => s.clearError);
@@ -18,28 +19,30 @@ export default function LoginScreen({ navigation }: any) {
     console.log("🔄 LoginScreen mounted - checking Firebase connection");
     console.log(`Current users loaded: ${invitedUsers.length}`);
 
-    // If no users loaded after 2 seconds, try to refresh Firebase listener
+    // If no users loaded after 5 seconds, show connection error
     const checkTimer = setTimeout(async () => {
       const currentCount = useUsersStore.getState().invitedUsers.length;
       if (currentCount === 0) {
-        console.log("⚠️  No users loaded after 2 seconds, trying direct fetch...");
+        console.log("⚠️  No users loaded after 5 seconds, trying direct fetch...");
         try {
           await useUsersStore.getState().fetchUsersDirectly();
           const newCount = useUsersStore.getState().invitedUsers.length;
           if (newCount > 0) {
             console.log(`✅ Direct fetch successful: ${newCount} users loaded`);
+            setShowConnectionError(false);
           } else {
-            console.log("⚠️  Direct fetch returned 0 users - trying listener refresh...");
-            useUsersStore.getState().refreshFirebaseListener();
+            console.log("❌ Direct fetch returned 0 users - showing connection error");
+            setShowConnectionError(true);
           }
         } catch (error) {
-          console.error("❌ Direct fetch failed, trying listener refresh:", error);
-          useUsersStore.getState().refreshFirebaseListener();
+          console.error("❌ Direct fetch failed:", error);
+          setShowConnectionError(true);
         }
       } else {
         console.log(`✅ Users successfully loaded: ${currentCount} users`);
+        setShowConnectionError(false);
       }
-    }, 2000);
+    }, 5000);
 
     return () => clearTimeout(checkTimer);
   }, []);
@@ -85,12 +88,24 @@ export default function LoginScreen({ navigation }: any) {
         waitAttempts++;
       }
 
+      // If users still not loaded, try direct fetch as last resort
       if (currentUsers.length === 0) {
-        console.error("❌ CRITICAL: Users never loaded after 10 seconds");
+        console.log("⚠️ Users not loaded via listener, attempting direct fetch...");
+        try {
+          await useUsersStore.getState().fetchUsersDirectly();
+          currentUsers = useUsersStore.getState().invitedUsers;
+          console.log(`Direct fetch result: ${currentUsers.length} users`);
+        } catch (fetchError) {
+          console.error("❌ Direct fetch failed:", fetchError);
+        }
+      }
+
+      if (currentUsers.length === 0) {
+        console.error("❌ CRITICAL: Users never loaded after all attempts");
         clearTimeout(loginTimeout);
         setIsLoading(false);
         useAuthStore.setState({
-          loginError: "Unable to load user data. Please close the app completely, reopen it, and try again. If issue persists, clear app cache.",
+          loginError: "Cannot connect to server. Please check your internet connection and try again. If this persists, delete and reinstall the app.",
           isAuthenticated: false,
           currentUser: null
         });
@@ -140,6 +155,25 @@ export default function LoginScreen({ navigation }: any) {
         keyboardShouldPersistTaps="handled"
       >
         <View className="flex-1 justify-center px-6">
+          {/* Connection Error Warning */}
+          {showConnectionError && (
+            <View className="mb-6 bg-red-50 border-2 border-red-300 rounded-xl p-4">
+              <Text className="text-red-800 text-base font-bold mb-2">⚠️ Connection Error</Text>
+              <Text className="text-red-700 text-sm mb-3">
+                Cannot connect to server. This app requires an internet connection.
+              </Text>
+              <Text className="text-red-700 text-sm font-semibold">
+                To fix this:
+              </Text>
+              <Text className="text-red-700 text-sm">
+                1. Check your internet connection{"\n"}
+                2. Force-close this app completely{"\n"}
+                3. Reopen the app{"\n"}
+                4. If issue persists, delete and reinstall the app
+              </Text>
+            </View>
+          )}
+
           {/* Header */}
           <View className="mb-12">
             <Text className="text-4xl font-bold text-[#fcc85c] mb-2">Welcome</Text>
