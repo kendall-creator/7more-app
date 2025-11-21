@@ -34,7 +34,7 @@ export default function LoginScreen({ navigation }: any) {
       const timeout = setTimeout(async () => {
         if (invitedUsers.length === 0) {
           console.log("⚠️ Users still not loaded after 2s, trying direct fetch...");
-          setDebugMessage("Fetching user data...");
+          setDebugMessage("Connecting to Firebase...");
           try {
             // Create a timeout promise (5 seconds max)
             const timeoutPromise = new Promise((_, reject) =>
@@ -52,13 +52,14 @@ export default function LoginScreen({ navigation }: any) {
               setUsersReady(true);
               setDebugMessage(`Ready! ${users.length} users loaded.`);
             } else {
-              setDebugMessage("Firebase unavailable. Tap retry or Sign In to use backup.");
-              setUsersReady(true); // Allow fallback login
+              setDebugMessage("ERROR: Firebase connected but returned 0 users. Check database permissions.");
+              setUsersReady(false);
             }
-          } catch (error) {
+          } catch (error: any) {
             console.error("❌ Direct fetch failed:", error);
-            setDebugMessage("Firebase unavailable. Tap retry or Sign In to use backup.");
-            setUsersReady(true); // Allow fallback login
+            const errorMsg = error?.message || String(error);
+            setDebugMessage(`ERROR: Cannot connect to Firebase. ${errorMsg}`);
+            setUsersReady(false);
           }
         }
       }, 2000);
@@ -271,43 +272,54 @@ export default function LoginScreen({ navigation }: any) {
                     usersReady ? "text-green-900" : "text-yellow-900"
                   }`}>{debugMessage}</Text>
 
-                  {/* Manual Refresh Button - only show if users not ready */}
-                  {!usersReady && (
-                    <Pressable
-                      onPress={async () => {
-                        setDebugMessage("Manually refreshing...");
-                        try {
-                          // Create a timeout promise
-                          const timeoutPromise = new Promise((_, reject) =>
-                            setTimeout(() => reject(new Error("Timeout")), 3000)
-                          );
+                  {/* Manual Refresh Button - always show for debugging */}
+                  <Pressable
+                    onPress={async () => {
+                      setDebugMessage("Testing Firebase connection...");
+                      try {
+                        // Import Firebase to test connection
+                        const { database } = await import("../config/firebase");
 
-                          // Race between fetch and timeout
-                          await Promise.race([
-                            useUsersStore.getState().fetchUsersDirectly(),
-                            timeoutPromise
-                          ]);
-
-                          const users = useUsersStore.getState().invitedUsers;
-                          if (users.length > 0) {
-                            setUsersReady(true);
-                            setDebugMessage(`Ready! ${users.length} users loaded.`);
-                          } else {
-                            setDebugMessage("Firebase failed. Using backup login - tap Sign In.");
-                            setUsersReady(true); // Allow login with fallback
-                          }
-                        } catch (error) {
-                          setDebugMessage("Firebase failed. Using backup login - tap Sign In.");
-                          setUsersReady(true); // Allow login with fallback
+                        if (!database) {
+                          setDebugMessage("ERROR: Firebase database is null. Check Firebase config.");
+                          setUsersReady(false);
+                          return;
                         }
-                      }}
-                      className="mt-2 bg-yellow-600 rounded-lg py-2 px-3 active:opacity-70"
-                    >
-                      <Text className="text-white text-xs font-semibold text-center">
-                        Tap to Retry Loading
-                      </Text>
-                    </Pressable>
-                  )}
+
+                        setDebugMessage("Firebase initialized. Fetching users...");
+
+                        // Create a timeout promise
+                        const timeoutPromise = new Promise((_, reject) =>
+                          setTimeout(() => reject(new Error("Firebase connection timeout after 5 seconds")), 5000)
+                        );
+
+                        // Race between fetch and timeout
+                        await Promise.race([
+                          useUsersStore.getState().fetchUsersDirectly(),
+                          timeoutPromise
+                        ]);
+
+                        const users = useUsersStore.getState().invitedUsers;
+                        if (users.length > 0) {
+                          setUsersReady(true);
+                          setDebugMessage(`SUCCESS! ${users.length} users loaded from Firebase.`);
+                        } else {
+                          setDebugMessage("ERROR: Firebase connected but returned 0 users. Database may be empty or read permission denied. Check Firebase Console → Database → Rules.");
+                          setUsersReady(false);
+                        }
+                      } catch (error: any) {
+                        const errorMsg = error?.message || String(error);
+                        const errorCode = error?.code || "";
+                        setDebugMessage(`ERROR: ${errorCode ? errorCode + " - " : ""}${errorMsg}`);
+                        setUsersReady(false);
+                      }
+                    }}
+                    className="mt-2 bg-yellow-600 rounded-lg py-2 px-3 active:opacity-70"
+                  >
+                    <Text className="text-white text-xs font-semibold text-center">
+                      Test Firebase Connection
+                    </Text>
+                  </Pressable>
                 </View>
               )}
 
