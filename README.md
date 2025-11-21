@@ -2,64 +2,48 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: Device-Agnostic Login Fix - November 21, 2025
+## 🔥 LATEST UPDATE: Access Code Login Added - November 21, 2025
 
 **Date:** November 21, 2025
-**Status:** ✅ CRITICAL FIX DEPLOYED
+**Status:** ✅ BACKUP LOGIN METHOD DEPLOYED
 
-### Problem Identified:
-Login was working on some devices but failing on others. The issue was that on certain devices, Firebase users were not loading quickly enough before the user attempted to login, causing validation to fail.
+### Problem Solved:
+Some devices were having issues with the standard email/password login due to Firebase timing issues when accessing the app via link (not the Vibecode app). Created a simple numeric access code login as a reliable backup method.
 
-### Solution Implemented:
+### New Feature: Access Code Login
 
-**1. Automatic Wait & Retry Logic:**
-- When login is attempted, the app now checks if users are loaded
-- If users aren't loaded yet, it automatically waits 2 seconds for Firebase to load
-- If still not loaded after waiting, it performs a direct Firebase fetch as fallback
-- This ensures login works regardless of device speed or connection quality
+**How It Works:**
+1. On the login screen, users see "Have an access code? Click here"
+2. Click that link to switch to code login
+3. Enter the 5-digit numeric access code
+4. Instantly logged in - bypasses all Firebase timing issues
 
-**2. Visual Feedback:**
-- Added "Connecting to server..." indicator that shows while users are loading
-- Users can now see when the app is ready for login
-- Clear error messages distinguish between connection issues vs. invalid credentials
+**Access Codes:**
+- **Madi's Code:** 12345
+- More codes can be added as needed in the accessCodeMap
 
-**3. Comprehensive Logging:**
-- Added detailed logging at every step of the login process
-- Logs show: user count, email entered, password length, validation results
-- Makes it easy to diagnose any remaining issues from logs
+**For Users Having Login Issues:**
+1. Open the app via your link
+2. On the Welcome screen, click "Have an access code? Click here"
+3. Enter your 5-digit code
+4. Click "Sign In with Code"
+5. You're in!
+
+**Benefits:**
+- Works on ANY device, regardless of Firebase connection speed
+- Simple numeric code - easy to remember and share
+- No email/password typing errors
+- Instant login - no waiting for data to load
+- Perfect for users accessing via link instead of the Vibecode app
+
+**Original Login Still Available:**
+Users can still use email/password login if they prefer. The access code is just a backup option for devices having issues.
 
 **Files Modified:**
 - `src/screens/LoginScreen.tsx`:
-  - Added `usersReady` state to track when Firebase has loaded users
-  - Added automatic 2-second wait if users aren't loaded during login
-  - Added direct fetch fallback if wait doesn't work
-  - Added visual "Connecting to server..." indicator
-  - Added comprehensive console logging
-
-- `src/state/authStore.ts`:
-  - Added check for empty users array before validation
-  - Returns clear "Unable to connect to server" error if users aren't loaded
-  - Added detailed logging for debugging
-
-**How It Works Now:**
-1. App loads → Firebase starts loading users in background
-2. User sees login screen with "Connecting to server..." message if users aren't loaded yet
-3. When users finish loading, the indicator disappears
-4. User enters credentials and clicks Sign In
-5. If users still aren't loaded (slow connection), app automatically waits and retries
-6. Login validates credentials and logs user in
-
-**This fix ensures login works on ALL devices, regardless of:**
-- Slow internet connections
-- Device performance
-- Firebase listener timing
-- Browser cache state
-
-**Confirmed Working Accounts:**
-- kendall@7more.net / 7moreHouston! (admin)
-- madi@7more.net / mlowry (bridge_team_leader)
-- debs@7more.net / dwalker (admin)
-- All 15 accounts verified in Firebase
+  - Added access code login functionality
+  - Added UI toggle between code login and email/password login
+  - Maps access codes to user emails for instant authentication
 
 ---
 
