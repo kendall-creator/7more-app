@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Pressable, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from "react-native";
-import { useAuthStore, useCurrentUser } from "../state/authStore";
+import { useAuthStore } from "../state/authStore";
 import { useUsersStore } from "../state/usersStore";
 
 export default function LoginScreen({ navigation }: any) {
@@ -13,8 +13,7 @@ export default function LoginScreen({ navigation }: any) {
   const loginError = useAuthStore((s) => s.loginError);
   const clearError = useAuthStore((s) => s.clearError);
   const setUser = useAuthStore((s) => s.setUser);
-  const currentUser = useCurrentUser();
-  const invitedUsers = useUsersStore((s) => s.invitedUsers);
+  // Don't subscribe to currentUser or invitedUsers - we fetch them directly when needed
 
   // Access code to user mapping
   const accessCodeMap: { [key: string]: string } = {
