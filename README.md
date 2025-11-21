@@ -2,6 +2,54 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
+## 🔥 CRITICAL: Firebase Connection Required - November 21, 2025
+
+**Date:** November 21, 2025
+**Status:** ⚠️ FIREBASE CONNECTIVITY ISSUE IDENTIFIED
+
+### Critical Issue:
+Some devices **cannot connect to Firebase Realtime Database**, causing the app to be completely non-functional on those devices. Even with the access code login working, users have no data (participants, shifts, resources) because Firebase is blocked.
+
+### Symptoms:
+- App shows "Firebase connection timeout after 5 seconds" when testing
+- Login works but shows empty screens (no participants, no data)
+- Console shows "Firebase listener timeout - no response after 10 seconds"
+
+### Root Cause:
+Firebase Realtime Database URL (`https://sevenmore-app-5a969-default-rtdb.firebaseio.com`) is **unreachable** from certain devices due to:
+1. **Network Firewall**: Corporate, school, or public WiFi blocking `*.firebaseio.com`
+2. **Cellular Restrictions**: Some cellular providers block Firebase domains
+3. **ISP Blocking**: Internet service provider filtering Firebase traffic
+4. **VPN/Proxy**: Network proxy blocking Firebase connections
+
+### Immediate Solutions:
+
+**For Users:**
+1. **Try different network**: Switch between WiFi and cellular data
+2. **Try different WiFi**: Use home WiFi instead of work/school WiFi
+3. **Disable VPN**: Turn off any VPN or proxy settings
+4. **Use mobile hotspot**: Create hotspot from another phone
+
+**For Network Administrators:**
+Whitelist these Firebase domains in your firewall:
+- `*.firebaseio.com`
+- `*.firebasedatabase.app`
+- `*.googleapis.com`
+- `*.google.com`
+
+### What Was Fixed:
+1. **Added 10-second timeout**: App no longer hangs forever, shows error instead
+2. **Better error messages**: Clear indication that Firebase is blocked
+3. **Graceful degradation**: App loads even when Firebase is unavailable
+4. **Network diagnostics**: "Test Firebase Connection" button shows exact error
+
+### Files Modified:
+- `src/state/usersStore.ts`: Added 10-second timeout to Firebase listener
+- `App.tsx`: Wrapped Firebase initialization in error handling
+- `src/screens/LoginScreen.tsx`: Added "Test Firebase Connection" diagnostic button
+
+---
+
 ## 🔥 LATEST UPDATE: Access Code Login Added - November 21, 2025
 
 **Date:** November 21, 2025

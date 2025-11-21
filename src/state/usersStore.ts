@@ -67,10 +67,19 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
 
     console.log("🔥 Initializing users Firebase listener...");
     isListenerInitialized = true;
+    set({ isLoading: true });
 
     const usersRef = ref(database, "users");
 
+    // Set a timeout in case Firebase never responds
+    const timeout = setTimeout(() => {
+      console.error("❌ Firebase listener timeout - no response after 10 seconds");
+      console.log("⚠️ Firebase may be blocked on this network. App will continue with empty data.");
+      set({ isLoading: false, invitedUsers: [] });
+    }, 10000); // 10 second timeout
+
     onValue(usersRef, (snapshot) => {
+      clearTimeout(timeout); // Clear timeout if we get data
       const data = snapshot.val();
       if (data) {
         const usersArray = Object.values(data) as InvitedUser[];
@@ -81,8 +90,10 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
         set({ invitedUsers: [], isLoading: false });
       }
     }, (error) => {
+      clearTimeout(timeout); // Clear timeout on error
       console.error("❌ Error in users listener:", error);
-      set({ isLoading: false });
+      console.log("⚠️ Firebase connection failed. App will continue with empty data.");
+      set({ isLoading: false, invitedUsers: [] });
     });
   },
 

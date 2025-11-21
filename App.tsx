@@ -55,31 +55,49 @@ export default function App() {
   useEffect(() => {
     console.log("🚀 App.tsx: Initializing all Firebase listeners and stores...");
 
-    // Initialize Firebase listeners for all stores
-    initUsersListener();
-    initParticipantsListener();
-    initSchedulerListener();
-    initResourcesListener();
-    initTransitionalHomesListener();
-    initMentorshipListener();
-    initGuidanceListener();
-    initTasksListener();
-    initReportingListener();
-    initVolunteerListener();
+    // Wrap Firebase initialization in try-catch to prevent crashes
+    const initializeApp = async () => {
+      try {
+        // Initialize Firebase listeners for all stores (non-blocking)
+        initUsersListener();
+        initParticipantsListener();
+        initSchedulerListener();
+        initResourcesListener();
+        initTransitionalHomesListener();
+        initMentorshipListener();
+        initGuidanceListener();
+        initTasksListener();
+        initReportingListener();
+        initVolunteerListener();
 
-    // Initialize default admin account on first launch
-    initializeDefaultAdmin();
+        // Initialize default admin account on first launch
+        await initializeDefaultAdmin().catch(err => {
+          console.warn("⚠️ Could not initialize default admin (Firebase may be unavailable):", err.message);
+        });
 
-    // Initialize default transitional homes
-    initDefaultHomes();
+        // Initialize default transitional homes
+        await initDefaultHomes().catch(err => {
+          console.warn("⚠️ Could not initialize default homes (Firebase may be unavailable):", err.message);
+        });
 
-    // Fix admin password flag (one-time fix)
-    fixAdminPasswordFlag();
+        // Fix admin password flag (one-time fix)
+        await fixAdminPasswordFlag().catch(err => {
+          console.warn("⚠️ Could not fix admin password (Firebase may be unavailable):", err.message);
+        });
 
-    // Fix mentee statuses for existing participants (one-time fix)
-    fixMenteeStatusesOnce();
+        // Fix mentee statuses for existing participants (one-time fix)
+        await fixMenteeStatusesOnce().catch(err => {
+          console.warn("⚠️ Could not fix mentee statuses (Firebase may be unavailable):", err.message);
+        });
 
-    console.log("✅ App.tsx: All initialization complete");
+        console.log("✅ App.tsx: All initialization complete");
+      } catch (error: any) {
+        console.error("❌ App initialization error:", error);
+        console.log("⚠️ App will continue with limited functionality (Firebase may be unavailable)");
+      }
+    };
+
+    initializeApp();
   }, []); // Empty dependency array - only run once on mount
 
   return (
