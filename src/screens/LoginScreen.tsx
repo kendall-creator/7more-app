@@ -22,23 +22,23 @@ export default function LoginScreen({ navigation }: any) {
   };
 
   const handleCodeLogin = async () => {
+    console.log("\n🔐 CODE LOGIN ATTEMPT:");
+    console.log(`  Access Code: ${accessCode}`);
+
+    if (!accessCode) {
+      console.log("❌ Missing access code");
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
-      console.log("\n🔐 CODE LOGIN ATTEMPT:");
-      console.log(`  Access Code: ${accessCode}`);
-
-      if (!accessCode) {
-        console.log("❌ Missing access code");
-        return;
-      }
-
-      setIsLoading(true);
-
       // Check if code is valid
       const userEmail = accessCodeMap[accessCode];
       if (!userEmail) {
         console.log("❌ Invalid access code");
-        clearError();
-        useAuthStore.getState().loginError = "Invalid access code. Please try again.";
+        useAuthStore.setState({ loginError: "Invalid access code. Please try again." });
+        setIsLoading(false);
         return;
       }
 
@@ -46,6 +46,8 @@ export default function LoginScreen({ navigation }: any) {
 
       // Wait for users to load if needed
       let currentUsers = useUsersStore.getState().invitedUsers;
+      console.log(`  Current users loaded: ${currentUsers.length}`);
+
       if (currentUsers.length === 0) {
         console.log("⚠️ No users loaded, fetching directly...");
         try {
@@ -55,6 +57,9 @@ export default function LoginScreen({ navigation }: any) {
           console.log(`  Users after fetch: ${currentUsers.length}`);
         } catch (fetchError) {
           console.error("❌ Direct fetch failed:", fetchError);
+          useAuthStore.setState({ loginError: "Unable to load user data. Please try again." });
+          setIsLoading(false);
+          return;
         }
       }
 
@@ -62,8 +67,8 @@ export default function LoginScreen({ navigation }: any) {
       const user = currentUsers.find(u => u.email.toLowerCase() === userEmail.toLowerCase());
       if (!user) {
         console.log("❌ User not found in database");
-        clearError();
-        useAuthStore.getState().loginError = "User account not found. Please contact admin.";
+        useAuthStore.setState({ loginError: "User account not found. Please contact admin." });
+        setIsLoading(false);
         return;
       }
 
@@ -81,9 +86,10 @@ export default function LoginScreen({ navigation }: any) {
       });
 
       console.log("✅ Code login successful!");
+      setIsLoading(false);
     } catch (error) {
       console.error("❌ Code login error:", error);
-    } finally {
+      useAuthStore.setState({ loginError: "Login failed. Please try again." });
       setIsLoading(false);
     }
   };
