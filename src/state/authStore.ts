@@ -27,13 +27,24 @@ export const useAuthStore = create<AuthStore>()((set) => ({
   loginError: null,
 
   login: async (email: string, password: string) => {
+    console.log("\n🔐 AuthStore.login called");
+    console.log(`  Email: "${email}"`);
+    console.log(`  Password: "${password}"`);
+
     // Clear previous error
     set({ loginError: null });
 
     // Validate credentials against invited users
+    console.log("  Calling validateCredentials...");
     const validatedUser = useUsersStore.getState().validateCredentials(email, password);
 
+    console.log("  validateCredentials returned:");
+    console.log(`  Result: ${validatedUser ? "User object" : "null/undefined"}`);
+    console.log(`  Result type: ${typeof validatedUser}`);
+    console.log(`  Result value:`, validatedUser);
+
     if (!validatedUser) {
+      console.log("  ❌ Login FAILED - validatedUser is falsy");
       set({
         loginError: "Invalid email or password. Please check your credentials or contact an admin for access.",
         isAuthenticated: false,
@@ -42,6 +53,7 @@ export const useAuthStore = create<AuthStore>()((set) => ({
       return false;
     }
 
+    console.log("  ✅ Login SUCCESS - setting user state");
     set({
       currentUser: validatedUser,
       isAuthenticated: true,
