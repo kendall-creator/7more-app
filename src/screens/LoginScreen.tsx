@@ -7,59 +7,36 @@ export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [usersReady, setUsersReady] = useState(false);
   const login = useAuthStore((s) => s.login);
   const loginError = useAuthStore((s) => s.loginError);
   const clearError = useAuthStore((s) => s.clearError);
   const currentUser = useCurrentUser();
   const invitedUsers = useUsersStore((s) => s.invitedUsers);
 
-  // Monitor when users are loaded
-  useEffect(() => {
-    console.log(`📊 LoginScreen: Users count = ${invitedUsers.length}`);
-    if (invitedUsers.length > 0) {
-      setUsersReady(true);
-      console.log("✅ LoginScreen: Users are ready for login");
-    }
-  }, [invitedUsers.length]);
-
   const handleLogin = async () => {
     console.log("\n🔐 LOGIN ATTEMPT:");
     console.log(`  Email: ${email}`);
     console.log(`  Password length: ${password.length}`);
     console.log(`  Users loaded: ${invitedUsers.length}`);
-    console.log(`  Users ready: ${usersReady}`);
 
     if (!email || !password) {
       console.log("❌ Missing email or password");
       return;
     }
 
-    // Wait for users to load if they haven't yet
+    setIsLoading(true);
+
+    // If no users loaded, try direct fetch immediately
     if (invitedUsers.length === 0) {
-      console.log("⚠️ No users loaded yet, waiting 2 seconds...");
-      setIsLoading(true);
-
-      // Wait up to 2 seconds for users to load
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      const currentCount = useUsersStore.getState().invitedUsers.length;
-      console.log(`  Users after wait: ${currentCount}`);
-
-      if (currentCount === 0) {
-        console.log("❌ Still no users after waiting - trying direct fetch");
-        try {
-          await useUsersStore.getState().fetchUsersDirectly();
-          await new Promise(resolve => setTimeout(resolve, 500));
-          const finalCount = useUsersStore.getState().invitedUsers.length;
-          console.log(`  Users after direct fetch: ${finalCount}`);
-        } catch (error) {
-          console.error("❌ Direct fetch failed:", error);
-        }
+      console.log("⚠️ No users loaded, fetching directly...");
+      try {
+        await useUsersStore.getState().fetchUsersDirectly();
+        console.log(`  Users after fetch: ${useUsersStore.getState().invitedUsers.length}`);
+      } catch (error) {
+        console.error("❌ Direct fetch failed:", error);
       }
     }
 
-    setIsLoading(true);
     console.log("🔄 Calling login function...");
     const result = await login(email, password);
     console.log(`  Login result: ${result ? "SUCCESS" : "FAILED"}`);
@@ -114,14 +91,6 @@ export default function LoginScreen({ navigation }: any) {
               returnKeyType="go"
             />
           </View>
-
-          {/* Loading indicator when users aren't ready */}
-          {!usersReady && (
-            <View className="mb-4 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex-row items-center">
-              <ActivityIndicator size="small" color="#2563eb" />
-              <Text className="text-blue-800 text-sm ml-3">Connecting to server...</Text>
-            </View>
-          )}
 
           {/* Error Message */}
           {loginError && (
