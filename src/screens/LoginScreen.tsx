@@ -178,6 +178,14 @@ export default function LoginScreen({ navigation }: any) {
           <Text className="text-center text-sm text-[#99896c]">
             {"Don't have an account? Contact your admin to get invited."}
           </Text>
+
+          {/* Debug Button - Development Only */}
+          <Pressable
+            onPress={() => navigation.navigate("DebugUsers")}
+            className="mt-4 py-2"
+          >
+            <Text className="text-center text-xs text-gray-400">Debug: View All Users</Text>
+          </Pressable>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
