@@ -73,19 +73,12 @@ export default function App() {
       initReportingListener();
       initVolunteerListener();
 
-      // Initialize defaults and fixes (wrap each in try-catch)
-      Promise.resolve(initializeDefaultAdmin()).catch((err: any) =>
-        console.error("Default admin error:", err)
-      );
-      Promise.resolve(initDefaultHomes()).catch((err: any) =>
-        console.error("Default homes error:", err)
-      );
-      Promise.resolve(fixAdminPasswordFlag()).catch((err: any) =>
-        console.error("Admin password fix error:", err)
-      );
-      Promise.resolve(fixMenteeStatusesOnce()).catch((err: any) =>
-        console.error("Mentee status fix error:", err)
-      );
+      // DO NOT call initialization functions that write to Firebase during startup
+      // This can cause crashes on some devices
+      // initializeDefaultAdmin();
+      // initDefaultHomes();
+      // fixAdminPasswordFlag();
+      // fixMenteeStatusesOnce();
 
       console.log("✅ App.tsx: All initialization complete");
     } catch (error) {
