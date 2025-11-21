@@ -13,40 +13,9 @@ export default function LoginScreen({ navigation }: any) {
   const currentUser = useCurrentUser();
   const invitedUsers = useUsersStore((s) => s.invitedUsers);
 
-  // Try direct fetch if users haven't loaded after 3 seconds
-  useEffect(() => {
-    const timer = setTimeout(async () => {
-      const currentCount = useUsersStore.getState().invitedUsers.length;
-      if (currentCount === 0) {
-        console.log("⚠️ Users not loaded after 3 seconds, trying direct fetch...");
-        try {
-          await useUsersStore.getState().fetchUsersDirectly();
-        } catch (error) {
-          console.error("❌ Direct fetch failed:", error);
-        }
-      }
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   const handleLogin = async () => {
     if (email && password) {
       setIsLoading(true);
-
-      // If users still haven't loaded, wait a bit and try direct fetch
-      let currentUsers = useUsersStore.getState().invitedUsers;
-      if (currentUsers.length === 0) {
-        console.log("⚠️ Attempting login with 0 users, trying direct fetch first...");
-        try {
-          await useUsersStore.getState().fetchUsersDirectly();
-          // Wait a moment for state to update
-          await new Promise(resolve => setTimeout(resolve, 500));
-        } catch (error) {
-          console.error("❌ Direct fetch failed during login:", error);
-        }
-      }
-
       const result = await login(email, password);
       setIsLoading(false);
     }
