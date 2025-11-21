@@ -76,6 +76,15 @@ const Tab = createBottomTabNavigator();
 // Tab navigator for authenticated users
 function MainTabs() {
   const userRole = useUserRole();
+  const currentUser = useCurrentUser();
+
+  // Safety check: if no user or role, show error
+  if (!currentUser || !userRole) {
+    console.error("❌ MainTabs rendered without valid user or role!");
+    console.error(`   currentUser: ${currentUser ? currentUser.name : "NULL"}`);
+    console.error(`   userRole: ${userRole || "NULL"}`);
+    return null; // Return null instead of crashing
+  }
 
   // Determine if user is a mentor or mentorship leader (they get the 4-tab layout)
   const isMentor = userRole === "mentor" || userRole === "mentorship_leader";

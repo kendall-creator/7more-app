@@ -27,26 +27,44 @@ export default function LoginScreen({ navigation }: any) {
     setIsLoading(true);
     clearError();
 
-    // Wait a moment for users to load if needed
+    console.log("🔐 Access code login attempt:", accessCode);
+    console.log("   Current invitedUsers length:", invitedUsers.length);
+
+    // Get users directly from store state instead of relying on component subscription
+    let currentUsers = useUsersStore.getState().invitedUsers;
+    console.log("   Users from store.getState():", currentUsers.length);
+
+    // Wait for users to load if needed (max 5 seconds)
     let attempts = 0;
-    while (invitedUsers.length === 0 && attempts < 10) {
+    while (currentUsers.length === 0 && attempts < 10) {
+      console.log(`   Waiting for users... attempt ${attempts + 1}/10`);
       await new Promise(resolve => setTimeout(resolve, 500));
+      currentUsers = useUsersStore.getState().invitedUsers;
       attempts++;
     }
 
+    console.log(`   Final user count: ${currentUsers.length}`);
+
     const userEmail = accessCodeMap[accessCode];
     if (!userEmail) {
+      console.log("   ❌ Invalid access code");
       useAuthStore.setState({ loginError: "Invalid access code. Please try again." });
       setIsLoading(false);
       return;
     }
 
-    const user = invitedUsers.find(u => u.email.toLowerCase() === userEmail.toLowerCase());
+    console.log(`   ✅ Valid access code, looking for: ${userEmail}`);
+    console.log(`   Available users: ${currentUsers.map(u => u.email).join(", ")}`);
+
+    const user = currentUsers.find(u => u.email.toLowerCase() === userEmail.toLowerCase());
     if (!user) {
-      useAuthStore.setState({ loginError: "User account not found. Please try again or contact admin." });
+      console.log("   ❌ User not found in database");
+      useAuthStore.setState({ loginError: `User ${userEmail} not found. ${currentUsers.length} users loaded. Please wait and try again.` });
       setIsLoading(false);
       return;
     }
+
+    console.log(`   ✅ User found: ${user.name}`);
 
     setUser({
       id: user.id,
@@ -58,6 +76,7 @@ export default function LoginScreen({ navigation }: any) {
       requiresPasswordChange: user.requiresPasswordChange,
     });
 
+    console.log("   ✅ Login successful!");
     setIsLoading(false);
   };
 
