@@ -65,10 +65,13 @@ export default function LoginScreen({ navigation }: any) {
   }, []);
 
   const handleLogin = async () => {
-    if (!email || !password || !usersReady) {
-      console.log("❌ Login blocked: email, password, or users not ready");
+    if (!email || !password) {
+      console.log("❌ Login blocked: email or password empty");
       return;
     }
+
+    // Allow login even if usersReady is false (emergency fallback will handle it)
+    console.log(`🚀 handleLogin called - usersReady: ${usersReady}`);
 
     try {
       setIsLoading(true);
@@ -146,7 +149,6 @@ export default function LoginScreen({ navigation }: any) {
               autoCapitalize="none"
               keyboardType="email-address"
               autoCorrect={false}
-              editable={usersReady}
             />
           </View>
 
@@ -165,7 +167,6 @@ export default function LoginScreen({ navigation }: any) {
               autoCapitalize="none"
               onSubmitEditing={handleLogin}
               returnKeyType="go"
-              editable={usersReady}
             />
           </View>
 
@@ -179,9 +180,9 @@ export default function LoginScreen({ navigation }: any) {
           {/* Login Button */}
           <Pressable
             onPress={handleLogin}
-            disabled={isLoading || !email || !password || !usersReady}
+            disabled={isLoading || !email || !password}
             className={`rounded-xl py-4 items-center mb-4 ${
-              isLoading || !email || !password || !usersReady
+              isLoading || !email || !password
                 ? "bg-[#d7d7d6]"
                 : "bg-[#405b69] active:opacity-80"
             }`}
@@ -189,9 +190,7 @@ export default function LoginScreen({ navigation }: any) {
             {isLoading ? (
               <ActivityIndicator color="#ffffff" />
             ) : (
-              <Text className="text-white text-base font-semibold">
-                {usersReady ? "Sign In" : "Loading..."}
-              </Text>
+              <Text className="text-white text-base font-semibold">Sign In</Text>
             )}
           </Pressable>
 

@@ -35,7 +35,50 @@ export const useAuthStore = create<AuthStore>()((set) => ({
       // Clear previous error
       set({ loginError: null });
 
-      // Validate credentials against invited users
+      // EMERGENCY FALLBACK: If Firebase hasn't loaded users, check hardcoded credentials
+      const loadedUsers = useUsersStore.getState().invitedUsers;
+      console.log(`  Users currently loaded: ${loadedUsers.length}`);
+
+      if (loadedUsers.length === 0) {
+        console.log("⚠️  WARNING: No users loaded from Firebase - using emergency fallback");
+
+        // Hardcoded emergency credentials for critical users
+        const emergencyUsers = [
+          { email: "mlowry@7more.net", password: "mlowry", name: "Madi Lowry", role: "bridge_team_leader", id: "emergency_madi" },
+          { email: "kendall@7more.net", password: "7moreHouston!", name: "Kendall", role: "admin", id: "emergency_kendall" },
+          { email: "pauljalfaro@hotmail.com", password: "palfaro", name: "Paul Alfaro", role: "mentorship_leader", id: "emergency_paul" },
+        ];
+
+        const emergencyUser = emergencyUsers.find(
+          u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+        );
+
+        if (emergencyUser) {
+          console.log("✅ EMERGENCY LOGIN SUCCESS - Firebase bypassed");
+          set({
+            currentUser: {
+              id: emergencyUser.id,
+              name: emergencyUser.name,
+              email: emergencyUser.email,
+              role: emergencyUser.role as any,
+              requiresPasswordChange: false
+            },
+            isAuthenticated: true,
+            loginError: null
+          });
+          return true;
+        } else {
+          console.log("❌ Emergency fallback: credentials not found");
+          set({
+            loginError: "Cannot connect to server. Please refresh the page and try again.",
+            isAuthenticated: false,
+            currentUser: null
+          });
+          return false;
+        }
+      }
+
+      // Normal path: Validate credentials against invited users
       console.log("  Calling validateCredentials...");
       const validatedUser = useUsersStore.getState().validateCredentials(email, password);
 
