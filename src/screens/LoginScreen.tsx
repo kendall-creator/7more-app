@@ -72,7 +72,35 @@ export default function LoginScreen({ navigation }: any) {
       console.log("🔐 LOGIN ATTEMPT STARTED");
       console.log("===========================================");
 
-      // Simple approach: just call login directly
+      // CRITICAL FIX: Wait for users to load before attempting login
+      let currentUsers = useUsersStore.getState().invitedUsers;
+      console.log(`Current users loaded: ${currentUsers.length}`);
+
+      // Wait up to 10 seconds for users to load
+      let waitAttempts = 0;
+      while (currentUsers.length === 0 && waitAttempts < 20) {
+        console.log(`⏳ Waiting for users to load... attempt ${waitAttempts + 1}/20`);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        currentUsers = useUsersStore.getState().invitedUsers;
+        waitAttempts++;
+      }
+
+      if (currentUsers.length === 0) {
+        console.error("❌ CRITICAL: Users never loaded after 10 seconds");
+        clearTimeout(loginTimeout);
+        setIsLoading(false);
+        useAuthStore.setState({
+          loginError: "Unable to load user data. Please close the app completely, reopen it, and try again. If issue persists, clear app cache.",
+          isAuthenticated: false,
+          currentUser: null
+        });
+        return;
+      }
+
+      console.log(`✅ Users loaded: ${currentUsers.length} users`);
+      console.log(`Available emails:`, currentUsers.map(u => u.email));
+
+      // Now attempt login
       const result = await login(email, password);
 
       console.log(`✅ Login function returned: ${result ? "SUCCESS" : "FAILED"}`);
