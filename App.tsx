@@ -16,6 +16,14 @@ import { useReportingStore } from "./src/state/reportingStore";
 import { useVolunteerStore } from "./src/state/volunteerStore";
 import { fixAdminPasswordFlag } from "./src/utils/fixAdminPassword";
 import { fixMenteeStatusesOnce } from "./src/utils/fixMenteeStatuses";
+import { ErrorBoundary } from "./src/components/ErrorBoundary";
+import { logCrash, logError } from "./src/utils/crashLogger";
+
+// Type declaration for React Native's ErrorUtils global
+declare const ErrorUtils: {
+  getGlobalHandler: () => ((error: Error, isFatal?: boolean) => void) | undefined;
+  setGlobalHandler: (handler: (error: Error, isFatal?: boolean) => void) => void;
+};
 
 /*
 IMPORTANT NOTICE: DO NOT REMOVE
@@ -59,12 +67,64 @@ export default function App() {
   useEffect(() => {
     console.log("🚀 App.tsx: Initializing all Firebase listeners and stores...");
 
+    // Set up global error handlers for unhandled errors and promise rejections
+    let originalErrorHandler: ((error: Error, isFatal?: boolean) => void) | undefined;
+
+    if (typeof ErrorUtils !== "undefined") {
+      originalErrorHandler = ErrorUtils.getGlobalHandler();
+
+      ErrorUtils.setGlobalHandler((error: Error, isFatal?: boolean) => {
+        // Log the crash
+        logCrash(error, { errorBoundary: false }).catch((logError) => {
+          console.error("Failed to log crash:", logError);
+        });
+
+        // Call original handler if it exists
+        if (originalErrorHandler) {
+          originalErrorHandler(error, isFatal);
+        } else {
+          console.error("Unhandled error:", error);
+        }
+      });
+    } else {
+      console.warn("⚠️ ErrorUtils not available, global error handler not set");
+    }
+
+    // Handle unhandled promise rejections
+    const rejectionHandler = (reason: any) => {
+      const error = reason instanceof Error ? reason : new Error(String(reason));
+      logError(error, "Unhandled Promise Rejection").catch((logError) => {
+        console.error("Failed to log promise rejection:", logError);
+      });
+      console.error("Unhandled promise rejection:", reason);
+    };
+
+    // Set up promise rejection handler
+    if (typeof global !== "undefined" && (global as any).HermesInternal) {
+      // React Native with Hermes
+      const originalHandler: ((this: Window, ev: PromiseRejectionEvent) => any) | null = global.onunhandledrejection;
+      global.onunhandledrejection = (event: any) => {
+        rejectionHandler(event.reason);
+        if (originalHandler) {
+          originalHandler.call(window, event);
+        }
+      };
+    } else {
+      // Fallback for other environments
+      if (typeof window !== "undefined") {
+        window.addEventListener("unhandledrejection", (event) => {
+          rejectionHandler(event.reason);
+        });
+      }
+    }
+
     // Wrap all initialization in try-catch to prevent crashes
     try {
       // Initialize users first (async function)
-      Promise.resolve(initUsersListener()).catch((err: any) =>
-        console.error("Users listener error:", err)
-      );
+      Promise.resolve(initUsersListener()).catch((err: any) => {
+        console.error("Users listener error:", err);
+        logError(err, "Users listener initialization").catch(() => {});
+      });
 
       // Initialize other Firebase listeners
       initParticipantsListener();
@@ -88,17 +148,30 @@ export default function App() {
     } catch (error) {
       console.error("❌ Critical error during app initialization:", error);
       console.log("⚠️ App will continue with limited functionality");
+      if (error instanceof Error) {
+        logError(error, "App initialization").catch(() => {});
+      }
     }
+
+    // Cleanup function
+    return () => {
+      // Restore original error handler on unmount
+      if (typeof ErrorUtils !== "undefined" && originalErrorHandler) {
+        ErrorUtils.setGlobalHandler(originalErrorHandler);
+      }
+    };
   }, []); // Empty dependency array - only run once on mount
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <NavigationContainer>
-          <RootNavigator />
-          <StatusBar style="auto" />
-        </NavigationContainer>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <ErrorBoundary>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <NavigationContainer>
+            <RootNavigator />
+            <StatusBar style="auto" />
+          </NavigationContainer>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }
