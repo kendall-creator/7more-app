@@ -94,10 +94,14 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
         set({ invitedUsers: [], isLoading: false });
       }
     } catch (directError: any) {
+      const errorType = (directError && directError.constructor && directError.constructor.name) || "Unknown";
+      const errorMessage = (directError && directError.message) || String(directError);
+      const errorCode = (directError && directError.code) || "no code";
+
       console.error("❌ Direct fetch failed:");
-      console.error("   Error type:", directError?.constructor?.name || "Unknown");
-      console.error("   Error message:", directError?.message || String(directError));
-      console.error("   Error code:", directError?.code || "no code");
+      console.error("   Error type: " + errorType);
+      console.error("   Error message: " + errorMessage);
+      console.error("   Error code: " + errorCode);
       console.error("   This device cannot connect to Firebase. Using emergency fallback users.");
 
       // Use fallback users as last resort
