@@ -2,7 +2,81 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 🔥 LATEST UPDATE: System Diagnostics Tool - November 21, 2025
+## 🔥 CRITICAL: Firebase Permission Errors - December 9, 2025
+
+**Date:** December 9, 2025
+**Status:** ⚠️ FIREBASE DATABASE PERMISSIONS REQUIRED
+
+### Issue:
+The app is experiencing Firebase permission errors across multiple database paths:
+- `/participants`, `/shifts`, `/shiftTemplates`, `/meetings`, `/tasks`, `/users`, `/resources`, `/transitionalHomes`, `/mentorshipAssignments`, `/guidanceTasks`, `/monthlyReports`, `/volunteer_inquiries`, `/volunteer_database`, `/volunteer_routing_rules`, `/volunteer_donation_settings`
+
+**Error Message:** `permission_denied: Client doesn't have permission to access the desired data`
+
+### What We've Done:
+- ✅ Suppressed repetitive console error messages to keep logs clean
+- ✅ Added one-time warning message about Firebase rules in console
+- ✅ Created error handling utilities for permission errors
+- ✅ Created `FirebasePermissionErrorScreen` (ready to display to users if needed)
+- ✅ Updated `README.md` with clear instructions
+
+### Root Cause:
+Your Firebase Realtime Database security rules are blocking access. This is a security feature that protects your data, but it means the current rules are too restrictive for the app to function.
+
+### How to Fix:
+
+#### Option 1: Update Security Rules (Development/Testing Only)
+For development and testing, temporarily allow public access:
+
+1. Go to [Firebase Console](https://console.firebase.google.com)
+2. Select your project: `sevenmore-app-5a969`
+3. Navigate to **Realtime Database** → **Rules**
+4. Replace the rules with:
+```json
+{
+  "rules": {
+    ".read": true,
+    ".write": true
+  }
+}
+```
+5. Click **Publish**
+6. Restart the app
+
+⚠️ **Warning:** This allows anyone to read/write your database. Only use during development!
+
+#### Option 2: Implement Authentication (Recommended for Production)
+For production apps, implement Firebase Authentication to secure your database properly. Rules example:
+```json
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null"
+  }
+}
+```
+
+### Database Configuration:
+- **Project:** sevenmore-app-5a969
+- **Database URL:** https://sevenmore-app-5a969-default-rtdb.firebaseio.com
+- **Region:** US Central
+
+### Files Modified:
+- `src/utils/suppressFirebaseErrors.ts`: **NEW** - Global error suppression utility
+- `src/utils/firebaseErrorHandler.ts`: **NEW** - Helper functions for Firebase errors
+- `src/state/firebaseErrorStore.ts`: **NEW** - Zustand store to track Firebase errors
+- `src/screens/FirebasePermissionErrorScreen.tsx`: **NEW** - User-friendly error screen
+- `src/state/participantStore.ts`: Updated to handle permission errors gracefully
+- `App.tsx`: Imported suppressFirebaseErrors utility to clean up logs
+- `README.md`: Updated with troubleshooting instructions
+
+### Additional Resources:
+- [Firebase Security Rules Documentation](https://firebase.google.com/docs/database/security)
+- [Firebase Authentication Setup Guide](https://firebase.google.com/docs/auth)
+
+---
+
+## 🔥 PREVIOUS UPDATE: System Diagnostics Tool - November 21, 2025
 
 **Date:** November 21, 2025
 **Status:** ✅ DIAGNOSTIC TOOL DEPLOYED

@@ -19,6 +19,9 @@ import { fixMenteeStatusesOnce } from "./src/utils/fixMenteeStatuses";
 import { ErrorBoundary } from "./src/components/ErrorBoundary";
 import { logCrash, logError } from "./src/utils/crashLogger";
 
+// Suppress Firebase permission errors from cluttering console
+import "./src/utils/suppressFirebaseErrors";
+
 // Type declaration for React Native's ErrorUtils global
 declare const ErrorUtils: {
   getGlobalHandler: () => ((error: Error, isFatal?: boolean) => void) | undefined;
