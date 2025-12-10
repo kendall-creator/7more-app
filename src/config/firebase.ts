@@ -1,5 +1,6 @@
 import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { getDatabase, Database } from "firebase/database";
+import { getAuth, Auth } from "firebase/auth";
 import { FIREBASE_FALLBACK_CONFIG, isUsingFallbackConfig } from "./firebase-fallback";
 
 // Helper to get env var with or without EXPO_PUBLIC_ prefix
@@ -51,6 +52,7 @@ const firebaseConfig = getFirebaseConfig();
 // Initialize Firebase
 let app: FirebaseApp | null = null;
 let database: Database | null = null;
+let auth: Auth | null = null;
 
 try {
   console.log("🔥 Starting Firebase initialization...");
@@ -69,6 +71,10 @@ try {
   database = getDatabase(app);
   console.log("   ✅ Database instance created");
 
+  console.log("   Getting auth instance...");
+  auth = getAuth(app);
+  console.log("   ✅ Auth instance created");
+
   // Log status for debugging
   if (isUsingFallbackConfig()) {
     console.log("✅ Firebase initialized with fallback config");
@@ -83,5 +89,5 @@ try {
   console.error("   Firebase config being used:", JSON.stringify(firebaseConfig, null, 2));
 }
 
-export { database };
+export { database, auth };
 export default app;

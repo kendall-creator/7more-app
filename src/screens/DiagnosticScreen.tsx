@@ -1,17 +1,43 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, Pressable, ActivityIndicator } from "react-native";
-import { database } from "../config/firebase";
+import { database, auth } from "../config/firebase";
 import { useUsersStore } from "../state/usersStore";
 import { ref, get as firebaseGet } from "firebase/database";
+import { syncUsersToFirebaseAuth } from "../utils/syncUsersToFirebaseAuth";
 
 export default function DiagnosticScreen({ navigation }: any) {
   const [diagnostics, setDiagnostics] = useState<string[]>([]);
   const [isRunning, setIsRunning] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const invitedUsers = useUsersStore((s) => s.invitedUsers);
 
   const addLog = (message: string) => {
     setDiagnostics((prev) => [...prev, `${new Date().toISOString().split("T")[1].split(".")[0]} - ${message}`]);
     console.log(message);
+  };
+
+  const handleSyncUsers = async () => {
+    setIsSyncing(true);
+    setDiagnostics([]);
+    addLog("🔄 Starting user sync to Firebase Auth...");
+
+    try {
+      const result = await syncUsersToFirebaseAuth();
+      if (result) {
+        addLog(`✅ Sync complete!`);
+        addLog(`   Synced: ${result.synced} users`);
+        addLog(`   Skipped: ${result.skipped} users`);
+        addLog(`   Errors: ${result.errors} users`);
+        addLog("");
+        addLog("🎉 All existing users now have Firebase Auth accounts!");
+        addLog("You can now update your Firebase rules to:");
+        addLog('{ "rules": { ".read": "auth != null", ".write": "auth != null" } }');
+      }
+    } catch (error: any) {
+      addLog(`❌ Error during sync: ${error.message}`);
+    }
+
+    setIsSyncing(false);
   };
 
   const runDiagnostics = async () => {
@@ -111,8 +137,18 @@ export default function DiagnosticScreen({ navigation }: any) {
 
       <View className="px-6 pb-8">
         <Pressable
+          onPress={handleSyncUsers}
+          disabled={isSyncing || isRunning}
+          className="bg-green-500 py-4 px-6 rounded-xl active:opacity-70 mb-3"
+        >
+          <Text className="text-white text-center font-semibold text-base">
+            {isSyncing ? "Syncing..." : "Sync Users to Firebase Auth"}
+          </Text>
+        </Pressable>
+
+        <Pressable
           onPress={runDiagnostics}
-          disabled={isRunning}
+          disabled={isRunning || isSyncing}
           className="bg-blue-500 py-4 px-6 rounded-xl active:opacity-70"
         >
           <Text className="text-white text-center font-semibold text-base">

@@ -1,4 +1,6 @@
 import { create } from "zustand";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { auth } from "../config/firebase";
 import { User } from "../types";
 import { useUsersStore } from "./usersStore";
 
@@ -61,16 +63,57 @@ export const useAuthStore = create<AuthStore>()((set) => ({
       return false;
     }
 
-    console.log("✅ Login successful!");
-    set({
-      currentUser: validatedUser,
-      isAuthenticated: true,
-      loginError: null
-    });
-    return true;
+    // Now authenticate with Firebase
+    if (!auth) {
+      console.log("❌ Firebase auth not initialized");
+      set({
+        loginError: "Authentication service unavailable. Please try again.",
+        isAuthenticated: false,
+        currentUser: null
+      });
+      return false;
+    }
+
+    try {
+      console.log("🔐 Authenticating with Firebase...");
+      await signInWithEmailAndPassword(auth, email, password);
+      console.log("✅ Firebase authentication successful!");
+
+      console.log("✅ Login successful!");
+      set({
+        currentUser: validatedUser,
+        isAuthenticated: true,
+        loginError: null
+      });
+      return true;
+    } catch (firebaseError: any) {
+      console.log("❌ Firebase authentication failed:", firebaseError.code);
+
+      // If Firebase auth fails with user-not-found, this is expected for first-time login
+      // We'll handle this in the user creation flow
+      if (firebaseError.code === "auth/user-not-found" || firebaseError.code === "auth/wrong-password") {
+        set({
+          loginError: "Please contact an administrator to set up your account in the system.",
+          isAuthenticated: false,
+          currentUser: null
+        });
+      } else {
+        set({
+          loginError: "Authentication error. Please try again.",
+          isAuthenticated: false,
+          currentUser: null
+        });
+      }
+      return false;
+    }
   },
 
   logout: () => {
+    if (auth) {
+      signOut(auth).catch((error) => {
+        console.log("Firebase signout error:", error);
+      });
+    }
     set({ currentUser: null, isAuthenticated: false, originalAdmin: null, loginError: null });
   },
 

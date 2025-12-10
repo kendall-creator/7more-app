@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { ref, set as firebaseSet, onValue, update as firebaseUpdate, remove, get as firebaseGet } from "firebase/database";
-import { database } from "../config/firebase";
+import { createUserWithEmailAndPassword, updatePassword as firebaseUpdatePassword } from "firebase/auth";
+import { database, auth } from "../config/firebase";
 import { User, UserRole, ReportingCategory, ReportingPermissions } from "../types";
 import { FALLBACK_USERS } from "./fallbackUsers";
 
@@ -173,33 +174,54 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
       throw new Error("Firebase not configured. Please add Firebase credentials in ENV tab.");
     }
 
-    const newUser: any = {
-      id: `user_${Date.now()}`,
-      name,
-      email: email.toLowerCase().trim(),
-      role, // Primary role (required)
-      roles: [role], // Initialize roles array with the primary role
-      password,
-      invitedAt: new Date().toISOString(),
-      invitedBy,
-      requiresPasswordChange: false, // No longer forcing password changes
-    };
-
-    // Only add optional fields if they have values (Firebase doesn't allow undefined)
-    if (nickname) {
-      newUser.nickname = nickname;
-    }
-    if (phone) {
-      newUser.phone = phone;
+    if (!auth) {
+      throw new Error("Firebase Auth not configured. Please check your setup.");
     }
 
-    const userRef = ref(database, `users/${newUser.id}`);
-    await firebaseSet(userRef, newUser);
+    try {
+      // First, create the Firebase Auth user
+      console.log(`🔐 Creating Firebase Auth user for ${email}...`);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      console.log("✅ Firebase Auth user created:", userCredential.user.uid);
 
-    return {
-      success: true,
-      password: password,
-    };
+      // Then create the database entry
+      const newUser: any = {
+        id: `user_${Date.now()}`,
+        firebaseUid: userCredential.user.uid, // Store Firebase Auth UID
+        name,
+        email: email.toLowerCase().trim(),
+        role, // Primary role (required)
+        roles: [role], // Initialize roles array with the primary role
+        password,
+        invitedAt: new Date().toISOString(),
+        invitedBy,
+        requiresPasswordChange: false, // No longer forcing password changes
+      };
+
+      // Only add optional fields if they have values (Firebase doesn't allow undefined)
+      if (nickname) {
+        newUser.nickname = nickname;
+      }
+      if (phone) {
+        newUser.phone = phone;
+      }
+
+      const userRef = ref(database, `users/${newUser.id}`);
+      await firebaseSet(userRef, newUser);
+
+      console.log("✅ User data saved to database");
+
+      return {
+        success: true,
+        password: password,
+      };
+    } catch (error: any) {
+      console.error("❌ Error creating user:", error);
+      if (error.code === "auth/email-already-in-use") {
+        throw new Error("This email is already registered in the system.");
+      }
+      throw error;
+    }
   },
 
   removeUser: async (userId) => {
