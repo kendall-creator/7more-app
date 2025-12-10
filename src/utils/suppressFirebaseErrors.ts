@@ -23,18 +23,12 @@ console.error = (...args: any[]) => {
      errorString.includes("Firebase"));
 
   if (isFirebasePermissionError) {
-    // Show a one-time message about Firebase rules
+    // Show a one-time message about Firebase rules using console.warn (not error)
+    // to avoid triggering React Native's error handler
     if (!hasShownFirebaseRulesMessage) {
-      originalConsoleError.call(
-        console,
-        "\n⚠️ FIREBASE PERMISSION ERRORS DETECTED\n" +
-        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
-        "Your Firebase security rules are blocking database access.\n" +
-        "To fix this:\n" +
-        "1. Open Firebase Console: https://console.firebase.google.com\n" +
-        "2. Go to: Realtime Database → Rules\n" +
-        "3. Update rules to allow access (see README.md for details)\n" +
-        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+      console.warn(
+        "Firebase permission errors detected. " +
+        "Please update your Firebase security rules in the Firebase Console."
       );
       hasShownFirebaseRulesMessage = true;
     }
