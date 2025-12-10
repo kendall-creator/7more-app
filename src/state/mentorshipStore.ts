@@ -85,7 +85,7 @@ export const useMentorshipStore = create<MentorshipStore>()((set, get) => ({
         set({ assignments: [], isLoading: false });
       }
     }, (error) => {
-      console.error("❌ Error in mentorship listener:", error);
+      console.warn("Mentorship listener unavailable");
       set({ isLoading: false });
     });
   },

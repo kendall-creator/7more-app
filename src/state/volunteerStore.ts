@@ -129,7 +129,7 @@ export const useVolunteerStore = create<VolunteerStore>()((set, get) => ({
         set({ inquiries: [] });
       }
     }, (error) => {
-      console.error("❌ Error in volunteer inquiries listener:", error);
+      console.warn("Volunteer inquiries listener unavailable");
     });
 
     // Listen to volunteer database
@@ -145,7 +145,7 @@ export const useVolunteerStore = create<VolunteerStore>()((set, get) => ({
         set({ volunteers: [] });
       }
     }, (error) => {
-      console.error("❌ Error in volunteer database listener:", error);
+      console.warn("Volunteer database listener unavailable");
     });
 
     // Listen to routing rules
@@ -161,7 +161,7 @@ export const useVolunteerStore = create<VolunteerStore>()((set, get) => ({
         set({ routingRules: DEFAULT_ROUTING_RULES });
       }
     }, (error) => {
-      console.error("❌ Error in routing rules listener:", error);
+      console.warn("Routing rules listener unavailable");
     });
 
     // Listen to donation settings
@@ -176,7 +176,7 @@ export const useVolunteerStore = create<VolunteerStore>()((set, get) => ({
         set({ donationSettings: DEFAULT_DONATION_SETTINGS });
       }
     }, (error) => {
-      console.error("❌ Error in donation settings listener:", error);
+      console.warn("Donation settings listener unavailable");
     });
 
     set({ isLoading: false });

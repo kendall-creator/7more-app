@@ -89,7 +89,7 @@ export const useGuidanceStore = create<GuidanceStore>()((set, get) => ({
         set({ guidanceTasks: [], isLoading: false });
       }
     }, (error) => {
-      console.error("❌ Error in guidance listener:", error);
+      console.warn("Guidance listener unavailable");
       set({ isLoading: false });
     });
   },

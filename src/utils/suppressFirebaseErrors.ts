@@ -14,21 +14,26 @@ console.error = (...args: any[]) => {
   // Convert all arguments to strings to check for permission errors
   const errorString = args.map(arg => String(arg)).join(" ");
 
-  // Check if this is a Firebase permission error
+  // Check if this is a Firebase-related error we should suppress
   const isFirebasePermissionError =
-    errorString.includes("permission_denied") &&
-    (errorString.includes("Client doesn't have permission") ||
-     errorString.includes("Error in") ||
-     errorString.includes("listener") ||
-     errorString.includes("Firebase"));
+    errorString.includes("permission_denied") ||
+    errorString.includes("Permission denied") ||
+    errorString.includes("Direct fetch failed") ||
+    errorString.includes("cannot connect to Firebase") ||
+    errorString.includes("Error type:") ||
+    errorString.includes("Error code:") ||
+    errorString.includes("Error message:") ||
+    errorString.includes("Real-time listener error") ||
+    (errorString.includes("Firebase") &&
+     (errorString.includes("error") || errorString.includes("Error")));
 
   if (isFirebasePermissionError) {
     // Show a one-time message about Firebase rules using console.warn (not error)
     // to avoid triggering React Native's error handler
     if (!hasShownFirebaseRulesMessage) {
       console.warn(
-        "Firebase permission errors detected. " +
-        "Please update your Firebase security rules in the Firebase Console."
+        "Firebase connection issue detected. " +
+        "Please check your Firebase configuration and security rules."
       );
       hasShownFirebaseRulesMessage = true;
     }

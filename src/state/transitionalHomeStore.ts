@@ -75,7 +75,7 @@ export const useTransitionalHomeStore = create<TransitionalHomeStore>()((set, ge
         set({ transitionalHomes: [], isLoading: false });
       }
     }, (error) => {
-      console.error("❌ Error in transitional home listener:", error);
+      console.warn("Transitional home listener unavailable");
       set({ isLoading: false });
     });
   },

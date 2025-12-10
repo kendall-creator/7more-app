@@ -138,7 +138,7 @@ export const useSchedulerStore = create<SchedulerStore>()((set, get) => ({
         set({ shifts: [], isLoading: false });
       }
     }, (error) => {
-      console.error("❌ Error in scheduler shifts listener:", error);
+      console.warn("Scheduler shifts listener unavailable");
       set({ isLoading: false });
     });
 
@@ -152,7 +152,7 @@ export const useSchedulerStore = create<SchedulerStore>()((set, get) => ({
         set({ meetings: [] });
       }
     }, (error) => {
-      console.error("❌ Error in scheduler meetings listener:", error);
+      console.warn("Scheduler meetings listener unavailable");
     });
 
     onValue(templatesRef, (snapshot) => {
@@ -165,7 +165,7 @@ export const useSchedulerStore = create<SchedulerStore>()((set, get) => ({
         set({ templates: [] });
       }
     }, (error) => {
-      console.error("❌ Error in scheduler templates listener:", error);
+      console.warn("Scheduler templates listener unavailable");
     });
   },
 

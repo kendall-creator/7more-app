@@ -85,7 +85,7 @@ export const useResourceStore = create<ResourceStore>()((set, get) => ({
         set({ resources: [], isLoading: false });
       }
     }, (error) => {
-      console.error("❌ Error in resource listener:", error);
+      console.warn("Resource listener unavailable");
       set({ isLoading: false });
     });
   },

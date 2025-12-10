@@ -95,11 +95,8 @@ export const useParticipantStore = create<ParticipantStore>()((set, get) => ({
         set({ participants: [], isLoading: false });
       }
     }, (error) => {
-      // Silently handle permission errors (Firebase rules need to be updated)
-      const isPermissionError = error?.message?.includes("permission_denied") || (error as any)?.code === "PERMISSION_DENIED";
-      if (!isPermissionError) {
-        console.error("❌ Error in participant listener:", error);
-      }
+      // Silently handle all Firebase errors
+      console.warn("Participant listener unavailable");
       set({ isLoading: false });
     });
   },

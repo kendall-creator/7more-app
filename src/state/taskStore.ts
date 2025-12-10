@@ -84,7 +84,7 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
         set({ tasks: [], isLoading: false });
       }
     }, (error) => {
-      console.error("❌ Error in tasks listener:", error);
+      console.warn("Tasks listener unavailable");
       set({ isLoading: false });
     });
   },

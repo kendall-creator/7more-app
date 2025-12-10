@@ -65,7 +65,7 @@ export const useReportingStore = create<ReportingStore>()((set, get) => ({
         set({ monthlyReports: [], isLoading: false });
       }
     }, (error) => {
-      console.error("❌ Error in reporting listener:", error);
+      console.warn("Reporting listener unavailable");
       set({ isLoading: false });
     });
   },

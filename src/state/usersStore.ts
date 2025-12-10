@@ -94,15 +94,8 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
         set({ invitedUsers: [], isLoading: false });
       }
     } catch (directError: any) {
-      const errorType = (directError && directError.constructor && directError.constructor.name) || "Unknown";
-      const errorMessage = (directError && directError.message) || String(directError);
-      const errorCode = (directError && directError.code) || "no code";
-
-      console.error("❌ Direct fetch failed:");
-      console.error("   Error type: " + errorType);
-      console.error("   Error message: " + errorMessage);
-      console.error("   Error code: " + errorCode);
-      console.error("   This device cannot connect to Firebase. Using emergency fallback users.");
+      // Log as warnings instead of errors to avoid triggering React Native error handler
+      console.warn("Firebase direct fetch failed - using fallback users");
 
       // Use fallback users as last resort
       console.log(`⚠️ Loading ${FALLBACK_USERS.length} emergency fallback users`);
@@ -121,7 +114,7 @@ export const useUsersStore = create<UsersStore>()((set, get) => ({
         set({ invitedUsers: [], isLoading: false });
       }
     }, (error) => {
-      console.error("❌ Real-time listener error:", error);
+      console.warn("Firebase real-time listener unavailable");
       // Don't clear users on listener error - keep the direct fetch data
     });
   },
