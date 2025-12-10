@@ -22,7 +22,6 @@ export const FIREBASE_FALLBACK_CONFIG = {
  * Returns true if environment variables are missing and fallback is being used
  */
 export const isUsingFallbackConfig = () => {
-  return !process.env.EXPO_PUBLIC_FIREBASE_API_KEY ||
-         process.env.EXPO_PUBLIC_FIREBASE_API_KEY === "" ||
-         process.env.EXPO_PUBLIC_FIREBASE_API_KEY.startsWith("YOUR_");
+  const apiKey = process.env.EXPO_PUBLIC_FIREBASE_API_KEY || process.env.FIREBASE_API_KEY;
+  return !apiKey || apiKey === "" || apiKey.startsWith("YOUR_");
 };
