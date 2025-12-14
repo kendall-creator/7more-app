@@ -1080,7 +1080,10 @@ export default function MainDashboard() {
               <div className="mt-6 bg-white rounded-xl shadow-sm border border-border p-6">
                 <h3 className="text-lg font-semibold text-text mb-4">Report Options</h3>
                 <div className="space-y-3">
-                  <button className="w-full bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg p-4 text-left transition-colors">
+                  <button
+                    onClick={() => alert("Monthly reports view coming soon")}
+                    className="w-full bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg p-4 text-left transition-colors"
+                  >
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-semibold text-text">View Monthly Reports</h4>
@@ -1092,7 +1095,10 @@ export default function MainDashboard() {
                     </div>
                   </button>
                   {isAdmin && (
-                    <button className="w-full bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 rounded-lg p-4 text-left transition-colors">
+                    <button
+                      onClick={() => alert("Report management coming soon")}
+                      className="w-full bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 rounded-lg p-4 text-left transition-colors"
+                    >
                       <div className="flex items-center justify-between">
                         <div>
                           <h4 className="font-semibold text-text">Manage Reports</h4>
