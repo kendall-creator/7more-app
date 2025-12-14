@@ -64,6 +64,7 @@ export default function MainDashboard() {
   const tasks = useDataStore((s) => s.tasks);
   const shifts = useDataStore((s) => s.shifts);
   const allUsers = useAuthStore((s) => s.users || []);
+  const addParticipant = useDataStore((s) => s.addParticipant);
 
   // Active view state
   const [activeView, setActiveView] = useState("dashboard");
@@ -281,7 +282,7 @@ export default function MainDashboard() {
     }
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validation matching mobile app
@@ -311,40 +312,133 @@ export default function MainDashboard() {
       return;
     }
 
-    // Would save to Firebase here
-    alert("Participant added successfully!");
+    try {
+      // Parse dates
+      const parseDate = (dateStr: string): Date | null => {
+        const parts = dateStr.split("/");
+        if (parts.length !== 3) return null;
+        const month = parseInt(parts[0], 10);
+        const day = parseInt(parts[1], 10);
+        const year = parseInt(parts[2], 10);
+        if (isNaN(month) || isNaN(day) || isNaN(year)) return null;
+        return new Date(year, month - 1, day);
+      };
 
-    // Reset form
-    setFormData({
-      firstName: "",
-      lastName: "",
-      nickname: "",
-      phoneNumber: "",
-      email: "",
-      address: "",
-      participantNumber: "",
-      tdcjNotAvailable: false,
-      dateOfBirth: "",
-      dobNotAvailable: false,
-      gender: "",
-      releaseDate: "",
-      releasedFrom: "",
-      otherReleaseLocation: "",
-      referralSource: "",
-      otherReferralSource: "",
-      legalStatus: [],
-      criticalNeeds: [],
-    });
+      const dobDate = formData.dobNotAvailable ? null : parseDate(formData.dateOfBirth);
+      const relDate = parseDate(formData.releaseDate);
+
+      if (!formData.dobNotAvailable && !dobDate) {
+        alert("Please enter a valid date of birth in MM/DD/YYYY format.");
+        return;
+      }
+
+      if (!relDate) {
+        alert("Please enter a valid release date in MM/DD/YYYY format.");
+        return;
+      }
+
+      const calculateAge = (dob: Date) => {
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const monthDiff = today.getMonth() - dob.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+          age--;
+        }
+        return age;
+      };
+
+      const calculateTimeOut = (release: Date) => {
+        const today = new Date();
+        const diffTime = Math.abs(today.getTime() - release.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+      };
+
+      const age = dobDate ? calculateAge(dobDate) : 0;
+      const timeOut = calculateTimeOut(relDate);
+
+      // Save to Firebase
+      await addParticipant({
+        participantNumber: formData.tdcjNotAvailable ? "Not Available" : formData.participantNumber,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        nickname: formData.nickname,
+        dateOfBirth: dobDate ? dobDate.toISOString() : "Not Available",
+        age,
+        gender: formData.gender,
+        phoneNumber: formData.phoneNumber,
+        email: formData.email,
+        address: formData.address,
+        releaseDate: relDate.toISOString(),
+        timeOut,
+        releasedFrom: formData.releasedFrom === "Other" ? formData.otherReleaseLocation : formData.releasedFrom,
+        referralSource: formData.referralSource,
+        otherReferralSource: formData.otherReferralSource,
+        legalStatus: formData.legalStatus,
+        criticalNeeds: formData.criticalNeeds,
+        status: "pending_bridge",
+        intakeType: selectedIntakeType as any,
+        completedGraduationSteps: [],
+      });
+
+      alert("Participant added successfully!");
+
+      // Reset form and go back
+      setFormData({
+        firstName: "",
+        lastName: "",
+        nickname: "",
+        phoneNumber: "",
+        email: "",
+        address: "",
+        participantNumber: "",
+        tdcjNotAvailable: false,
+        dateOfBirth: "",
+        dobNotAvailable: false,
+        gender: "",
+        releaseDate: "",
+        releasedFrom: "",
+        otherReleaseLocation: "",
+        referralSource: "",
+        otherReferralSource: "",
+        legalStatus: [],
+        criticalNeeds: [],
+      });
+      setSelectedIntakeType(null);
+      setActiveView("dashboard");
+    } catch (error) {
+      console.error("Error adding participant:", error);
+      alert("Failed to add participant. Please try again.");
+    }
   };
 
   const handleMissedCallSubmit = async (data: any) => {
-    // TODO: Save to Firebase
-    console.log("Missed call submitted:", data);
-    alert(`${data.intakeType === "missed_call_voicemail" ? "Voicemail" : "Missed call"} entry added to Bridge Team callback queue!`);
+    try {
+      await addParticipant({
+        phoneNumber: data.phoneNumber,
+        firstName: data.name || "Unknown",
+        lastName: data.intakeType === "missed_call_voicemail" ? "(Voicemail)" : "(Missed Call)",
+        participantNumber: `TEMP-${Date.now()}`,
+        dateOfBirth: "1990-01-01",
+        age: 0,
+        gender: "Unknown",
+        releaseDate: new Date().toISOString(),
+        timeOut: 0,
+        releasedFrom: "Unknown",
+        status: "pending_bridge",
+        intakeType: data.intakeType,
+        completedGraduationSteps: [],
+      });
 
-    // Reset and go back
-    setSelectedIntakeType(null);
-    setActiveView("dashboard");
+      alert(`${data.intakeType === "missed_call_voicemail" ? "Voicemail" : "Missed call"} entry added to Bridge Team callback queue!`);
+
+      // Reset and go back
+      setSelectedIntakeType(null);
+      setActiveView("dashboard");
+    } catch (error) {
+      console.error("Error adding missed call:", error);
+      alert("Failed to add entry. Please try again.");
+    }
   };
 
   const handleIntakeTypeSelect = (type: string) => {

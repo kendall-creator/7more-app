@@ -43,20 +43,29 @@ export interface Participant {
   participantNumber: string;
   firstName: string;
   lastName: string;
+  nickname?: string;
   dateOfBirth: string;
   age: number;
   gender: string;
   phoneNumber?: string;
   email?: string;
+  address?: string;
   releaseDate: string;
   timeOut: number;
   releasedFrom: string;
+  referralSource?: string;
+  otherReferralSource?: string;
+  legalStatus?: string[];
+  criticalNeeds?: string[];
   status: ParticipantStatus;
-  submittedAt: string;
+  intakeType?: string;
+  completedGraduationSteps: string[];
+  createdAt?: string;
+  submittedAt?: string;
   assignedMentor?: string;
   assignedToMentorAt?: string;
-  notes: Note[];
-  history: HistoryEntry[];
+  notes?: Note[];
+  history?: HistoryEntry[];
 }
 
 // Note structure

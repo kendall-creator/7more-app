@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { ref, onValue, get as firebaseGet } from "firebase/database";
+import { ref, onValue, get as firebaseGet, set as firebaseSet } from "firebase/database";
 import { database } from "../config/firebase";
 import { Participant, Task, Shift } from "../types";
 
@@ -12,6 +12,7 @@ interface DataState {
 
 interface DataActions {
   initializeListeners: () => void;
+  addParticipant: (participant: Partial<Participant>) => Promise<void>;
 }
 
 type DataStore = DataState & DataActions;
@@ -93,5 +94,46 @@ export const useDataStore = create<DataStore>()((set) => ({
         set({ shifts: shiftsArray });
       }
     });
+  },
+
+  addParticipant: async (participantData: Partial<Participant>) => {
+    if (!database) {
+      throw new Error("Firebase not configured");
+    }
+
+    // Generate a unique ID for the participant
+    const participantId = `participant_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // Create the full participant object with required fields
+    const newParticipant: Participant = {
+      id: participantId,
+      firstName: participantData.firstName || "Unknown",
+      lastName: participantData.lastName || "",
+      participantNumber: participantData.participantNumber || `TEMP-${Date.now()}`,
+      dateOfBirth: participantData.dateOfBirth || "Not Available",
+      age: participantData.age || 0,
+      gender: participantData.gender || "Unknown",
+      phoneNumber: participantData.phoneNumber,
+      email: participantData.email,
+      address: participantData.address,
+      releaseDate: participantData.releaseDate || new Date().toISOString(),
+      timeOut: participantData.timeOut || 0,
+      releasedFrom: participantData.releasedFrom || "Unknown",
+      status: participantData.status || "pending_bridge",
+      completedGraduationSteps: participantData.completedGraduationSteps || [],
+      intakeType: participantData.intakeType,
+      nickname: participantData.nickname,
+      referralSource: participantData.referralSource,
+      otherReferralSource: participantData.otherReferralSource,
+      legalStatus: participantData.legalStatus,
+      criticalNeeds: participantData.criticalNeeds,
+      createdAt: new Date().toISOString(),
+    };
+
+    // Save to Firebase
+    const participantRef = ref(database, `participants/${participantId}`);
+    await firebaseSet(participantRef, newParticipant);
+
+    return;
   },
 }));
