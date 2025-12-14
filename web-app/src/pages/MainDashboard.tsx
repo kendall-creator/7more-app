@@ -24,6 +24,9 @@ import {
   Copy,
 } from "lucide-react";
 import AddParticipantForm from "./AddParticipantForm";
+import IntakeTypeSelection from "./IntakeTypeSelection";
+import MissedCallNoVoicemail from "./MissedCallNoVoicemail";
+import MissedCallVoicemail from "./MissedCallVoicemail";
 
 // NavButton component
 function NavButton({
@@ -64,6 +67,7 @@ export default function MainDashboard() {
 
   // Active view state
   const [activeView, setActiveView] = useState("dashboard");
+  const [selectedIntakeType, setSelectedIntakeType] = useState<string | null>(null);
 
   // Debug: Log user role on mount
   console.log("MainDashboard - User:", currentUser?.email, "Role:", currentUser?.role, "Active View:", activeView);
@@ -331,6 +335,25 @@ export default function MainDashboard() {
       legalStatus: [],
       criticalNeeds: [],
     });
+  };
+
+  const handleMissedCallSubmit = async (data: any) => {
+    // TODO: Save to Firebase
+    console.log("Missed call submitted:", data);
+    alert(`${data.intakeType === "missed_call_voicemail" ? "Voicemail" : "Missed call"} entry added to Bridge Team callback queue!`);
+
+    // Reset and go back
+    setSelectedIntakeType(null);
+    setActiveView("dashboard");
+  };
+
+  const handleIntakeTypeSelect = (type: string) => {
+    setSelectedIntakeType(type);
+  };
+
+  const handleIntakeCancel = () => {
+    setSelectedIntakeType(null);
+    setActiveView("dashboard");
   };
 
   // Filter data based on search
@@ -685,26 +708,51 @@ export default function MainDashboard() {
             </>
           )}
 
-          {/* Add Participant Form - Complete Intake */}
+          {/* Add Participant - Multi-step Intake Flow */}
           {activeView === "add-participant" && (
             <>
-              <div className="mb-6">
-                <h1 className="text-3xl font-bold text-text mb-2">Add Participant</h1>
-                <p className="text-secondary">Manually add a new participant to the system</p>
-              </div>
-              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
-                <AddParticipantForm
-                  formData={formData}
-                  setFormData={setFormData}
-                  handleFormSubmit={handleFormSubmit}
-                  LEGAL_STATUS_OPTIONS={LEGAL_STATUS_OPTIONS}
-                  RELEASE_LOCATION_OPTIONS={RELEASE_LOCATION_OPTIONS}
-                  REFERRAL_SOURCE_OPTIONS={REFERRAL_SOURCE_OPTIONS}
-                  CRITICAL_NEEDS_OPTIONS={CRITICAL_NEEDS_OPTIONS}
-                  toggleLegalStatus={toggleLegalStatus}
-                  toggleCriticalNeed={toggleCriticalNeed}
+              {!selectedIntakeType ? (
+                <IntakeTypeSelection
+                  onSelect={handleIntakeTypeSelect}
+                  onCancel={handleIntakeCancel}
                 />
-              </div>
+              ) : selectedIntakeType === "full_form_entry" || selectedIntakeType === "live_call_intake" ? (
+                <>
+                  <div className="mb-6">
+                    <h1 className="text-3xl font-bold text-text mb-2">
+                      {selectedIntakeType === "live_call_intake" ? "Live Call Intake" : "Full Form Entry"}
+                    </h1>
+                    <p className="text-secondary">
+                      {selectedIntakeType === "live_call_intake"
+                        ? "Complete intake for participant on the phone now"
+                        : "Manually add a new participant to the system"}
+                    </p>
+                  </div>
+                  <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+                    <AddParticipantForm
+                      formData={formData}
+                      setFormData={setFormData}
+                      handleFormSubmit={handleFormSubmit}
+                      LEGAL_STATUS_OPTIONS={LEGAL_STATUS_OPTIONS}
+                      RELEASE_LOCATION_OPTIONS={RELEASE_LOCATION_OPTIONS}
+                      REFERRAL_SOURCE_OPTIONS={REFERRAL_SOURCE_OPTIONS}
+                      CRITICAL_NEEDS_OPTIONS={CRITICAL_NEEDS_OPTIONS}
+                      toggleLegalStatus={toggleLegalStatus}
+                      toggleCriticalNeed={toggleCriticalNeed}
+                    />
+                  </div>
+                </>
+              ) : selectedIntakeType === "missed_call_no_voicemail" ? (
+                <MissedCallNoVoicemail
+                  onSubmit={handleMissedCallSubmit}
+                  onCancel={handleIntakeCancel}
+                />
+              ) : selectedIntakeType === "missed_call_voicemail" ? (
+                <MissedCallVoicemail
+                  onSubmit={handleMissedCallSubmit}
+                  onCancel={handleIntakeCancel}
+                />
+              ) : null}
             </>
           )}
 
