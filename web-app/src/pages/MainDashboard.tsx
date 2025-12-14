@@ -1115,6 +1115,52 @@ export default function MainDashboard() {
             </>
           )}
 
+          {/* View Reporting View */}
+          {activeView === "view-reporting" && (
+            <>
+              <div className="mb-6">
+                <button
+                  onClick={() => setActiveView("reporting")}
+                  className="flex items-center gap-2 text-secondary hover:text-text mb-4 transition-colors"
+                >
+                  <ChevronRight className="w-5 h-5 rotate-180" />
+                  <span className="text-sm font-medium">Back to Monthly Reporting</span>
+                </button>
+                <h1 className="text-3xl font-bold text-text mb-2">View Reports</h1>
+                <p className="text-secondary">View monthly reports with filtering and comparisons</p>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+                <p className="text-secondary text-center py-12">
+                  Report viewing interface coming soon - filter by date range, view aggregations, and compare months
+                </p>
+              </div>
+            </>
+          )}
+
+          {/* Manage Reporting View */}
+          {activeView === "manage-reporting" && (
+            <>
+              <div className="mb-6">
+                <button
+                  onClick={() => setActiveView("reporting")}
+                  className="flex items-center gap-2 text-secondary hover:text-text mb-4 transition-colors"
+                >
+                  <ChevronRight className="w-5 h-5 rotate-180" />
+                  <span className="text-sm font-medium">Back to Monthly Reporting</span>
+                </button>
+                <h1 className="text-3xl font-bold text-text mb-2">Manage Reports</h1>
+                <p className="text-secondary">Enter and edit monthly report data</p>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+                <p className="text-secondary text-center py-12">
+                  Report management interface coming soon - enter data for all categories
+                </p>
+              </div>
+            </>
+          )}
+
           {/* Resources View */}
           {activeView === "resources" && (
             <>
