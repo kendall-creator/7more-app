@@ -23,6 +23,7 @@ import {
   Edit,
   Copy,
 } from "lucide-react";
+import AddParticipantForm from "./AddParticipantForm";
 
 // NavButton component
 function NavButton({
@@ -69,7 +70,7 @@ export default function MainDashboard() {
   const [resourceSearch, setResourceSearch] = useState("");
   const [volunteerSearch, setVolunteerSearch] = useState("");
 
-  // Form state for Add Participant
+  // Form state for Add Participant - mirrors mobile app
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -78,11 +79,54 @@ export default function MainDashboard() {
     email: "",
     address: "",
     participantNumber: "",
+    tdcjNotAvailable: false,
     dateOfBirth: "",
+    dobNotAvailable: false,
     gender: "",
     releaseDate: "",
     releasedFrom: "",
+    otherReleaseLocation: "",
+    referralSource: "",
+    otherReferralSource: "",
+    legalStatus: [] as string[],
+    criticalNeeds: [] as string[],
   });
+
+  const LEGAL_STATUS_OPTIONS = [
+    "The participant is on parole",
+    "The participant is on probation",
+    "The participant is on an ankle monitor",
+    "The participant has an SA conviction",
+    "The participant has an SA–Minor conviction",
+    "The participant has barriers that prevent them from working right now",
+    "None of these apply",
+  ];
+
+  const RELEASE_LOCATION_OPTIONS = [
+    "Pam Lychner",
+    "Huntsville",
+    "Plane",
+    "Hawaii",
+    "Other",
+  ];
+
+  const REFERRAL_SOURCE_OPTIONS = [
+    "I met them in person",
+    "Family/friend",
+    "Online",
+    "Other",
+  ];
+
+  const CRITICAL_NEEDS_OPTIONS = [
+    "Needs help getting a phone",
+    "Employment needed",
+    "Housing needed",
+    "Clothing needed",
+    "Food needed",
+    "Building",
+    "Healthy relationships",
+    "Managing finances",
+  ];
 
   const isMentor =
     currentUser?.role === "mentor" || currentUser?.role === "mentorship_leader";
@@ -202,10 +246,67 @@ export default function MainDashboard() {
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
+  const toggleLegalStatus = (option: string) => {
+    if (formData.legalStatus.includes(option)) {
+      setFormData({
+        ...formData,
+        legalStatus: formData.legalStatus.filter((s) => s !== option),
+      });
+    } else {
+      setFormData({
+        ...formData,
+        legalStatus: [...formData.legalStatus, option],
+      });
+    }
+  };
+
+  const toggleCriticalNeed = (option: string) => {
+    if (formData.criticalNeeds.includes(option)) {
+      setFormData({
+        ...formData,
+        criticalNeeds: formData.criticalNeeds.filter((n) => n !== option),
+      });
+    } else {
+      setFormData({
+        ...formData,
+        criticalNeeds: [...formData.criticalNeeds, option],
+      });
+    }
+  };
+
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission - in real app would save to Firebase
-    alert("Participant added successfully! (This is a demo)");
+
+    // Validation matching mobile app
+    if ((!formData.tdcjNotAvailable && !formData.participantNumber) ||
+        !formData.firstName ||
+        !formData.lastName ||
+        !formData.gender ||
+        !formData.releasedFrom ||
+        (!formData.dobNotAvailable && !formData.dateOfBirth) ||
+        !formData.releaseDate) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    if (!formData.phoneNumber?.trim() && !formData.email?.trim()) {
+      alert("Please provide at least one contact method (email or phone number).");
+      return;
+    }
+
+    if (formData.releasedFrom === "Other" && !formData.otherReleaseLocation.trim()) {
+      alert("Please specify the release location.");
+      return;
+    }
+
+    if (formData.referralSource === "Other" && !formData.otherReferralSource.trim()) {
+      alert("Please specify how the participant heard about 7more.");
+      return;
+    }
+
+    // Would save to Firebase here
+    alert("Participant added successfully!");
+
     // Reset form
     setFormData({
       firstName: "",
@@ -215,10 +316,17 @@ export default function MainDashboard() {
       email: "",
       address: "",
       participantNumber: "",
+      tdcjNotAvailable: false,
       dateOfBirth: "",
+      dobNotAvailable: false,
       gender: "",
       releaseDate: "",
       releasedFrom: "",
+      otherReleaseLocation: "",
+      referralSource: "",
+      otherReferralSource: "",
+      legalStatus: [],
+      criticalNeeds: [],
     });
   };
 
@@ -582,206 +690,17 @@ export default function MainDashboard() {
                 <p className="text-secondary">Manually add a new participant to the system</p>
               </div>
               <div className="bg-white rounded-xl shadow-sm border border-border p-6">
-                <form onSubmit={handleFormSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-text mb-2">
-                        First Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.firstName}
-                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="First name"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-text mb-2">
-                        Last Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.lastName}
-                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="Last name"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-text mb-2">
-                      Nickname <span className="text-secondary text-xs">(Optional)</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.nickname}
-                      onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
-                      className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="Enter nickname"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-text mb-2">
-                        Phone Number
-                      </label>
-                      <input
-                        type="tel"
-                        value={formData.phoneNumber}
-                        onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="(555) 123-4567"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-text mb-2">
-                        Email Address
-                      </label>
-                      <input
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="email@example.com"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-text mb-2">
-                      Full Address <span className="text-secondary text-xs">(Optional)</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.address}
-                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="Street address, City, State, ZIP"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-text mb-2">
-                        TDCJ Number <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.participantNumber}
-                        onChange={(e) => setFormData({ ...formData, participantNumber: e.target.value })}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="Enter TDCJ number"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-text mb-2">
-                        Date of Birth <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="date"
-                        required
-                        value={formData.dateOfBirth}
-                        onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-text mb-2">
-                      Gender <span className="text-red-500">*</span>
-                    </label>
-                    <div className="flex gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, gender: "Male" })}
-                        className={`flex-1 py-2 px-4 rounded-lg border-2 transition-colors ${
-                          formData.gender === "Male"
-                            ? "bg-primary/10 border-primary text-primary"
-                            : "border-border text-text"
-                        }`}
-                      >
-                        Male
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, gender: "Female" })}
-                        className={`flex-1 py-2 px-4 rounded-lg border-2 transition-colors ${
-                          formData.gender === "Female"
-                            ? "bg-primary/10 border-primary text-primary"
-                            : "border-border text-text"
-                        }`}
-                      >
-                        Female
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-text mb-2">
-                        Release Date <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="date"
-                        required
-                        value={formData.releaseDate}
-                        onChange={(e) => setFormData({ ...formData, releaseDate: e.target.value })}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-text mb-2">
-                        Released From <span className="text-red-500">*</span>
-                      </label>
-                      <select
-                        required
-                        value={formData.releasedFrom}
-                        onChange={(e) => setFormData({ ...formData, releasedFrom: e.target.value })}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      >
-                        <option value="">Select facility</option>
-                        <option value="Pam Lychner">Pam Lychner</option>
-                        <option value="Huntsville">Huntsville</option>
-                        <option value="Other">Other</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 pt-4">
-                    <button
-                      type="submit"
-                      className="flex-1 bg-primary hover:bg-primary/90 text-white rounded-lg px-4 py-3 font-medium transition-colors"
-                    >
-                      Add Participant
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({
-                        firstName: "",
-                        lastName: "",
-                        nickname: "",
-                        phoneNumber: "",
-                        email: "",
-                        address: "",
-                        participantNumber: "",
-                        dateOfBirth: "",
-                        gender: "",
-                        releaseDate: "",
-                        releasedFrom: "",
-                      })}
-                      className="bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg px-6 py-3 font-medium transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
+                <AddParticipantForm
+                  formData={formData}
+                  setFormData={setFormData}
+                  handleFormSubmit={handleFormSubmit}
+                  LEGAL_STATUS_OPTIONS={LEGAL_STATUS_OPTIONS}
+                  RELEASE_LOCATION_OPTIONS={RELEASE_LOCATION_OPTIONS}
+                  REFERRAL_SOURCE_OPTIONS={REFERRAL_SOURCE_OPTIONS}
+                  CRITICAL_NEEDS_OPTIONS={CRITICAL_NEEDS_OPTIONS}
+                  toggleLegalStatus={toggleLegalStatus}
+                  toggleCriticalNeed={toggleCriticalNeed}
+                />
               </div>
             </>
           )}
