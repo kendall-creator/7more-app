@@ -65,6 +65,9 @@ export default function MainDashboard() {
   // Active view state
   const [activeView, setActiveView] = useState("dashboard");
 
+  // Debug: Log user role on mount
+  console.log("MainDashboard - User:", currentUser?.email, "Role:", currentUser?.role, "Active View:", activeView);
+
   // Search states for various views
   const [searchQuery, setSearchQuery] = useState("");
   const [resourceSearch, setResourceSearch] = useState("");
