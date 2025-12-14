@@ -574,7 +574,7 @@ export default function MainDashboard() {
             </>
           )}
 
-          {/* Add Participant View */}
+          {/* Add Participant Form - Complete Intake */}
           {activeView === "add-participant" && (
             <>
               <div className="mb-6">
