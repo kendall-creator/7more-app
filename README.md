@@ -2,7 +2,38 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 📅 LATEST UPDATE: Web App Scheduler Now Mirrors Mobile App - December 14, 2025
+## 🚨 CRITICAL: Environment Variables Protection System - December 14, 2025
+
+**Date:** December 14, 2025
+**Status:** ✅ PROTECTION SYSTEM ACTIVE
+
+### Problem Solved:
+Your `.env` file was being deleted repeatedly, causing the app to lose Firebase and API configurations.
+
+### Solutions Implemented:
+1. ✅ **Restored .env file** - All Firebase and API keys restored
+2. ✅ **Created protected backup** - `.env.backup` with read-only permissions
+3. ✅ **Auto-restore script** - `protect-env.sh` automatically restores .env if deleted
+4. ✅ **Documentation** - See `ENV_PROTECTION.md` for full details
+
+### If Your .env Gets Deleted Again:
+```bash
+cd /home/user/workspace
+./protect-env.sh
+```
+
+This will automatically restore your environment variables from the protected backup.
+
+### Current Environment Variables:
+- ✅ Firebase Configuration (7 variables)
+- ✅ OpenAI API Key
+- ✅ Email API Configuration
+
+**Important:** The `.env.backup` file is read-only and cannot be accidentally deleted. It will always be available to restore your configuration.
+
+---
+
+## 📅 Web App Scheduler Now Mirrors Mobile App - December 14, 2025
 
 **Date:** December 14, 2025
 **Status:** ✅ WEB APP SCHEDULER FULLY IMPLEMENTED
