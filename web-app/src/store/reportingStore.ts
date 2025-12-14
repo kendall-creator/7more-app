@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { ref, onValue } from "firebase/database";
+import { ref, onValue, set as firebaseSet, update as firebaseUpdate } from "firebase/database";
 import { database } from "../config/firebase";
 
 interface MonthlyReport {
@@ -96,6 +96,12 @@ interface ReportingState {
   monthlyReports: MonthlyReport[];
   isLoading: boolean;
   initializeFirebaseListener: () => void;
+  createMonthlyReport: (month: number, year: number, createdBy: string, createdByName: string) => Promise<MonthlyReport>;
+  updateReleaseFacilityCounts: (reportId: string, counts: any) => Promise<void>;
+  updateCallMetrics: (reportId: string, callMetrics: any) => Promise<void>;
+  updateDonorData: (reportId: string, donorData: any) => Promise<void>;
+  updateFinancialData: (reportId: string, beginningBalance: number | null, endingBalance: number | null) => Promise<void>;
+  updateSocialMediaMetrics: (reportId: string, socialMediaMetrics: any) => Promise<void>;
   getReportForMonth: (month: number, year: number) => MonthlyReport | undefined;
   getPostedReports: () => MonthlyReport[];
   getMostRecentPostedReport: () => MonthlyReport | undefined;
@@ -161,5 +167,145 @@ export const useReportingStore = create<ReportingState>()((set, get) => ({
       if (a.year !== b.year) return b.year - a.year;
       return b.month - a.month;
     })[0];
+  },
+
+  createMonthlyReport: async (month, year, createdBy, createdByName) => {
+    if (!database) {
+      throw new Error("Firebase not configured");
+    }
+
+    const existingReport = get().getReportForMonth(month, year);
+    if (existingReport) {
+      return existingReport;
+    }
+
+    const newReport: MonthlyReport = {
+      id: `report_${year}_${month}_${Date.now()}`,
+      month,
+      year,
+      releaseFacilityCounts: {
+        pamLychner: null,
+        huntsville: null,
+        planeStateJail: null,
+        havinsUnit: null,
+        clemensUnit: null,
+        other: null,
+      },
+      callMetrics: {
+        inbound: null,
+        outbound: null,
+        missedCallsPercent: null,
+        hungUpPriorToWelcome: null,
+        hungUpWithin10Seconds: null,
+        missedDueToNoAnswer: null,
+      },
+      mentorshipMetrics: {
+        participantsAssignedToMentorship: 0,
+      },
+      bridgeTeamMetrics: {
+        participantsReceived: { autoCalculated: 0, manualOverride: null },
+        statusCounts: {
+          pendingBridge: { autoCalculated: 0, manualOverride: null },
+          attemptedToContact: { autoCalculated: 0, manualOverride: null },
+          contacted: { autoCalculated: 0, manualOverride: null },
+          unableToContact: { autoCalculated: 0, manualOverride: null },
+        },
+        averageDaysToFirstOutreach: { autoCalculated: 0, manualOverride: null },
+        formsByDayOfWeek: {
+          monday: 0,
+          tuesday: 0,
+          wednesday: 0,
+          thursday: 0,
+          friday: 0,
+          saturday: 0,
+          sunday: 0,
+          topDay: "N/A",
+        },
+      },
+      donorData: {
+        newDonors: null,
+        amountFromNewDonors: null,
+        checks: null,
+        totalFromChecks: null,
+      },
+      financialData: {
+        beginningBalance: null,
+        endingBalance: null,
+        difference: 0,
+      },
+      socialMediaMetrics: {
+        reelsPostViews: null,
+        viewsFromNonFollowers: null,
+        followers: null,
+        followersGained: null,
+      },
+      wins: [],
+      concerns: [],
+      isPosted: false,
+      createdBy,
+      createdByName,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const reportRef = ref(database, `monthlyReports/${newReport.id}`);
+    await firebaseSet(reportRef, newReport);
+
+    return newReport;
+  },
+
+  updateReleaseFacilityCounts: async (reportId, counts) => {
+    if (!database) throw new Error("Firebase not configured");
+
+    const reportRef = ref(database, `monthlyReports/${reportId}`);
+    await firebaseUpdate(reportRef, {
+      releaseFacilityCounts: counts,
+      updatedAt: new Date().toISOString(),
+    });
+  },
+
+  updateCallMetrics: async (reportId, callMetrics) => {
+    if (!database) throw new Error("Firebase not configured");
+
+    const reportRef = ref(database, `monthlyReports/${reportId}`);
+    await firebaseUpdate(reportRef, {
+      callMetrics,
+      updatedAt: new Date().toISOString(),
+    });
+  },
+
+  updateDonorData: async (reportId, donorData) => {
+    if (!database) throw new Error("Firebase not configured");
+
+    const reportRef = ref(database, `monthlyReports/${reportId}`);
+    await firebaseUpdate(reportRef, {
+      donorData,
+      updatedAt: new Date().toISOString(),
+    });
+  },
+
+  updateFinancialData: async (reportId, beginningBalance, endingBalance) => {
+    if (!database) throw new Error("Firebase not configured");
+
+    const difference = (endingBalance || 0) - (beginningBalance || 0);
+    const reportRef = ref(database, `monthlyReports/${reportId}`);
+    await firebaseUpdate(reportRef, {
+      financialData: {
+        beginningBalance,
+        endingBalance,
+        difference,
+      },
+      updatedAt: new Date().toISOString(),
+    });
+  },
+
+  updateSocialMediaMetrics: async (reportId, socialMediaMetrics) => {
+    if (!database) throw new Error("Firebase not configured");
+
+    const reportRef = ref(database, `monthlyReports/${reportId}`);
+    await firebaseUpdate(reportRef, {
+      socialMediaMetrics,
+      updatedAt: new Date().toISOString(),
+    });
   },
 }));

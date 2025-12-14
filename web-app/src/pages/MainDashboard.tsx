@@ -73,6 +73,17 @@ export default function MainDashboard() {
   // Reporting store
   const monthlyReports = useReportingStore((s) => s.monthlyReports);
   const initializeReportingListener = useReportingStore((s) => s.initializeFirebaseListener);
+  const createMonthlyReport = useReportingStore((s) => s.createMonthlyReport);
+  const updateReleaseFacilityCounts = useReportingStore((s) => s.updateReleaseFacilityCounts);
+  const updateCallMetrics = useReportingStore((s) => s.updateCallMetrics);
+  const updateDonorData = useReportingStore((s) => s.updateDonorData);
+  const updateFinancialData = useReportingStore((s) => s.updateFinancialData);
+  const updateSocialMediaMetrics = useReportingStore((s) => s.updateSocialMediaMetrics);
+
+  // Reporting form state
+  const [reportMonth, setReportMonth] = useState(new Date().getMonth() + 1);
+  const [reportYear, setReportYear] = useState(new Date().getFullYear());
+  const [currentReport, setCurrentReport] = useState<any>(null);
 
   // Initialize reporting listener on mount
   useEffect(() => {
@@ -82,6 +93,23 @@ export default function MainDashboard() {
   // Active view state
   const [activeView, setActiveView] = useState("dashboard");
   const [selectedIntakeType, setSelectedIntakeType] = useState<string | null>(null);
+
+  // Load report when month/year changes
+  useEffect(() => {
+    const loadReport = async () => {
+      if (!currentUser) return;
+
+      let report = monthlyReports.find((r) => r.month === reportMonth && r.year === reportYear);
+
+      if (!report && activeView === "manage-reporting") {
+        report = await createMonthlyReport(reportMonth, reportYear, currentUser.id, currentUser.name || currentUser.email);
+      }
+
+      setCurrentReport(report);
+    };
+
+    loadReport();
+  }, [reportMonth, reportYear, monthlyReports, activeView, currentUser, createMonthlyReport]);
 
   // Debug: Log user role on mount
   console.log("MainDashboard - User:", currentUser?.email, "Role:", currentUser?.role, "Active View:", activeView);
@@ -1136,7 +1164,7 @@ export default function MainDashboard() {
           )}
 
           {/* Manage Reporting View */}
-          {activeView === "manage-reporting" && (
+          {activeView === "manage-reporting" && currentReport && (
             <>
               <div className="mb-6">
                 <button
@@ -1147,31 +1175,207 @@ export default function MainDashboard() {
                   <span className="text-sm font-medium">Back to Monthly Reporting</span>
                 </button>
                 <h1 className="text-3xl font-bold text-text mb-2">Manage Reports</h1>
-                <p className="text-secondary">Enter and edit monthly report data</p>
+                <p className="text-secondary">Enter and edit monthly report data for {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][reportMonth - 1]} {reportYear}</p>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FileText className="w-8 h-8 text-indigo-600" />
+              {/* Month Selector */}
+              <div className="bg-white rounded-lg p-4 mb-4 border border-border">
+                <label className="block text-sm font-semibold text-text mb-2">Select Month</label>
+                <div className="flex gap-4">
+                  <select
+                    value={reportMonth}
+                    onChange={(e) => setReportMonth(Number(e.target.value))}
+                    className="flex-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map((month, idx) => (
+                      <option key={month} value={idx + 1}>{month}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={reportYear}
+                    onChange={(e) => setReportYear(Number(e.target.value))}
+                    className="flex-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    {[2024, 2025, 2026].map((year) => (
+                      <option key={year} value={year}>{year}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {/* Releasees Met */}
+                <div className="bg-white rounded-lg p-6 border border-border">
+                  <h3 className="text-lg font-bold text-text mb-4">Releasees Met</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {[
+                      { label: "Pam Lychner", key: "pamLychner" },
+                      { label: "Huntsville", key: "huntsville" },
+                      { label: "Plane State Jail", key: "planeStateJail" },
+                      { label: "Havins Unit", key: "havinsUnit" },
+                      { label: "Clemens Unit", key: "clemensUnit" },
+                      { label: "Other", key: "other" },
+                    ].map((field) => (
+                      <div key={field.key}>
+                        <label className="block text-sm font-medium text-secondary mb-1">{field.label}</label>
+                        <input
+                          type="number"
+                          value={currentReport.releaseFacilityCounts?.[field.key] ?? ""}
+                          onChange={async (e) => {
+                            const value = e.target.value === "" ? null : Number(e.target.value);
+                            const updated = { ...currentReport.releaseFacilityCounts, [field.key]: value };
+                            setCurrentReport({ ...currentReport, releaseFacilityCounts: updated });
+                            await updateReleaseFacilityCounts(currentReport.id, updated);
+                          }}
+                          className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                          placeholder="0"
+                        />
+                      </div>
+                    ))}
                   </div>
-                  <h3 className="text-lg font-bold text-text mb-2">Use Mobile App for Data Entry</h3>
-                  <p className="text-secondary mb-4 max-w-xl mx-auto">
-                    Report data entry is available in the mobile app with a comprehensive interface for managing monthly reports.
-                  </p>
-                  <div className="text-left max-w-md mx-auto space-y-2 text-sm text-secondary bg-gray-50 rounded-lg p-4 mb-4">
-                    <p className="font-semibold text-text mb-2">Available on mobile:</p>
-                    <p>• Release facility counts by location</p>
-                    <p>• Call metrics (inbound, outbound, missed)</p>
-                    <p>• Bridge team status and metrics</p>
-                    <p>• Mentorship assignments (auto-calculated)</p>
-                    <p>• Donor data and financial information</p>
-                    <p>• Social media analytics</p>
-                    <p>• Monthly wins and concerns</p>
+                </div>
+
+                {/* Call Metrics */}
+                <div className="bg-white rounded-lg p-6 border border-border">
+                  <h3 className="text-lg font-bold text-text mb-4">Call Metrics</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {[
+                      { label: "Inbound Calls", key: "inbound" },
+                      { label: "Outbound Calls", key: "outbound" },
+                      { label: "Missed Calls %", key: "missedCallsPercent" },
+                    ].map((field) => (
+                      <div key={field.key}>
+                        <label className="block text-sm font-medium text-secondary mb-1">{field.label}</label>
+                        <input
+                          type="number"
+                          value={currentReport.callMetrics?.[field.key] ?? ""}
+                          onChange={async (e) => {
+                            const value = e.target.value === "" ? null : Number(e.target.value);
+                            const updated = { ...currentReport.callMetrics, [field.key]: value };
+                            setCurrentReport({ ...currentReport, callMetrics: updated });
+                            await updateCallMetrics(currentReport.id, updated);
+                          }}
+                          className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                          placeholder="0"
+                        />
+                      </div>
+                    ))}
                   </div>
-                  <p className="text-sm text-secondary">
-                    Open the mobile app and navigate to <span className="font-semibold">Admin → Monthly Reporting → Manage Reports</span> to enter data.
-                  </p>
+                </div>
+
+                {/* Donor Data */}
+                <div className="bg-white rounded-lg p-6 border border-border">
+                  <h3 className="text-lg font-bold text-text mb-4">Donor Data</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {[
+                      { label: "New Donors", key: "newDonors" },
+                      { label: "Amount from New Donors", key: "amountFromNewDonors" },
+                      { label: "Checks", key: "checks" },
+                      { label: "Total from Checks", key: "totalFromChecks" },
+                    ].map((field) => (
+                      <div key={field.key}>
+                        <label className="block text-sm font-medium text-secondary mb-1">{field.label}</label>
+                        <input
+                          type="number"
+                          step={field.key.includes("Amount") || field.key.includes("Total") ? "0.01" : "1"}
+                          value={currentReport.donorData?.[field.key] ?? ""}
+                          onChange={async (e) => {
+                            const value = e.target.value === "" ? null : Number(e.target.value);
+                            const updated = { ...currentReport.donorData, [field.key]: value };
+                            setCurrentReport({ ...currentReport, donorData: updated });
+                            await updateDonorData(currentReport.id, updated);
+                          }}
+                          className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                          placeholder="0"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Financial Data */}
+                <div className="bg-white rounded-lg p-6 border border-border">
+                  <h3 className="text-lg font-bold text-text mb-4">Financial Data</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-secondary mb-1">Beginning Balance</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={currentReport.financialData?.beginningBalance ?? ""}
+                        onChange={async (e) => {
+                          const value = e.target.value === "" ? null : Number(e.target.value);
+                          setCurrentReport({
+                            ...currentReport,
+                            financialData: { ...currentReport.financialData, beginningBalance: value },
+                          });
+                          await updateFinancialData(currentReport.id, value, currentReport.financialData?.endingBalance);
+                        }}
+                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-secondary mb-1">Ending Balance</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={currentReport.financialData?.endingBalance ?? ""}
+                        onChange={async (e) => {
+                          const value = e.target.value === "" ? null : Number(e.target.value);
+                          setCurrentReport({
+                            ...currentReport,
+                            financialData: { ...currentReport.financialData, endingBalance: value },
+                          });
+                          await updateFinancialData(currentReport.id, currentReport.financialData?.beginningBalance, value);
+                        }}
+                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        placeholder="0.00"
+                      />
+                    </div>
+                  </div>
+                  {currentReport.financialData?.beginningBalance != null && currentReport.financialData?.endingBalance != null && (
+                    <div className="mt-4 bg-indigo-50 p-4 rounded-lg">
+                      <p className="text-sm text-secondary">Difference</p>
+                      <p className="text-2xl font-bold text-indigo-900">
+                        ${((currentReport.financialData.endingBalance - currentReport.financialData.beginningBalance).toFixed(2))}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Social Media */}
+                <div className="bg-white rounded-lg p-6 border border-border">
+                  <h3 className="text-lg font-bold text-text mb-4">Social Media</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {[
+                      { label: "Reels/Post Views", key: "reelsPostViews" },
+                      { label: "Views from Non-Followers", key: "viewsFromNonFollowers" },
+                      { label: "Total Followers", key: "followers" },
+                      { label: "Followers Gained", key: "followersGained" },
+                    ].map((field) => (
+                      <div key={field.key}>
+                        <label className="block text-sm font-medium text-secondary mb-1">{field.label}</label>
+                        <input
+                          type="number"
+                          value={currentReport.socialMediaMetrics?.[field.key] ?? ""}
+                          onChange={async (e) => {
+                            const value = e.target.value === "" ? null : Number(e.target.value);
+                            const updated = { ...currentReport.socialMediaMetrics, [field.key]: value };
+                            setCurrentReport({ ...currentReport, socialMediaMetrics: updated });
+                            await updateSocialMediaMetrics(currentReport.id, updated);
+                          }}
+                          className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                          placeholder="0"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <p className="text-sm text-green-800">Changes are saved automatically as you type</p>
                 </div>
               </div>
             </>
