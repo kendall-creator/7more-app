@@ -2,6 +2,48 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
+## 📊 LATEST UPDATE: Volunteer Shift Metrics Added to Reporting - December 14, 2025
+
+**Date:** December 14, 2025
+**Status:** ✅ VOLUNTEER METRICS INTEGRATED INTO MONTHLY REPORTING
+
+### What Was Added:
+- ✅ **Volunteer Shift Tracking** - Scheduler data now included in monthly reports
+- ✅ **Auto-Calculated Metrics** - System automatically computes volunteer statistics from shift data
+- ✅ **Month-over-Month Comparisons** - Compare volunteer engagement across months
+- ✅ **Manual Override Capability** - Admins can manually adjust auto-calculated values if needed
+
+### New Volunteer Metrics in Monthly Reports:
+1. **Shifts Completed** - Total number of volunteer shifts that were staffed and completed
+2. **Unique Volunteers** - Number of individual volunteers who worked during the month
+3. **Total Volunteer Hours** - Sum of all hours volunteers contributed (calculated from shift times)
+4. **Average Volunteers Per Shift** - Average number of volunteers assigned per completed shift
+
+### How It Works:
+When creating or viewing a monthly report, the system now:
+1. **Automatically calculates** volunteer metrics from scheduler shift data for that month
+2. **Displays metrics** in both single-month view and date range views
+3. **Shows comparisons** with previous months (up/down arrows with percentage changes)
+4. **Allows overrides** for manual adjustments when needed
+
+### Where to View:
+- **Mobile App**: Reporting tab → View Reports (metrics display with month-over-month comparisons)
+- **Web App**: View Reporting section → Shows volunteer shift metrics alongside other reporting categories
+
+### Technical Changes:
+- Added `VolunteerMetrics` interface to track shift data
+- Updated `MonthlyReport` to include `volunteerMetrics` field
+- Modified `reportingStore` to calculate metrics from `schedulerStore` shift data
+- Enhanced reporting views (mobile & web) to display volunteer metrics with comparison indicators
+
+### Files Modified:
+- `src/types/index.ts` - Added VolunteerMetrics interface
+- `src/state/reportingStore.ts` - Added calculateVolunteerMetrics function
+- `web-app/src/store/reportingStore.ts` - Updated MonthlyReport interface
+- `web-app/src/pages/ViewReportingView.tsx` - Added volunteer metrics display sections
+
+---
+
 ## 🔐 Firebase Authentication - SECURE SETUP COMPLETE
 
 **Date:** December 10, 2025

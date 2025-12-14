@@ -1,8 +1,9 @@
 import { create } from "zustand";
 import { ref, set as firebaseSet, onValue, update as firebaseUpdate, remove } from "firebase/database";
 import { database } from "../config/firebase";
-import { MonthlyReport, ReleaseFacilityCount, CallMetrics, MentorshipMetrics, DonorData, FinancialData, SocialMediaMetrics, WinConcernEntry, BridgeTeamMetrics } from "../types";
+import { MonthlyReport, ReleaseFacilityCount, CallMetrics, MentorshipMetrics, DonorData, FinancialData, SocialMediaMetrics, WinConcernEntry, BridgeTeamMetrics, VolunteerMetrics } from "../types";
 import { useParticipantStore } from "./participantStore";
+import { useSchedulerStore } from "./schedulerStore";
 
 interface ReportingState {
   monthlyReports: MonthlyReport[];
@@ -19,9 +20,11 @@ interface ReportingActions {
   getMostRecentPostedReport: () => MonthlyReport | undefined;
   calculateMentorshipMetrics: (month: number, year: number) => MentorshipMetrics;
   calculateBridgeTeamMetrics: (month: number, year: number) => BridgeTeamMetrics;
+  calculateVolunteerMetrics: (month: number, year: number) => VolunteerMetrics;
   updateReleaseFacilityCounts: (reportId: string, counts: ReleaseFacilityCount) => Promise<void>;
   updateCallMetrics: (reportId: string, callMetrics: CallMetrics) => Promise<void>;
   updateBridgeTeamMetrics: (reportId: string, bridgeTeamMetrics: BridgeTeamMetrics) => Promise<void>;
+  updateVolunteerMetrics: (reportId: string, volunteerMetrics: VolunteerMetrics) => Promise<void>;
   updateDonorData: (reportId: string, donorData: DonorData) => Promise<void>;
   updateFinancialData: (reportId: string, beginningBalance: number | null, endingBalance: number | null) => Promise<void>;
   updateSocialMediaMetrics: (reportId: string, socialMediaMetrics: SocialMediaMetrics) => Promise<void>;
@@ -84,6 +87,7 @@ export const useReportingStore = create<ReportingStore>()((set, get) => ({
     // Calculate metrics
     const mentorshipMetrics = get().calculateMentorshipMetrics(month, year);
     const bridgeTeamMetrics = get().calculateBridgeTeamMetrics(month, year);
+    const volunteerMetrics = get().calculateVolunteerMetrics(month, year);
 
     const newReport: MonthlyReport = {
       id: `report_${year}_${month}_${Date.now()}`,
@@ -126,6 +130,7 @@ export const useReportingStore = create<ReportingStore>()((set, get) => ({
       wins: [],
       concerns: [],
       bridgeTeamMetrics,
+      volunteerMetrics,
       isPosted: false, // New reports default to unpublished
       createdBy,
       createdByName,
@@ -305,6 +310,71 @@ export const useReportingStore = create<ReportingStore>()((set, get) => ({
     };
   },
 
+  calculateVolunteerMetrics: (month, year) => {
+    const schedulerStore = useSchedulerStore.getState();
+    const shifts = schedulerStore.shifts;
+
+    // Calculate date range for the month
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+
+    let totalShiftsCompleted = 0;
+    const uniqueVolunteerIds = new Set<string>();
+    let totalVolunteerHours = 0;
+    let totalVolunteerSlots = 0;
+
+    shifts.forEach((shift) => {
+      const shiftDate = new Date(shift.date);
+
+      // Check if shift was in this month and has passed (completed)
+      if (shiftDate >= startDate && shiftDate <= endDate && shiftDate < new Date()) {
+        const assignedUsers = shift.assignedUsers || [];
+
+        if (assignedUsers.length > 0) {
+          totalShiftsCompleted++;
+
+          // Count unique volunteers
+          assignedUsers.forEach((assignment) => {
+            uniqueVolunteerIds.add(assignment.userId);
+          });
+
+          // Calculate hours for this shift
+          const [startHour, startMin] = shift.startTime.split(":").map(Number);
+          const [endHour, endMin] = shift.endTime.split(":").map(Number);
+          const shiftHours = (endHour + endMin / 60) - (startHour + startMin / 60);
+
+          // Multiply by number of volunteers who worked
+          totalVolunteerHours += shiftHours * assignedUsers.length;
+          totalVolunteerSlots += assignedUsers.length;
+        }
+      }
+    });
+
+    const uniqueVolunteers = uniqueVolunteerIds.size;
+    const averageVolunteersPerShift = totalShiftsCompleted > 0
+      ? totalVolunteerSlots / totalShiftsCompleted
+      : 0;
+
+    return {
+      totalShiftsCompleted: {
+        autoCalculated: totalShiftsCompleted,
+        manualOverride: null,
+      },
+      uniqueVolunteers: {
+        autoCalculated: uniqueVolunteers,
+        manualOverride: null,
+      },
+      totalVolunteerHours: {
+        autoCalculated: Math.round(totalVolunteerHours * 10) / 10, // Round to 1 decimal
+        manualOverride: null,
+      },
+      averageVolunteersPerShift: {
+        autoCalculated: Math.round(averageVolunteersPerShift * 10) / 10, // Round to 1 decimal
+        manualOverride: null,
+      },
+    };
+  },
+
   updateReleaseFacilityCounts: async (reportId, counts) => {
     if (!database) {
       throw new Error("Firebase not configured. Please add Firebase credentials in ENV tab.");
@@ -332,6 +402,16 @@ export const useReportingStore = create<ReportingStore>()((set, get) => ({
 
     await get().updateMonthlyReport(reportId, {
       bridgeTeamMetrics,
+    });
+  },
+
+  updateVolunteerMetrics: async (reportId, volunteerMetrics) => {
+    if (!database) {
+      throw new Error("Firebase not configured. Please add Firebase credentials in ENV tab.");
+    }
+
+    await get().updateMonthlyReport(reportId, {
+      volunteerMetrics,
     });
   },
 

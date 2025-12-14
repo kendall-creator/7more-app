@@ -63,6 +63,24 @@ interface MonthlyReport {
       topDay: string;
     };
   };
+  volunteerMetrics?: {
+    totalShiftsCompleted: {
+      autoCalculated: number;
+      manualOverride: number | null;
+    };
+    uniqueVolunteers: {
+      autoCalculated: number;
+      manualOverride: number | null;
+    };
+    totalVolunteerHours: {
+      autoCalculated: number;
+      manualOverride: number | null;
+    };
+    averageVolunteersPerShift: {
+      autoCalculated: number;
+      manualOverride: number | null;
+    };
+  };
   donorData: {
     newDonors: number | null;
     amountFromNewDonors: number | null;

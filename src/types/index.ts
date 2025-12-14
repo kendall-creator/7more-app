@@ -663,6 +663,32 @@ export interface BridgeTeamMetrics {
   };
 }
 
+export interface VolunteerMetrics {
+  // Total number of shifts completed in the month
+  totalShiftsCompleted: {
+    autoCalculated: number;
+    manualOverride: number | null;
+  };
+
+  // Total number of unique volunteers who worked shifts
+  uniqueVolunteers: {
+    autoCalculated: number;
+    manualOverride: number | null;
+  };
+
+  // Total volunteer hours (calculated from shift times)
+  totalVolunteerHours: {
+    autoCalculated: number;
+    manualOverride: number | null;
+  };
+
+  // Average volunteers per shift
+  averageVolunteersPerShift: {
+    autoCalculated: number;
+    manualOverride: number | null;
+  };
+}
+
 export interface MonthlyReport {
   id: string;
   month: number; // 1-12
@@ -692,6 +718,9 @@ export interface MonthlyReport {
 
   // 8. Bridge Team Metrics (Auto-calculated + Manual Override)
   bridgeTeamMetrics?: BridgeTeamMetrics;
+
+  // 9. Volunteer Metrics (Auto-calculated + Manual Override)
+  volunteerMetrics?: VolunteerMetrics;
 
   // Admin posting control
   isPosted: boolean; // True when admin publishes for board viewing

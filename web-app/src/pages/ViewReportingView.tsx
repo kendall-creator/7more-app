@@ -186,11 +186,22 @@ export default function ViewReportingView({ onNavigate, monthlyReports, currentU
     const followers = reportsInRange[reportsInRange.length - 1]?.socialMediaMetrics?.followers || 0;
     const followersGained = reportsInRange.reduce((sum, r) => sum + (r.socialMediaMetrics?.followersGained || 0), 0) / divisor;
 
+    // Volunteer Metrics
+    const totalShiftsCompleted = reportsInRange.reduce((sum, r) =>
+      sum + (r.volunteerMetrics?.totalShiftsCompleted?.manualOverride ?? r.volunteerMetrics?.totalShiftsCompleted?.autoCalculated ?? 0), 0) / divisor;
+    const uniqueVolunteers = reportsInRange.reduce((sum, r) =>
+      sum + (r.volunteerMetrics?.uniqueVolunteers?.manualOverride ?? r.volunteerMetrics?.uniqueVolunteers?.autoCalculated ?? 0), 0) / divisor;
+    const totalVolunteerHours = reportsInRange.reduce((sum, r) =>
+      sum + (r.volunteerMetrics?.totalVolunteerHours?.manualOverride ?? r.volunteerMetrics?.totalVolunteerHours?.autoCalculated ?? 0), 0) / divisor;
+    const averageVolunteersPerShift = reportsInRange.reduce((sum, r) =>
+      sum + (r.volunteerMetrics?.averageVolunteersPerShift?.manualOverride ?? r.volunteerMetrics?.averageVolunteersPerShift?.autoCalculated ?? 0), 0) / divisor;
+
     return {
       releasees: { total: totalReleasees, pamLychner, huntsville, planeStateJail, havinsUnit, clemensUnit, other },
       calls: { inbound, outbound, missedCallsPercent },
       mentorship: { participantsAssignedToMentorship },
       bridgeTeam: { participantsReceived, pendingBridge, attemptedToContact, contacted, unableToContact, averageDaysToFirstOutreach },
+      volunteers: { totalShiftsCompleted, uniqueVolunteers, totalVolunteerHours, averageVolunteersPerShift },
       donors: { newDonors, amountFromNewDonors, checks, totalFromChecks },
       financials: { beginningBalance, endingBalance, difference: endingBalance - beginningBalance },
       socialMedia: { reelsPostViews, viewsFromNonFollowers, followers, followersGained },
@@ -320,6 +331,29 @@ export default function ViewReportingView({ onNavigate, monthlyReports, currentU
             {renderMetricRow("Participants Assigned",
               report.mentorshipMetrics.participantsAssignedToMentorship,
               prevReport?.mentorshipMetrics?.participantsAssignedToMentorship ?? 0
+            )}
+          </div>
+        )}
+
+        {/* Volunteer Metrics */}
+        {(categoryFilter === "all" || categoryFilter === "mentorship") && report.volunteerMetrics && (
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <h3 className="text-lg font-bold text-gray-900 mb-3">Volunteer Shifts</h3>
+            {renderMetricRow("Shifts Completed",
+              report.volunteerMetrics.totalShiftsCompleted?.manualOverride ?? report.volunteerMetrics.totalShiftsCompleted?.autoCalculated ?? 0,
+              prevReport?.volunteerMetrics?.totalShiftsCompleted?.manualOverride ?? prevReport?.volunteerMetrics?.totalShiftsCompleted?.autoCalculated ?? 0
+            )}
+            {renderMetricRow("Unique Volunteers",
+              report.volunteerMetrics.uniqueVolunteers?.manualOverride ?? report.volunteerMetrics.uniqueVolunteers?.autoCalculated ?? 0,
+              prevReport?.volunteerMetrics?.uniqueVolunteers?.manualOverride ?? prevReport?.volunteerMetrics?.uniqueVolunteers?.autoCalculated ?? 0
+            )}
+            {renderMetricRow("Total Volunteer Hours",
+              report.volunteerMetrics.totalVolunteerHours?.manualOverride ?? report.volunteerMetrics.totalVolunteerHours?.autoCalculated ?? 0,
+              prevReport?.volunteerMetrics?.totalVolunteerHours?.manualOverride ?? prevReport?.volunteerMetrics?.totalVolunteerHours?.autoCalculated ?? 0
+            )}
+            {renderMetricRow("Avg Volunteers Per Shift",
+              report.volunteerMetrics.averageVolunteersPerShift?.manualOverride ?? report.volunteerMetrics.averageVolunteersPerShift?.autoCalculated ?? 0,
+              prevReport?.volunteerMetrics?.averageVolunteersPerShift?.manualOverride ?? prevReport?.volunteerMetrics?.averageVolunteersPerShift?.autoCalculated ?? 0
             )}
           </div>
         )}
@@ -497,6 +531,31 @@ export default function ViewReportingView({ onNavigate, monthlyReports, currentU
             <div className="flex justify-between py-2">
               <p className="text-gray-700">Participants Assigned</p>
               <p className="text-gray-900 font-semibold">{formatNumber(aggregatedMetrics.mentorship.participantsAssignedToMentorship)}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Volunteer Metrics */}
+        {(categoryFilter === "all" || categoryFilter === "mentorship") && (
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <h3 className="text-lg font-bold text-gray-900 mb-3">Volunteer Shifts</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between py-2 border-b border-gray-100">
+                <p className="text-gray-700">Shifts Completed</p>
+                <p className="text-gray-900 font-semibold">{formatNumber(aggregatedMetrics.volunteers.totalShiftsCompleted)}</p>
+              </div>
+              <div className="flex justify-between py-2 border-b border-gray-100">
+                <p className="text-gray-700">Unique Volunteers</p>
+                <p className="text-gray-900 font-semibold">{formatNumber(aggregatedMetrics.volunteers.uniqueVolunteers)}</p>
+              </div>
+              <div className="flex justify-between py-2 border-b border-gray-100">
+                <p className="text-gray-700">Total Volunteer Hours</p>
+                <p className="text-gray-900 font-semibold">{formatNumber(aggregatedMetrics.volunteers.totalVolunteerHours, 1)}</p>
+              </div>
+              <div className="flex justify-between py-2">
+                <p className="text-gray-700">Avg Volunteers Per Shift</p>
+                <p className="text-gray-900 font-semibold">{formatNumber(aggregatedMetrics.volunteers.averageVolunteersPerShift, 1)}</p>
+              </div>
             </div>
           </div>
         )}
