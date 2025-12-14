@@ -17,6 +17,11 @@ import {
   FileText,
   UserCircle,
   PlusCircle,
+  Search,
+  X,
+  Trash2,
+  Edit,
+  Copy,
 } from "lucide-react";
 
 // NavButton component
@@ -54,14 +59,36 @@ export default function MainDashboard() {
   const participants = useDataStore((s) => s.participants);
   const tasks = useDataStore((s) => s.tasks);
   const shifts = useDataStore((s) => s.shifts);
+  const allUsers = useAuthStore((s) => s.users || []);
 
   // Active view state
   const [activeView, setActiveView] = useState("dashboard");
+
+  // Search states for various views
+  const [searchQuery, setSearchQuery] = useState("");
+  const [resourceSearch, setResourceSearch] = useState("");
+  const [volunteerSearch, setVolunteerSearch] = useState("");
+
+  // Form state for Add Participant
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    nickname: "",
+    phoneNumber: "",
+    email: "",
+    address: "",
+    participantNumber: "",
+    dateOfBirth: "",
+    gender: "",
+    releaseDate: "",
+    releasedFrom: "",
+  });
 
   const isMentor =
     currentUser?.role === "mentor" || currentUser?.role === "mentorship_leader";
   const isMentorshipLeader = currentUser?.role === "mentorship_leader";
   const isBridgeTeam = currentUser?.role === "bridge_team";
+  const isAdmin = currentUser?.role === "admin";
 
   // Get assigned participants
   const assignedParticipants = useMemo(
@@ -173,6 +200,115 @@ export default function MainDashboard() {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle form submission - in real app would save to Firebase
+    alert("Participant added successfully! (This is a demo)");
+    // Reset form
+    setFormData({
+      firstName: "",
+      lastName: "",
+      nickname: "",
+      phoneNumber: "",
+      email: "",
+      address: "",
+      participantNumber: "",
+      dateOfBirth: "",
+      gender: "",
+      releaseDate: "",
+      releasedFrom: "",
+    });
+  };
+
+  // Filter data based on search
+  const filteredParticipants = participants.filter((p) => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      p.firstName?.toLowerCase().includes(query) ||
+      p.lastName?.toLowerCase().includes(query) ||
+      p.participantNumber?.toLowerCase().includes(query) ||
+      p.email?.toLowerCase().includes(query)
+    );
+  });
+
+  const filteredUsers = allUsers.filter((u: any) => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      u.name?.toLowerCase().includes(query) ||
+      u.email?.toLowerCase().includes(query) ||
+      u.role?.toLowerCase().includes(query)
+    );
+  });
+
+  const filteredTasks = tasks.filter((t) => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      t.title?.toLowerCase().includes(query) ||
+      t.description?.toLowerCase().includes(query) ||
+      t.assignedToUserName?.toLowerCase().includes(query)
+    );
+  });
+
+  // Mock resources data (would come from Firebase in real app)
+  const mockResources = [
+    {
+      id: "1",
+      title: "Employment Resources",
+      category: "Employment",
+      content: "List of employment agencies and job training programs available for recently released individuals. Contact WorkForce Solutions at (555) 123-4567 for more information.",
+      description: "Job search and career development resources"
+    },
+    {
+      id: "2",
+      title: "Housing Assistance",
+      category: "Housing",
+      content: "Transitional housing programs and rental assistance contacts. Call Housing Authority at (555) 987-6543 or visit their office at 123 Main St.",
+      description: "Emergency and transitional housing options"
+    },
+    {
+      id: "3",
+      title: "Mental Health Services",
+      category: "Healthcare",
+      content: "Free and low-cost mental health services available through Community Health Center. Crisis hotline: 1-800-273-8255",
+      description: "Mental health support and counseling"
+    }
+  ];
+
+  const filteredResources = mockResources.filter((r) => {
+    if (!resourceSearch) return true;
+    const query = resourceSearch.toLowerCase();
+    return (
+      r.title.toLowerCase().includes(query) ||
+      r.content.toLowerCase().includes(query) ||
+      r.category.toLowerCase().includes(query)
+    );
+  });
+
+  // Mock volunteers data
+  const mockVolunteers = [
+    { id: "1", firstName: "John", lastName: "Smith", email: "john@example.com", phoneNumber: "(555) 111-2222", interests: ["Bridge Team", "Mentoring"] },
+    { id: "2", firstName: "Sarah", lastName: "Johnson", email: "sarah@example.com", phoneNumber: "(555) 333-4444", interests: ["Administrative Work"] },
+    { id: "3", firstName: "Mike", lastName: "Davis", email: "mike@example.com", phoneNumber: "(555) 555-6666", interests: ["Clothing Donation", "General Volunteer"] }
+  ];
+
+  const filteredVolunteers = mockVolunteers.filter((v) => {
+    if (!volunteerSearch) return true;
+    const query = volunteerSearch.toLowerCase();
+    return (
+      v.firstName.toLowerCase().includes(query) ||
+      v.lastName.toLowerCase().includes(query) ||
+      v.email.toLowerCase().includes(query)
+    );
+  });
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    alert("Copied to clipboard!");
   };
 
   return (
@@ -376,17 +512,39 @@ export default function MainDashboard() {
           {/* All Participants View */}
           {activeView === "participants" && (
             <>
-              <div className="mb-8">
+              <div className="mb-6">
                 <h1 className="text-3xl font-bold text-text mb-2">All Participants</h1>
                 <p className="text-secondary">View and manage all participants in the system</p>
               </div>
+              <div className="mb-4">
+                <div className="relative">
+                  <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary" />
+                  <input
+                    type="text"
+                    placeholder="Search by name, number, or email..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-10 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                    >
+                      <X className="w-5 h-5 text-secondary" />
+                    </button>
+                  )}
+                </div>
+              </div>
               <div className="bg-white rounded-xl shadow-sm border border-border p-6">
                 <div className="space-y-4">
-                  {participants.length === 0 ? (
-                    <p className="text-secondary text-center py-8">No participants found</p>
+                  {filteredParticipants.length === 0 ? (
+                    <p className="text-secondary text-center py-8">
+                      {searchQuery ? "No participants match your search" : "No participants found"}
+                    </p>
                   ) : (
-                    <div className="grid grid-cols-1 gap-4">
-                      {participants.map((p) => (
+                    <div className="grid grid-cols-1 gap-3">
+                      {filteredParticipants.map((p) => (
                         <div
                           key={p.id}
                           className="border border-border rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer"
@@ -399,6 +557,11 @@ export default function MainDashboard() {
                               <p className="text-sm text-secondary mt-1">
                                 #{p.participantNumber} • Status: {p.status?.replace(/_/g, " ")}
                               </p>
+                              {p.email && (
+                                <p className="text-sm text-secondary mt-1">
+                                  Email: {p.email}
+                                </p>
+                              )}
                             </div>
                             <ChevronRight className="w-5 h-5 text-secondary" />
                           </div>
@@ -407,6 +570,655 @@ export default function MainDashboard() {
                     </div>
                   )}
                 </div>
+              </div>
+            </>
+          )}
+
+          {/* Add Participant View */}
+          {activeView === "add-participant" && (
+            <>
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold text-text mb-2">Add Participant</h1>
+                <p className="text-secondary">Manually add a new participant to the system</p>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+                <form onSubmit={handleFormSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-text mb-2">
+                        First Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.firstName}
+                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        placeholder="First name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-text mb-2">
+                        Last Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.lastName}
+                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        placeholder="Last name"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-text mb-2">
+                      Nickname <span className="text-secondary text-xs">(Optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.nickname}
+                      onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
+                      className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Enter nickname"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-text mb-2">
+                        Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        value={formData.phoneNumber}
+                        onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        placeholder="(555) 123-4567"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-text mb-2">
+                        Email Address
+                      </label>
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        placeholder="email@example.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-text mb-2">
+                      Full Address <span className="text-secondary text-xs">(Optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Street address, City, State, ZIP"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-text mb-2">
+                        TDCJ Number <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.participantNumber}
+                        onChange={(e) => setFormData({ ...formData, participantNumber: e.target.value })}
+                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        placeholder="Enter TDCJ number"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-text mb-2">
+                        Date of Birth <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="date"
+                        required
+                        value={formData.dateOfBirth}
+                        onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-text mb-2">
+                      Gender <span className="text-red-500">*</span>
+                    </label>
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, gender: "Male" })}
+                        className={`flex-1 py-2 px-4 rounded-lg border-2 transition-colors ${
+                          formData.gender === "Male"
+                            ? "bg-primary/10 border-primary text-primary"
+                            : "border-border text-text"
+                        }`}
+                      >
+                        Male
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, gender: "Female" })}
+                        className={`flex-1 py-2 px-4 rounded-lg border-2 transition-colors ${
+                          formData.gender === "Female"
+                            ? "bg-primary/10 border-primary text-primary"
+                            : "border-border text-text"
+                        }`}
+                      >
+                        Female
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-text mb-2">
+                        Release Date <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="date"
+                        required
+                        value={formData.releaseDate}
+                        onChange={(e) => setFormData({ ...formData, releaseDate: e.target.value })}
+                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-text mb-2">
+                        Released From <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        required
+                        value={formData.releasedFrom}
+                        onChange={(e) => setFormData({ ...formData, releasedFrom: e.target.value })}
+                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      >
+                        <option value="">Select facility</option>
+                        <option value="Pam Lychner">Pam Lychner</option>
+                        <option value="Huntsville">Huntsville</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      type="submit"
+                      className="flex-1 bg-primary hover:bg-primary/90 text-white rounded-lg px-4 py-3 font-medium transition-colors"
+                    >
+                      Add Participant
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({
+                        firstName: "",
+                        lastName: "",
+                        nickname: "",
+                        phoneNumber: "",
+                        email: "",
+                        address: "",
+                        participantNumber: "",
+                        dateOfBirth: "",
+                        gender: "",
+                        releaseDate: "",
+                        releasedFrom: "",
+                      })}
+                      className="bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg px-6 py-3 font-medium transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </>
+          )}
+
+          {/* Manage Users View */}
+          {activeView === "users" && (
+            <>
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold text-text mb-2">Manage Users</h1>
+                <p className="text-secondary">View and manage system users and their roles</p>
+              </div>
+              <div className="mb-4">
+                <div className="flex gap-3">
+                  <div className="relative flex-1">
+                    <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary" />
+                    <input
+                      type="text"
+                      placeholder="Search by name, email, or role..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-10 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery("")}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                      >
+                        <X className="w-5 h-5 text-secondary" />
+                      </button>
+                    )}
+                  </div>
+                  <button className="bg-primary hover:bg-primary/90 text-white rounded-lg px-4 py-2 font-medium flex items-center gap-2 transition-colors">
+                    <UserPlus className="w-5 h-5" />
+                    Add User
+                  </button>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+                <div className="space-y-3">
+                  {filteredUsers.length === 0 ? (
+                    <p className="text-secondary text-center py-8">
+                      {searchQuery ? "No users match your search" : "No users found"}
+                    </p>
+                  ) : (
+                    filteredUsers.map((user: any) => (
+                      <div
+                        key={user.id}
+                        className="border border-border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3">
+                              <h3 className="font-semibold text-text">{user.name}</h3>
+                              {user.id === currentUser?.id && (
+                                <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded">
+                                  You
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-secondary mt-1">{user.email}</p>
+                            <div className="mt-2">
+                              <span className="inline-block bg-primary/10 text-primary text-xs font-semibold px-2 py-1 rounded">
+                                {user.role?.split("_").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
+                              </span>
+                            </div>
+                          </div>
+                          {user.id !== currentUser?.id && (
+                            <div className="flex gap-2">
+                              <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                                <Edit className="w-5 h-5" />
+                              </button>
+                              <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                                <Trash2 className="w-5 h-5" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Task Management View */}
+          {activeView === "tasks" && (
+            <>
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold text-text mb-2">Task Management</h1>
+                <p className="text-secondary">View, create, and manage tasks across the organization</p>
+              </div>
+              <div className="mb-4">
+                <div className="flex gap-3">
+                  <div className="relative flex-1">
+                    <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary" />
+                    <input
+                      type="text"
+                      placeholder="Search tasks..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-10 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery("")}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                      >
+                        <X className="w-5 h-5 text-secondary" />
+                      </button>
+                    )}
+                  </div>
+                  <button className="bg-primary hover:bg-primary/90 text-white rounded-lg px-4 py-2 font-medium flex items-center gap-2 transition-colors">
+                    <PlusCircle className="w-5 h-5" />
+                    Create Task
+                  </button>
+                </div>
+              </div>
+
+              {/* Tabs for task views */}
+              <div className="bg-white border-b border-border mb-4 rounded-t-xl">
+                <div className="flex gap-4 px-6 pt-4">
+                  <button className="pb-2 border-b-2 border-primary text-primary font-semibold">
+                    All Tasks
+                  </button>
+                  <button className="pb-2 border-b-2 border-transparent text-secondary hover:text-text">
+                    My Tasks
+                  </button>
+                  <button className="pb-2 border-b-2 border-transparent text-secondary hover:text-text">
+                    Tasks I Assigned
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {["overdue", "in_progress", "pending"].map((status) => {
+                  const statusTasks = filteredTasks.filter((t) => t.status === status);
+                  if (statusTasks.length === 0) return null;
+
+                  const statusColors = {
+                    overdue: "bg-red-50 border-red-200 text-red-700",
+                    in_progress: "bg-blue-50 border-blue-200 text-blue-700",
+                    pending: "bg-gray-50 border-gray-200 text-gray-700"
+                  };
+
+                  const statusLabels = {
+                    overdue: "Overdue",
+                    in_progress: "In Progress",
+                    pending: "Pending"
+                  };
+
+                  return (
+                    <div key={status}>
+                      <h3 className="text-sm font-bold text-text mb-3 uppercase">
+                        {statusLabels[status as keyof typeof statusLabels]} ({statusTasks.length})
+                      </h3>
+                      <div className="space-y-3">
+                        {statusTasks.map((task) => (
+                          <div
+                            key={task.id}
+                            className={`rounded-lg p-4 border-2 cursor-pointer hover:opacity-80 transition-opacity ${statusColors[status as keyof typeof statusColors]}`}
+                          >
+                            <h4 className="font-semibold text-text">{task.title}</h4>
+                            {task.description && (
+                              <p className="text-sm text-secondary mt-2">{task.description}</p>
+                            )}
+                            <div className="flex items-center gap-4 mt-3 text-sm">
+                              <span className="text-secondary">
+                                Assigned to: {task.assignedToUserName || "Unassigned"}
+                              </span>
+                              <span className="text-secondary">
+                                Priority: {task.priority}
+                              </span>
+                              {task.dueDate && (
+                                <span className="text-secondary">
+                                  Due: {formatDate(task.dueDate)}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+                {filteredTasks.length === 0 && (
+                  <div className="bg-white rounded-xl shadow-sm border border-border p-12 text-center">
+                    <CheckCircle className="w-16 h-16 text-border mx-auto mb-4" />
+                    <p className="text-secondary">
+                      {searchQuery ? "No tasks match your search" : "No tasks found"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Volunteers View */}
+          {activeView === "volunteers" && (
+            <>
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold text-text mb-2">Volunteer Management</h1>
+                <p className="text-secondary">View and manage volunteer database</p>
+              </div>
+              <div className="mb-4">
+                <div className="relative">
+                  <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary" />
+                  <input
+                    type="text"
+                    placeholder="Search volunteers..."
+                    value={volunteerSearch}
+                    onChange={(e) => setVolunteerSearch(e.target.value)}
+                    className="w-full pl-10 pr-10 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  {volunteerSearch && (
+                    <button
+                      onClick={() => setVolunteerSearch("")}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                    >
+                      <X className="w-5 h-5 text-secondary" />
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-3">
+                {filteredVolunteers.length === 0 ? (
+                  <div className="bg-white rounded-xl shadow-sm border border-border p-12 text-center">
+                    <Users className="w-16 h-16 text-border mx-auto mb-4" />
+                    <p className="text-secondary">
+                      {volunteerSearch ? "No volunteers match your search" : "No volunteers found"}
+                    </p>
+                  </div>
+                ) : (
+                  filteredVolunteers.map((volunteer) => (
+                    <div
+                      key={volunteer.id}
+                      className="bg-white rounded-lg border border-border p-4 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-text">
+                            {volunteer.firstName} {volunteer.lastName}
+                          </h3>
+                          <div className="flex items-center gap-3 mt-2 text-sm text-secondary">
+                            <span className="flex items-center gap-1">
+                              <Phone className="w-4 h-4" />
+                              {volunteer.phoneNumber}
+                            </span>
+                            <span>{volunteer.email}</span>
+                          </div>
+                          <div className="flex gap-2 mt-2">
+                            {volunteer.interests.map((interest) => (
+                              <span
+                                key={interest}
+                                className="inline-block bg-primary/10 text-primary text-xs font-semibold px-2 py-1 rounded"
+                              >
+                                {interest}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <button className="bg-primary hover:bg-primary/90 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors">
+                          Convert to User
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Monthly Reporting View */}
+          {activeView === "reporting" && (
+            <>
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold text-text mb-2">Monthly Reporting</h1>
+                <p className="text-secondary">View reports and analytics for program metrics</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <Users className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-text">{participants.length}</h3>
+                      <p className="text-sm text-secondary">Total Participants</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-secondary">All time</p>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                      <CheckSquare className="w-6 h-6 text-green-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-text">
+                        {tasks.filter(t => t.status === "completed").length}
+                      </h3>
+                      <p className="text-sm text-secondary">Completed Tasks</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-secondary">This month</p>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                      <Calendar className="w-6 h-6 text-purple-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-text">{shifts.length}</h3>
+                      <p className="text-sm text-secondary">Total Shifts</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-secondary">This month</p>
+                </div>
+              </div>
+
+              <div className="mt-6 bg-white rounded-xl shadow-sm border border-border p-6">
+                <h3 className="text-lg font-semibold text-text mb-4">Report Options</h3>
+                <div className="space-y-3">
+                  <button className="w-full bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg p-4 text-left transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-semibold text-text">View Monthly Reports</h4>
+                        <p className="text-sm text-secondary mt-1">
+                          Access detailed monthly analytics and metrics
+                        </p>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-secondary" />
+                    </div>
+                  </button>
+                  {isAdmin && (
+                    <button className="w-full bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 rounded-lg p-4 text-left transition-colors">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-semibold text-text">Manage Reports</h4>
+                          <p className="text-sm text-secondary mt-1">
+                            Enter and edit monthly report data (Admin only)
+                          </p>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-secondary" />
+                      </div>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Resources View */}
+          {activeView === "resources" && (
+            <>
+              <div className="mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="text-3xl font-bold text-text mb-2">Resources</h1>
+                    <p className="text-secondary">Quick access to participant resources</p>
+                  </div>
+                  {isAdmin && (
+                    <button className="bg-primary hover:bg-primary/90 text-white rounded-lg px-4 py-2 font-medium flex items-center gap-2 transition-colors">
+                      <PlusCircle className="w-5 h-5" />
+                      Add New
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className="mb-4">
+                <div className="relative">
+                  <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary" />
+                  <input
+                    type="text"
+                    placeholder="Search resources..."
+                    value={resourceSearch}
+                    onChange={(e) => setResourceSearch(e.target.value)}
+                    className="w-full pl-10 pr-10 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  {resourceSearch && (
+                    <button
+                      onClick={() => setResourceSearch("")}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                    >
+                      <X className="w-5 h-5 text-secondary" />
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-4">
+                {filteredResources.length === 0 ? (
+                  <div className="bg-white rounded-xl shadow-sm border border-border p-12 text-center">
+                    <FileText className="w-16 h-16 text-border mx-auto mb-4" />
+                    <p className="text-secondary">
+                      {resourceSearch ? "No resources match your search" : "No resources found"}
+                    </p>
+                  </div>
+                ) : (
+                  filteredResources.map((resource) => (
+                    <div
+                      key={resource.id}
+                      className="bg-white rounded-xl shadow-sm border border-border p-6"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-bold text-text mb-1">{resource.title}</h3>
+                          {resource.description && (
+                            <p className="text-sm text-secondary">{resource.description}</p>
+                          )}
+                        </div>
+                        <span className="bg-accent/20 text-accent text-xs font-semibold px-3 py-1 rounded-full">
+                          {resource.category}
+                        </span>
+                      </div>
+                      <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                        <p className="text-sm text-text leading-relaxed">{resource.content}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => copyToClipboard(resource.content)}
+                          className="flex-1 bg-primary hover:bg-primary/90 text-white rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+                        >
+                          <Copy className="w-4 h-4" />
+                          Copy Text
+                        </button>
+                        {isAdmin && (
+                          <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg px-4 py-2 text-sm font-medium flex items-center gap-2 transition-colors">
+                            <Edit className="w-4 h-4" />
+                            Edit
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </>
           )}
@@ -527,87 +1339,17 @@ export default function MainDashboard() {
             </>
           )}
 
-          {/* Placeholder views for other navigation items */}
-          {activeView === "users" && (
-            <>
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold text-text mb-2">Manage Users</h1>
-                <p className="text-secondary">View and manage system users</p>
-              </div>
-              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
-                <p className="text-secondary text-center py-12">User management interface</p>
-              </div>
-            </>
-          )}
-
-          {activeView === "tasks" && (
-            <>
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold text-text mb-2">Task Management</h1>
-                <p className="text-secondary">Manage and assign tasks</p>
-              </div>
-              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
-                <p className="text-secondary text-center py-12">Task management interface</p>
-              </div>
-            </>
-          )}
-
-          {activeView === "volunteers" && (
-            <>
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold text-text mb-2">Volunteers</h1>
-                <p className="text-secondary">View and manage volunteers</p>
-              </div>
-              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
-                <p className="text-secondary text-center py-12">Volunteer management interface</p>
-              </div>
-            </>
-          )}
-
-          {activeView === "reporting" && (
-            <>
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold text-text mb-2">Monthly Reporting</h1>
-                <p className="text-secondary">View reports and analytics</p>
-              </div>
-              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
-                <p className="text-secondary text-center py-12">Reporting dashboard</p>
-              </div>
-            </>
-          )}
-
-          {activeView === "resources" && (
-            <>
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold text-text mb-2">Resources</h1>
-                <p className="text-secondary">Access documents and resources</p>
-              </div>
-              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
-                <p className="text-secondary text-center py-12">Resource library</p>
-              </div>
-            </>
-          )}
-
-          {activeView === "add-participant" && (
-            <>
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold text-text mb-2">Add Participant</h1>
-                <p className="text-secondary">Add a new participant to the system</p>
-              </div>
-              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
-                <p className="text-secondary text-center py-12">Participant intake form</p>
-              </div>
-            </>
-          )}
-
+          {/* Assign Tasks View */}
           {activeView === "assign-tasks" && (
             <>
               <div className="mb-8">
                 <h1 className="text-3xl font-bold text-text mb-2">Assign Tasks</h1>
-                <p className="text-secondary">Assign tasks to team members</p>
+                <p className="text-secondary">Create and assign tasks to team members</p>
               </div>
               <div className="bg-white rounded-xl shadow-sm border border-border p-6">
-                <p className="text-secondary text-center py-12">Task assignment interface</p>
+                <p className="text-secondary text-center py-12">
+                  Task assignment interface - Create new tasks and assign them to users
+                </p>
               </div>
             </>
           )}
