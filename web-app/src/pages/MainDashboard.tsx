@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import { useDataStore } from "../store/dataStore";
+import { useReportingStore } from "../store/reportingStore";
 import {
   LogOut,
   UserPlus,
@@ -68,6 +69,15 @@ export default function MainDashboard() {
   const shifts = useDataStore((s) => s.shifts);
   const allUsers = useAuthStore((s) => s.users || []);
   const addParticipant = useDataStore((s) => s.addParticipant);
+
+  // Reporting store
+  const monthlyReports = useReportingStore((s) => s.monthlyReports);
+  const initializeReportingListener = useReportingStore((s) => s.initializeFirebaseListener);
+
+  // Initialize reporting listener on mount
+  useEffect(() => {
+    initializeReportingListener();
+  }, [initializeReportingListener]);
 
   // Active view state
   const [activeView, setActiveView] = useState("dashboard");
@@ -1120,7 +1130,7 @@ export default function MainDashboard() {
           {activeView === "view-reporting" && (
             <ViewReportingView
               onNavigate={setActiveView}
-              monthlyReports={[]}
+              monthlyReports={monthlyReports}
               currentUser={currentUser}
             />
           )}
