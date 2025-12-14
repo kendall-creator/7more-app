@@ -2,7 +2,41 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## 📊 LATEST UPDATE: Volunteer Shift Metrics Added to Reporting - December 14, 2025
+## 📅 LATEST UPDATE: Web App Scheduler Now Mirrors Mobile App - December 14, 2025
+
+**Date:** December 14, 2025
+**Status:** ✅ WEB APP SCHEDULER FULLY IMPLEMENTED
+
+### What Was Fixed:
+- ✅ **Complete Scheduler View** - Web app now has full week calendar view matching mobile app
+- ✅ **My Schedule / Manage Schedule Tabs** - Dual-tab interface for viewing personal vs all shifts
+- ✅ **Week Navigation** - Browse previous and future weeks with navigation controls
+- ✅ **Shift Management** - View shifts, sign up/cancel, see assigned volunteers
+- ✅ **Meeting Support** - Display meetings with RSVP functionality
+- ✅ **Role-Based Filtering** - Proper visibility based on user role (admin, volunteer, support, etc.)
+- ✅ **Detailed Modals** - Click on shifts/meetings for full details and actions
+
+### Features Now Available in Web App:
+1. **Week Calendar View** - Monday through Sunday display with current week highlighting
+2. **Shift Cards** - Color-coded by status (signed up = yellow, full = gray, open = white)
+3. **Meeting Cards** - Display virtual/in-person meetings with RSVP status
+4. **Admin Controls** - Create shifts/meetings, assign users, edit existing entries
+5. **Real-time Updates** - Synced with Firebase, matches mobile app data exactly
+
+### Technical Implementation:
+- Created new `SchedulerView.tsx` component for web app
+- Added meetings support to web app's `dataStore.ts` with Firebase listener
+- Integrated SchedulerView into MainDashboard navigation
+- Matches mobile app's scheduling logic and UI patterns
+
+### Files Modified:
+- `web-app/src/pages/SchedulerView.tsx` - NEW: Full scheduler implementation
+- `web-app/src/store/dataStore.ts` - Added meetings state and Firebase listener
+- `web-app/src/pages/MainDashboard.tsx` - Integrated SchedulerView component
+
+---
+
+## 📊 PREVIOUS UPDATE: Volunteer Shift Metrics Added to Reporting - December 14, 2025
 
 **Date:** December 14, 2025
 **Status:** ✅ VOLUNTEER METRICS INTEGRATED INTO MONTHLY REPORTING

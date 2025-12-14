@@ -31,6 +31,7 @@ import AdminHomepageView from "./AdminHomepageView";
 import BridgeTeamDashboardView from "./BridgeTeamDashboardView";
 import MentorDashboardView from "./MentorDashboardView";
 import ViewReportingView from "./ViewReportingView";
+import SchedulerView from "./SchedulerView";
 
 // NavButton component
 function NavButton({
@@ -1524,18 +1525,7 @@ export default function MainDashboard() {
 
           {/* Scheduler View */}
           {activeView === "scheduler" && (
-            <>
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold text-text mb-2">Scheduler</h1>
-                <p className="text-secondary">View and manage shifts and schedules</p>
-              </div>
-              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
-                <div className="text-center py-12">
-                  <Clock className="w-16 h-16 text-border mx-auto mb-4" />
-                  <p className="text-secondary">Nothing scheduled at this time</p>
-                </div>
-              </div>
-            </>
+            <SchedulerView onNavigate={setActiveView} />
           )}
 
           {/* Assign Tasks View */}

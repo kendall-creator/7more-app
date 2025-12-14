@@ -3,10 +3,31 @@ import { ref, onValue, get as firebaseGet, set as firebaseSet } from "firebase/d
 import { database } from "../config/firebase";
 import { Participant, Task, Shift } from "../types";
 
+interface Meeting {
+  id: string;
+  title: string;
+  description?: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  type: "virtual" | "in_person";
+  videoCallLink?: string;
+  createdBy: string;
+  createdByName: string;
+  createdByNickname?: string;
+  invitees: Array<{
+    userId: string;
+    userName: string;
+    userNickname?: string;
+    rsvpStatus: "pending" | "yes" | "no" | "maybe";
+  }>;
+}
+
 interface DataState {
   participants: Participant[];
   tasks: Task[];
   shifts: Shift[];
+  meetings: Meeting[];
   isLoading: boolean;
 }
 
@@ -21,6 +42,7 @@ export const useDataStore = create<DataStore>()((set) => ({
   participants: [],
   tasks: [],
   shifts: [],
+  meetings: [],
   isLoading: true,
 
   initializeListeners: () => {
@@ -92,6 +114,26 @@ export const useDataStore = create<DataStore>()((set) => ({
       if (data) {
         const shiftsArray = Object.values(data) as Shift[];
         set({ shifts: shiftsArray });
+      }
+    });
+
+    // Meetings listener
+    const meetingsRef = ref(database, "meetings");
+    firebaseGet(meetingsRef)
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const meetingsArray = Object.values(data) as Meeting[];
+          set({ meetings: meetingsArray });
+        }
+      })
+      .catch(console.error);
+
+    onValue(meetingsRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const meetingsArray = Object.values(data) as Meeting[];
+        set({ meetings: meetingsArray });
       }
     });
   },
