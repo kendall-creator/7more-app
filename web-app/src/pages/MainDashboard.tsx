@@ -29,6 +29,7 @@ import MissedCallVoicemail from "./MissedCallVoicemail";
 import AdminHomepageView from "./AdminHomepageView";
 import BridgeTeamDashboardView from "./BridgeTeamDashboardView";
 import MentorDashboardView from "./MentorDashboardView";
+import ViewReportingView from "./ViewReportingView";
 
 // NavButton component
 function NavButton({
@@ -1117,108 +1118,11 @@ export default function MainDashboard() {
 
           {/* View Reporting View */}
           {activeView === "view-reporting" && (
-            <>
-              <div className="mb-6">
-                <button
-                  onClick={() => setActiveView("reporting")}
-                  className="flex items-center gap-2 text-secondary hover:text-text mb-4 transition-colors"
-                >
-                  <ChevronRight className="w-5 h-5 rotate-180" />
-                  <span className="text-sm font-medium">Back to Monthly Reporting</span>
-                </button>
-                <h1 className="text-3xl font-bold text-text mb-2">View Reports</h1>
-                <p className="text-secondary">Current month metrics and statistics</p>
-              </div>
-
-              <div className="space-y-4">
-                {/* Participants Report */}
-                <div className="bg-white rounded-xl shadow-sm border border-border p-6">
-                  <h3 className="text-lg font-bold text-text mb-4">Participants Overview</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <p className="text-2xl font-bold text-text">{participants.length}</p>
-                      <p className="text-xs text-secondary mt-1">Total Participants</p>
-                    </div>
-                    <div className="bg-orange-50 rounded-lg p-3">
-                      <p className="text-2xl font-bold text-orange-600">
-                        {participants.filter(p => p.status === "pending_bridge").length}
-                      </p>
-                      <p className="text-xs text-secondary mt-1">Pending Bridge</p>
-                    </div>
-                    <div className="bg-yellow-50 rounded-lg p-3">
-                      <p className="text-2xl font-bold text-yellow-600">
-                        {participants.filter(p => p.status === "pending_mentor").length}
-                      </p>
-                      <p className="text-xs text-secondary mt-1">Awaiting Mentor</p>
-                    </div>
-                    <div className="bg-green-50 rounded-lg p-3">
-                      <p className="text-2xl font-bold text-green-600">
-                        {participants.filter(p => p.status === "active_mentorship").length}
-                      </p>
-                      <p className="text-xs text-secondary mt-1">Active Mentorship</p>
-                    </div>
-                    <div className="bg-blue-50 rounded-lg p-3">
-                      <p className="text-2xl font-bold text-blue-600">
-                        {participants.filter(p => p.status === "graduated").length}
-                      </p>
-                      <p className="text-xs text-secondary mt-1">Graduated</p>
-                    </div>
-                    <div className="bg-red-50 rounded-lg p-3">
-                      <p className="text-2xl font-bold text-red-600">
-                        {participants.filter(p => p.status === "bridge_unable" || p.status === "mentor_unable").length}
-                      </p>
-                      <p className="text-xs text-secondary mt-1">Unable to Contact</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Tasks Report */}
-                <div className="bg-white rounded-xl shadow-sm border border-border p-6">
-                  <h3 className="text-lg font-bold text-text mb-4">Tasks Summary</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <p className="text-2xl font-bold text-text">{tasks.length}</p>
-                      <p className="text-xs text-secondary mt-1">Total Tasks</p>
-                    </div>
-                    <div className="bg-yellow-50 rounded-lg p-3">
-                      <p className="text-2xl font-bold text-yellow-600">
-                        {tasks.filter(t => t.status === "pending").length}
-                      </p>
-                      <p className="text-xs text-secondary mt-1">Pending</p>
-                    </div>
-                    <div className="bg-blue-50 rounded-lg p-3">
-                      <p className="text-2xl font-bold text-blue-600">
-                        {tasks.filter(t => t.status === "in_progress").length}
-                      </p>
-                      <p className="text-xs text-secondary mt-1">In Progress</p>
-                    </div>
-                    <div className="bg-green-50 rounded-lg p-3">
-                      <p className="text-2xl font-bold text-green-600">
-                        {tasks.filter(t => t.status === "completed").length}
-                      </p>
-                      <p className="text-xs text-secondary mt-1">Completed</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Shifts Report */}
-                <div className="bg-white rounded-xl shadow-sm border border-border p-6">
-                  <h3 className="text-lg font-bold text-text mb-4">Volunteer Shifts</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <p className="text-2xl font-bold text-text">{shifts.length}</p>
-                      <p className="text-xs text-secondary mt-1">Total Shifts</p>
-                    </div>
-                    <div className="bg-green-50 rounded-lg p-3">
-                      <p className="text-2xl font-bold text-green-600">
-                        {shifts.filter(s => s.assignedUserId || (s.assignedUsers && s.assignedUsers.length > 0) || s.assignedToSupportNetwork).length}
-                      </p>
-                      <p className="text-xs text-secondary mt-1">Covered Shifts</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </>
+            <ViewReportingView
+              onNavigate={setActiveView}
+              monthlyReports={[]}
+              currentUser={currentUser}
+            />
           )}
 
           {/* Manage Reporting View */}
@@ -1238,23 +1142,25 @@ export default function MainDashboard() {
 
               <div className="bg-white rounded-xl shadow-sm border border-border p-6">
                 <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FileText className="w-8 h-8 text-yellow-600" />
+                  <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <FileText className="w-8 h-8 text-indigo-600" />
                   </div>
-                  <h3 className="text-lg font-bold text-text mb-2">Report Data Entry</h3>
-                  <p className="text-secondary mb-4">
-                    This interface allows administrators to enter monthly report data including:
+                  <h3 className="text-lg font-bold text-text mb-2">Use Mobile App for Data Entry</h3>
+                  <p className="text-secondary mb-4 max-w-xl mx-auto">
+                    Report data entry is available in the mobile app with a comprehensive interface for managing monthly reports.
                   </p>
-                  <div className="text-left max-w-md mx-auto space-y-2 text-sm text-secondary">
-                    <p>• Release facility counts and locations</p>
-                    <p>• Call volumes (inbound/outbound)</p>
-                    <p>• Bridge team status metrics</p>
-                    <p>• Mentorship assignments and progress</p>
-                    <p>• Donor information and financials</p>
+                  <div className="text-left max-w-md mx-auto space-y-2 text-sm text-secondary bg-gray-50 rounded-lg p-4 mb-4">
+                    <p className="font-semibold text-text mb-2">Available on mobile:</p>
+                    <p>• Release facility counts by location</p>
+                    <p>• Call metrics (inbound, outbound, missed)</p>
+                    <p>• Bridge team status and metrics</p>
+                    <p>• Mentorship assignments (auto-calculated)</p>
+                    <p>• Donor data and financial information</p>
                     <p>• Social media analytics</p>
+                    <p>• Monthly wins and concerns</p>
                   </div>
-                  <p className="text-secondary mt-4 text-sm italic">
-                    Full data entry interface coming soon
+                  <p className="text-sm text-secondary">
+                    Open the mobile app and navigate to <span className="font-semibold">Admin → Monthly Reporting → Manage Reports</span> to enter data.
                   </p>
                 </div>
               </div>
