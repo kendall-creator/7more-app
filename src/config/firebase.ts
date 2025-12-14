@@ -1,17 +1,23 @@
 import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { getDatabase, Database } from "firebase/database";
+import { getAuth, Auth } from "firebase/auth";
 import { FIREBASE_FALLBACK_CONFIG, isUsingFallbackConfig } from "./firebase-fallback";
+
+// Helper to get env var with or without EXPO_PUBLIC_ prefix
+const getEnvVar = (name: string): string | undefined => {
+  return process.env[`EXPO_PUBLIC_${name}`] || process.env[name];
+};
 
 // Check if all required Firebase environment variables are set
 const isFirebaseConfigured = () => {
   const requiredVars = [
-    process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
-    process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
-    process.env.EXPO_PUBLIC_FIREBASE_DATABASE_URL,
-    process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
-    process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
-    process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-    process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+    getEnvVar("FIREBASE_API_KEY"),
+    getEnvVar("FIREBASE_AUTH_DOMAIN"),
+    getEnvVar("FIREBASE_DATABASE_URL"),
+    getEnvVar("FIREBASE_PROJECT_ID"),
+    getEnvVar("FIREBASE_STORAGE_BUCKET"),
+    getEnvVar("FIREBASE_MESSAGING_SENDER_ID"),
+    getEnvVar("FIREBASE_APP_ID"),
   ];
 
   return requiredVars.every(
@@ -24,13 +30,13 @@ const getFirebaseConfig = () => {
   // First try to use environment variables
   if (isFirebaseConfigured()) {
     return {
-      apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || "",
-      authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || "",
-      databaseURL: process.env.EXPO_PUBLIC_FIREBASE_DATABASE_URL || "",
-      projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || "",
-      storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || "",
-      messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "",
-      appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || "",
+      apiKey: getEnvVar("FIREBASE_API_KEY") || "",
+      authDomain: getEnvVar("FIREBASE_AUTH_DOMAIN") || "",
+      databaseURL: getEnvVar("FIREBASE_DATABASE_URL") || "",
+      projectId: getEnvVar("FIREBASE_PROJECT_ID") || "",
+      storageBucket: getEnvVar("FIREBASE_STORAGE_BUCKET") || "",
+      messagingSenderId: getEnvVar("FIREBASE_MESSAGING_SENDER_ID") || "",
+      appId: getEnvVar("FIREBASE_APP_ID") || "",
     };
   }
 
@@ -46,6 +52,7 @@ const firebaseConfig = getFirebaseConfig();
 // Initialize Firebase
 let app: FirebaseApp | null = null;
 let database: Database | null = null;
+let auth: Auth | null = null;
 
 try {
   console.log("🔥 Starting Firebase initialization...");
@@ -64,6 +71,10 @@ try {
   database = getDatabase(app);
   console.log("   ✅ Database instance created");
 
+  console.log("   Getting auth instance...");
+  auth = getAuth(app);
+  console.log("   ✅ Auth instance created");
+
   // Log status for debugging
   if (isUsingFallbackConfig()) {
     console.log("✅ Firebase initialized with fallback config");
@@ -78,5 +89,5 @@ try {
   console.error("   Firebase config being used:", JSON.stringify(firebaseConfig, null, 2));
 }
 
-export { database };
+export { database, auth };
 export default app;

@@ -1,4 +1,6 @@
 import { create } from "zustand";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { auth } from "../config/firebase";
 import { User } from "../types";
 import { useUsersStore } from "./usersStore";
 
