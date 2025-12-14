@@ -1285,7 +1285,7 @@ export default function MainDashboard() {
           {(activeView === "dashboard" || !activeView) && (
             <>
               {/* Admin Homepage */}
-              {isAdmin && <AdminHomepageView />}
+              {isAdmin && <AdminHomepageView onNavigate={setActiveView} />}
 
               {/* Bridge Team Dashboard */}
               {isBridgeTeam && <BridgeTeamDashboardView />}

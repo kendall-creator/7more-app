@@ -9,10 +9,12 @@ import {
 } from "lucide-react";
 import { useDataStore } from "../store/dataStore";
 import { useAuthStore } from "../store/authStore";
-import { useNavigate } from "react-router-dom";
 
-export default function AdminHomepageView() {
-  const navigate = useNavigate();
+interface AdminHomepageViewProps {
+  onNavigate: (view: string) => void;
+}
+
+export default function AdminHomepageView({ onNavigate }: AdminHomepageViewProps) {
   const currentUser = useAuthStore((s) => s.currentUser);
   const participants = useDataStore((s) => s.participants);
   const tasks = useDataStore((s) => s.tasks);
@@ -141,14 +143,14 @@ export default function AdminHomepageView() {
           <h2 className="text-base font-bold text-text mb-3">Quick Actions</h2>
           <div className="grid grid-cols-2 gap-3 mb-3">
             <button
-              onClick={() => navigate("?view=add-participant")}
+              onClick={() => onNavigate("add-participant")}
               className="bg-gray-700 hover:bg-gray-800 text-white rounded-xl p-4 text-left transition-colors"
             >
               <UserPlus className="w-6 h-6 mb-2" />
               <p className="text-sm font-semibold">New Participant Intake</p>
             </button>
             <button
-              onClick={() => navigate("?view=assign-tasks")}
+              onClick={() => onNavigate("assign-tasks")}
               className="bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl p-4 text-left transition-colors"
             >
               <PlusCircle className="w-6 h-6 mb-2" />
@@ -158,14 +160,14 @@ export default function AdminHomepageView() {
           {!isBridgeTeamLeader && (
             <div className="grid grid-cols-2 gap-3">
               <button
-                onClick={() => navigate("?view=volunteers")}
+                onClick={() => onNavigate("volunteers")}
                 className="bg-green-600 hover:bg-green-700 text-white rounded-xl p-4 text-left transition-colors"
               >
                 <Users className="w-6 h-6 mb-2" />
                 <p className="text-sm font-semibold">Volunteer Mgmt</p>
               </button>
               <button
-                onClick={() => navigate("?view=volunteers")}
+                onClick={() => onNavigate("volunteers")}
                 className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl p-4 text-left transition-colors"
               >
                 <UserPlus className="w-6 h-6 mb-2" />
@@ -182,26 +184,38 @@ export default function AdminHomepageView() {
               <Users className="w-5 h-5 text-gray-700" />
               <h3 className="text-base font-bold text-text">Participants</h3>
             </div>
-            <button className="text-gray-700 text-sm font-semibold hover:underline">View All</button>
+            <button onClick={() => onNavigate("participants")} className="text-gray-700 text-sm font-semibold hover:underline">View All</button>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <div className="bg-gray-50 rounded-xl p-3">
+            <button
+              onClick={() => onNavigate("participants")}
+              className="bg-gray-50 rounded-xl p-3 text-left hover:bg-gray-100 transition-colors"
+            >
               <p className="text-2xl font-bold text-text">{stats.total}</p>
               <p className="text-xs text-secondary mt-1">Total</p>
-            </div>
-            <div className="bg-red-50 rounded-xl p-3">
+            </button>
+            <button
+              onClick={() => onNavigate("participants")}
+              className="bg-red-50 rounded-xl p-3 text-left hover:bg-red-100 transition-colors"
+            >
               <p className="text-2xl font-bold text-red-600">{stats.pendingMentor}</p>
               <p className="text-xs text-secondary mt-1">Need Assignment</p>
-            </div>
-            <div className="bg-green-50 rounded-xl p-3">
+            </button>
+            <button
+              onClick={() => onNavigate("participants")}
+              className="bg-green-50 rounded-xl p-3 text-left hover:bg-green-100 transition-colors"
+            >
               <p className="text-2xl font-bold text-green-600">{stats.activeMentorship}</p>
               <p className="text-xs text-secondary mt-1">Active</p>
-            </div>
-            <div className="bg-blue-50 rounded-xl p-3">
+            </button>
+            <button
+              onClick={() => onNavigate("participants")}
+              className="bg-blue-50 rounded-xl p-3 text-left hover:bg-blue-100 transition-colors"
+            >
               <p className="text-2xl font-bold text-blue-600">{stats.graduated}</p>
               <p className="text-xs text-secondary mt-1">Graduated</p>
-            </div>
+            </button>
           </div>
         </div>
 
@@ -212,26 +226,38 @@ export default function AdminHomepageView() {
               <CheckSquare className="w-5 h-5 text-gray-500" />
               <h3 className="text-base font-bold text-text">Tasks</h3>
             </div>
-            <button className="text-gray-700 text-sm font-semibold hover:underline">Manage</button>
+            <button onClick={() => onNavigate("tasks")} className="text-gray-700 text-sm font-semibold hover:underline">Manage</button>
           </div>
 
           <div className="grid grid-cols-4 gap-2">
-            <div className="bg-gray-50 rounded-xl p-3">
+            <button
+              onClick={() => onNavigate("tasks")}
+              className="bg-gray-50 rounded-xl p-3 text-left hover:bg-gray-100 transition-colors"
+            >
               <p className="text-2xl font-bold text-text">{taskStats.totalTasks}</p>
               <p className="text-xs text-secondary mt-1">Total</p>
-            </div>
-            <div className="bg-red-50 rounded-xl p-3">
+            </button>
+            <button
+              onClick={() => onNavigate("tasks")}
+              className="bg-red-50 rounded-xl p-3 text-left hover:bg-red-100 transition-colors"
+            >
               <p className="text-2xl font-bold text-red-600">{taskStats.overdue}</p>
               <p className="text-xs text-secondary mt-1">Overdue</p>
-            </div>
-            <div className="bg-blue-50 rounded-xl p-3">
+            </button>
+            <button
+              onClick={() => onNavigate("tasks")}
+              className="bg-blue-50 rounded-xl p-3 text-left hover:bg-blue-100 transition-colors"
+            >
               <p className="text-2xl font-bold text-blue-600">{taskStats.inProgress}</p>
               <p className="text-xs text-secondary mt-1">In Progress</p>
-            </div>
-            <div className="bg-green-50 rounded-xl p-3">
+            </button>
+            <button
+              onClick={() => onNavigate("tasks")}
+              className="bg-green-50 rounded-xl p-3 text-left hover:bg-green-100 transition-colors"
+            >
               <p className="text-2xl font-bold text-green-600">{taskStats.completed}</p>
               <p className="text-xs text-secondary mt-1">Completed</p>
-            </div>
+            </button>
           </div>
         </div>
 
@@ -242,7 +268,7 @@ export default function AdminHomepageView() {
               <Users className="w-5 h-5 text-cyan-600" />
               <h3 className="text-base font-bold text-text">Bridge Team</h3>
             </div>
-            <button className="text-gray-700 text-sm font-semibold hover:underline">Manage</button>
+            <button onClick={() => onNavigate("users")} className="text-gray-700 text-sm font-semibold hover:underline">Manage</button>
           </div>
 
           <div className="grid grid-cols-2 gap-2 mb-4">
@@ -285,7 +311,7 @@ export default function AdminHomepageView() {
                 <Users className="w-5 h-5 text-yellow-500" />
                 <h3 className="text-base font-bold text-text">Mentors</h3>
               </div>
-              <button className="text-gray-700 text-sm font-semibold hover:underline">Manage</button>
+              <button onClick={() => onNavigate("users")} className="text-gray-700 text-sm font-semibold hover:underline">Manage</button>
             </div>
 
             <div className="grid grid-cols-2 gap-2 mb-4">
@@ -324,7 +350,7 @@ export default function AdminHomepageView() {
               <Calendar className="w-5 h-5 text-gray-500" />
               <h3 className="text-base font-bold text-text">Pam Lychner Schedule</h3>
             </div>
-            <button className="text-gray-700 text-sm font-semibold hover:underline">View All</button>
+            <button onClick={() => onNavigate("scheduler")} className="text-gray-700 text-sm font-semibold hover:underline">View All</button>
           </div>
 
           {pamLychnerSchedule.map((day) => (
