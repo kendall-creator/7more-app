@@ -13,7 +13,27 @@ import {
   ChevronRight,
   CheckCircle,
   Clock,
+  BarChart3,
+  FileText,
+  UserCircle,
+  PlusCircle,
 } from "lucide-react";
+
+// NavButton component
+function NavButton({ icon, label, active = false }: { icon: React.ReactNode; label: string; active?: boolean }) {
+  return (
+    <button
+      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+        active
+          ? "bg-primary text-white"
+          : "text-text hover:bg-gray-100"
+      }`}
+    >
+      {icon}
+      <span className="font-medium text-sm">{label}</span>
+    </button>
+  );
+}
 
 export default function MainDashboard() {
   const navigate = useNavigate();
@@ -142,52 +162,102 @@ export default function MainDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Top Navigation Bar */}
-      <nav className="bg-white border-b border-border shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo/Brand */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-white text-lg font-bold">7+</span>
-              </div>
-              <span className="text-xl font-bold text-text">7more</span>
+    <div className="min-h-screen bg-background flex">
+      {/* Sidebar Navigation */}
+      <aside className="w-64 bg-white border-r border-border flex flex-col">
+        {/* Logo */}
+        <div className="p-6 border-b border-border">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+              <span className="text-white text-lg font-bold">7+</span>
             </div>
-
-            {/* User Info & Logout */}
-            <div className="flex items-center gap-4">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-semibold text-text">
-                  {currentUser?.name}
-                </p>
-                <p className="text-xs text-secondary">{currentUser?.email}</p>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-text hover:bg-gray-100 rounded-lg transition-colors"
-                title="Logout"
-              >
-                <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Logout</span>
-              </button>
-            </div>
+            <span className="text-xl font-bold text-text">7more</span>
           </div>
         </div>
-      </nav>
+
+        {/* Navigation based on role */}
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          {/* Admin & Bridge Team Leader Navigation */}
+          {(currentUser?.role === "admin" || currentUser?.role === "bridge_team_leader") && (
+            <>
+              <NavButton icon={<Users className="w-5 h-5" />} label="All Participants" active />
+              <NavButton icon={<UserPlus className="w-5 h-5" />} label="Add Participant" />
+              <NavButton icon={<Users className="w-5 h-5" />} label="Manage Users" />
+              <NavButton icon={<CheckSquare className="w-5 h-5" />} label="Task Management" />
+              <NavButton icon={<UserCircle className="w-5 h-5" />} label="Volunteers" />
+              <NavButton icon={<Calendar className="w-5 h-5" />} label="Scheduler" />
+              <NavButton icon={<BarChart3 className="w-5 h-5" />} label="Monthly Reporting" />
+              <NavButton icon={<FileText className="w-5 h-5" />} label="Resources" />
+            </>
+          )}
+
+          {/* Bridge Team Navigation */}
+          {currentUser?.role === "bridge_team" && (
+            <>
+              <NavButton icon={<Users className="w-5 h-5" />} label="My Queue" active />
+              <NavButton icon={<Calendar className="w-5 h-5" />} label="Scheduler" />
+              <NavButton icon={<CheckSquare className="w-5 h-5" />} label="My Tasks" />
+              <NavButton icon={<FileText className="w-5 h-5" />} label="Resources" />
+            </>
+          )}
+
+          {/* Mentor Navigation */}
+          {currentUser?.role === "mentor" && (
+            <>
+              <NavButton icon={<Users className="w-5 h-5" />} label="My Mentees" active />
+              <NavButton icon={<CheckSquare className="w-5 h-5" />} label="My Tasks" />
+              <NavButton icon={<UserCircle className="w-5 h-5" />} label="Volunteers" />
+              <NavButton icon={<FileText className="w-5 h-5" />} label="Resources" />
+            </>
+          )}
+
+          {/* Mentorship Leader Navigation */}
+          {currentUser?.role === "mentorship_leader" && (
+            <>
+              <NavButton icon={<Users className="w-5 h-5" />} label="My Mentees" active />
+              <NavButton icon={<UserCircle className="w-5 h-5" />} label="Volunteers" />
+              <NavButton icon={<CheckSquare className="w-5 h-5" />} label="My Tasks" />
+              <NavButton icon={<PlusCircle className="w-5 h-5" />} label="Assign Tasks" />
+              <NavButton icon={<BarChart3 className="w-5 h-5" />} label="Reporting" />
+              <NavButton icon={<FileText className="w-5 h-5" />} label="Resources" />
+            </>
+          )}
+        </nav>
+
+        {/* User info and logout */}
+        <div className="p-4 border-t border-border">
+          <div className="mb-3 px-4">
+            <p className="text-sm font-semibold text-text truncate">
+              {currentUser?.name}
+            </p>
+            <p className="text-xs text-secondary truncate">{currentUser?.email}</p>
+            <p className="text-xs text-accent mt-1 font-medium">
+              {currentUser?.role?.split("_").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
+            </p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Logout</span>
+          </button>
+        </div>
+      </aside>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-text mb-2">
-            Welcome back, {currentUser?.name?.split(" ")[0]}!
-          </h1>
-          <p className="text-secondary">Here is your overview for today</p>
-        </div>
+      <main className="flex-1 overflow-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Page Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-text mb-2">
+              Welcome back, {currentUser?.name?.split(" ")[0]}!
+            </h1>
+            <p className="text-secondary">Here is your overview for today</p>
+          </div>
 
-        {/* Content Grid */}
-        <div className="space-y-6">
+          {/* Content Grid */}
+          <div className="space-y-6">
           {/* Quick Actions - For users with volunteer management access */}
           {(currentUser?.role === "mentorship_leader" ||
             currentUser?.role === "bridge_team") && (
@@ -507,6 +577,7 @@ export default function MainDashboard() {
               </div>
             </div>
           )}
+        </div>
         </div>
       </main>
     </div>
