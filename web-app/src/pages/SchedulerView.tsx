@@ -25,7 +25,6 @@ export default function SchedulerView({ onNavigate }: SchedulerViewProps) {
   const currentUser = useAuthStore((s) => s.currentUser);
   const shifts = useDataStore((s) => s.shifts);
   const meetings = useDataStore((s) => s.meetings || []);
-  const allUsers = useAuthStore((s) => s.users || []);
 
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
   const [selectedShift, setSelectedShift] = useState<any>(null);
@@ -40,6 +39,9 @@ export default function SchedulerView({ onNavigate }: SchedulerViewProps) {
 
   // Default to "My Schedule" for non-admins, "Manage Schedule" for admins
   const [activeTab, setActiveTab] = useState<"my" | "manage">(isAdmin ? "manage" : "my");
+
+  // Debug logging
+  console.log("SchedulerView - Shifts:", shifts.length, "Meetings:", meetings.length, "User Role:", userRole, "Active Tab:", activeTab);
 
   // Get week start (Monday)
   const getWeekStart = (offset: number = 0) => {
@@ -101,6 +103,7 @@ export default function SchedulerView({ onNavigate }: SchedulerViewProps) {
       }
     }
 
+    console.log("Visible shifts after filtering:", filtered.length, "from total:", shifts.length);
     return filtered;
   }, [shifts, userRole, isSupportVolunteer, isSupporter, activeTab, currentUser]);
 
