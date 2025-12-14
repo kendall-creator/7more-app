@@ -10,8 +10,27 @@ const config = getDefaultConfig(__dirname);
 // Disable Watchman for file watching.
 config.resolver.useWatchman = false;
 
+// Add resolver for react-native-css-interop subpath exports
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  // Handle react-native-css-interop subpath exports
+  if (moduleName === 'react-native-css-interop/jsx-runtime') {
+    return {
+      filePath: path.resolve(__dirname, 'node_modules/react-native-css-interop/dist/runtime/jsx-runtime.js'),
+      type: 'sourceFile',
+    };
+  }
+  if (moduleName === 'react-native-css-interop/jsx-dev-runtime') {
+    return {
+      filePath: path.resolve(__dirname, 'node_modules/react-native-css-interop/dist/runtime/jsx-dev-runtime.js'),
+      type: 'sourceFile',
+    };
+  }
+  // Fall back to default resolution
+  return context.resolveRequest(context, moduleName, platform);
+};
+
 // Get environment variables for Metro cache configuration.
-const metroCacheVersion = process.env.METRO_CACHE_VERSION || "2";
+const metroCacheVersion = process.env.METRO_CACHE_VERSION || "1";
 const metroCacheHttpEndpoint = process.env.METRO_CACHE_HTTP_ENDPOINT;
 const metroCacheDir = process.env.METRO_CACHE_DIR || path.join(os.homedir(), ".metro-cache");
 
