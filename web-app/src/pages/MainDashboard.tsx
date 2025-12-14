@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import { useDataStore } from "../store/dataStore";
@@ -20,9 +20,20 @@ import {
 } from "lucide-react";
 
 // NavButton component
-function NavButton({ icon, label, active = false }: { icon: React.ReactNode; label: string; active?: boolean }) {
+function NavButton({
+  icon,
+  label,
+  active = false,
+  onClick
+}: {
+  icon: React.ReactNode;
+  label: string;
+  active?: boolean;
+  onClick?: () => void;
+}) {
   return (
     <button
+      onClick={onClick}
       className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
         active
           ? "bg-primary text-white"
@@ -43,6 +54,9 @@ export default function MainDashboard() {
   const participants = useDataStore((s) => s.participants);
   const tasks = useDataStore((s) => s.tasks);
   const shifts = useDataStore((s) => s.shifts);
+
+  // Active view state
+  const [activeView, setActiveView] = useState("dashboard");
 
   const isMentor =
     currentUser?.role === "mentor" || currentUser?.role === "mentorship_leader";
@@ -180,46 +194,156 @@ export default function MainDashboard() {
           {/* Admin & Bridge Team Leader Navigation */}
           {(currentUser?.role === "admin" || currentUser?.role === "bridge_team_leader") && (
             <>
-              <NavButton icon={<Users className="w-5 h-5" />} label="All Participants" active />
-              <NavButton icon={<UserPlus className="w-5 h-5" />} label="Add Participant" />
-              <NavButton icon={<Users className="w-5 h-5" />} label="Manage Users" />
-              <NavButton icon={<CheckSquare className="w-5 h-5" />} label="Task Management" />
-              <NavButton icon={<UserCircle className="w-5 h-5" />} label="Volunteers" />
-              <NavButton icon={<Calendar className="w-5 h-5" />} label="Scheduler" />
-              <NavButton icon={<BarChart3 className="w-5 h-5" />} label="Monthly Reporting" />
-              <NavButton icon={<FileText className="w-5 h-5" />} label="Resources" />
+              <NavButton
+                icon={<Users className="w-5 h-5" />}
+                label="All Participants"
+                active={activeView === "participants"}
+                onClick={() => setActiveView("participants")}
+              />
+              <NavButton
+                icon={<UserPlus className="w-5 h-5" />}
+                label="Add Participant"
+                active={activeView === "add-participant"}
+                onClick={() => setActiveView("add-participant")}
+              />
+              <NavButton
+                icon={<Users className="w-5 h-5" />}
+                label="Manage Users"
+                active={activeView === "users"}
+                onClick={() => setActiveView("users")}
+              />
+              <NavButton
+                icon={<CheckSquare className="w-5 h-5" />}
+                label="Task Management"
+                active={activeView === "tasks"}
+                onClick={() => setActiveView("tasks")}
+              />
+              <NavButton
+                icon={<UserCircle className="w-5 h-5" />}
+                label="Volunteers"
+                active={activeView === "volunteers"}
+                onClick={() => setActiveView("volunteers")}
+              />
+              <NavButton
+                icon={<Calendar className="w-5 h-5" />}
+                label="Scheduler"
+                active={activeView === "scheduler"}
+                onClick={() => setActiveView("scheduler")}
+              />
+              <NavButton
+                icon={<BarChart3 className="w-5 h-5" />}
+                label="Monthly Reporting"
+                active={activeView === "reporting"}
+                onClick={() => setActiveView("reporting")}
+              />
+              <NavButton
+                icon={<FileText className="w-5 h-5" />}
+                label="Resources"
+                active={activeView === "resources"}
+                onClick={() => setActiveView("resources")}
+              />
             </>
           )}
 
           {/* Bridge Team Navigation */}
           {currentUser?.role === "bridge_team" && (
             <>
-              <NavButton icon={<Users className="w-5 h-5" />} label="My Queue" active />
-              <NavButton icon={<Calendar className="w-5 h-5" />} label="Scheduler" />
-              <NavButton icon={<CheckSquare className="w-5 h-5" />} label="My Tasks" />
-              <NavButton icon={<FileText className="w-5 h-5" />} label="Resources" />
+              <NavButton
+                icon={<Users className="w-5 h-5" />}
+                label="My Queue"
+                active={activeView === "dashboard"}
+                onClick={() => setActiveView("dashboard")}
+              />
+              <NavButton
+                icon={<Calendar className="w-5 h-5" />}
+                label="Scheduler"
+                active={activeView === "scheduler"}
+                onClick={() => setActiveView("scheduler")}
+              />
+              <NavButton
+                icon={<CheckSquare className="w-5 h-5" />}
+                label="My Tasks"
+                active={activeView === "my-tasks"}
+                onClick={() => setActiveView("my-tasks")}
+              />
+              <NavButton
+                icon={<FileText className="w-5 h-5" />}
+                label="Resources"
+                active={activeView === "resources"}
+                onClick={() => setActiveView("resources")}
+              />
             </>
           )}
 
           {/* Mentor Navigation */}
           {currentUser?.role === "mentor" && (
             <>
-              <NavButton icon={<Users className="w-5 h-5" />} label="My Mentees" active />
-              <NavButton icon={<CheckSquare className="w-5 h-5" />} label="My Tasks" />
-              <NavButton icon={<UserCircle className="w-5 h-5" />} label="Volunteers" />
-              <NavButton icon={<FileText className="w-5 h-5" />} label="Resources" />
+              <NavButton
+                icon={<Users className="w-5 h-5" />}
+                label="My Mentees"
+                active={activeView === "my-mentees"}
+                onClick={() => setActiveView("my-mentees")}
+              />
+              <NavButton
+                icon={<CheckSquare className="w-5 h-5" />}
+                label="My Tasks"
+                active={activeView === "my-tasks"}
+                onClick={() => setActiveView("my-tasks")}
+              />
+              <NavButton
+                icon={<UserCircle className="w-5 h-5" />}
+                label="Volunteers"
+                active={activeView === "volunteers"}
+                onClick={() => setActiveView("volunteers")}
+              />
+              <NavButton
+                icon={<FileText className="w-5 h-5" />}
+                label="Resources"
+                active={activeView === "resources"}
+                onClick={() => setActiveView("resources")}
+              />
             </>
           )}
 
           {/* Mentorship Leader Navigation */}
           {currentUser?.role === "mentorship_leader" && (
             <>
-              <NavButton icon={<Users className="w-5 h-5" />} label="My Mentees" active />
-              <NavButton icon={<UserCircle className="w-5 h-5" />} label="Volunteers" />
-              <NavButton icon={<CheckSquare className="w-5 h-5" />} label="My Tasks" />
-              <NavButton icon={<PlusCircle className="w-5 h-5" />} label="Assign Tasks" />
-              <NavButton icon={<BarChart3 className="w-5 h-5" />} label="Reporting" />
-              <NavButton icon={<FileText className="w-5 h-5" />} label="Resources" />
+              <NavButton
+                icon={<Users className="w-5 h-5" />}
+                label="My Mentees"
+                active={activeView === "my-mentees"}
+                onClick={() => setActiveView("my-mentees")}
+              />
+              <NavButton
+                icon={<UserCircle className="w-5 h-5" />}
+                label="Volunteers"
+                active={activeView === "volunteers"}
+                onClick={() => setActiveView("volunteers")}
+              />
+              <NavButton
+                icon={<CheckSquare className="w-5 h-5" />}
+                label="My Tasks"
+                active={activeView === "my-tasks"}
+                onClick={() => setActiveView("my-tasks")}
+              />
+              <NavButton
+                icon={<PlusCircle className="w-5 h-5" />}
+                label="Assign Tasks"
+                active={activeView === "assign-tasks"}
+                onClick={() => setActiveView("assign-tasks")}
+              />
+              <NavButton
+                icon={<BarChart3 className="w-5 h-5" />}
+                label="Reporting"
+                active={activeView === "reporting"}
+                onClick={() => setActiveView("reporting")}
+              />
+              <NavButton
+                icon={<FileText className="w-5 h-5" />}
+                label="Resources"
+                active={activeView === "resources"}
+                onClick={() => setActiveView("resources")}
+              />
             </>
           )}
         </nav>
@@ -248,13 +372,54 @@ export default function MainDashboard() {
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Page Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-text mb-2">
-              Welcome back, {currentUser?.name?.split(" ")[0]}!
-            </h1>
-            <p className="text-secondary">Here is your overview for today</p>
-          </div>
+
+          {/* All Participants View */}
+          {activeView === "participants" && (
+            <>
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-text mb-2">All Participants</h1>
+                <p className="text-secondary">View and manage all participants in the system</p>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+                <div className="space-y-4">
+                  {participants.length === 0 ? (
+                    <p className="text-secondary text-center py-8">No participants found</p>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-4">
+                      {participants.map((p) => (
+                        <div
+                          key={p.id}
+                          className="border border-border rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="font-semibold text-text">
+                                {p.firstName} {p.lastName}
+                              </h3>
+                              <p className="text-sm text-secondary mt-1">
+                                #{p.participantNumber} • Status: {p.status?.replace(/_/g, " ")}
+                              </p>
+                            </div>
+                            <ChevronRight className="w-5 h-5 text-secondary" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Dashboard/Overview View (default) */}
+          {(activeView === "dashboard" || !activeView) && (
+            <>
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-text mb-2">
+                  Welcome back, {currentUser?.name?.split(" ")[0]}!
+                </h1>
+                <p className="text-secondary">Here is your overview for today</p>
+              </div>
 
           {/* Content Grid */}
           <div className="space-y-6">
@@ -578,6 +743,8 @@ export default function MainDashboard() {
             </div>
           )}
         </div>
+        </>
+          )}
         </div>
       </main>
     </div>
