@@ -1,0 +1,12 @@
+{
+  "buildCommand": "cd web-app && bun run build",
+  "outputDirectory": "web-app/dist",
+  "framework": "vite",
+  "installCommand": "cd web-app && bun install",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
