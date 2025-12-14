@@ -411,6 +411,207 @@ export default function MainDashboard() {
             </>
           )}
 
+          {/* My Mentees View */}
+          {activeView === "my-mentees" && (
+            <>
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-text mb-2">My Mentees</h1>
+                <p className="text-secondary">View and manage your assigned mentees</p>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+                <div className="space-y-4">
+                  {assignedParticipants.length === 0 ? (
+                    <p className="text-secondary text-center py-8">No mentees assigned yet</p>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-4">
+                      {assignedParticipants.map((p) => (
+                        <div
+                          key={p.id}
+                          className="border border-border rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="font-semibold text-text">
+                                {p.firstName} {p.lastName}
+                              </h3>
+                              <p className="text-sm text-secondary mt-1">
+                                #{p.participantNumber} • Status: {p.status?.replace(/_/g, " ")}
+                              </p>
+                            </div>
+                            <ChevronRight className="w-5 h-5 text-secondary" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* My Tasks View */}
+          {activeView === "my-tasks" && (
+            <>
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-text mb-2">My Tasks</h1>
+                <p className="text-secondary">View and manage your assigned tasks</p>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+                <div className="space-y-4">
+                  {myTasks.length === 0 ? (
+                    <div className="text-center py-12">
+                      <CheckCircle className="w-16 h-16 text-border mx-auto mb-4" />
+                      <p className="text-secondary">No active tasks</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-4">
+                      {myTasks.map((task) => (
+                        <div
+                          key={task.id}
+                          className={`rounded-lg p-4 border cursor-pointer hover:opacity-80 transition-opacity ${
+                            task.status === "overdue"
+                              ? "bg-red-50 border-red-200"
+                              : "bg-background border-border"
+                          }`}
+                        >
+                          <h3 className="font-semibold text-text">{task.title}</h3>
+                          <p className="text-sm text-secondary mt-2">
+                            From: {task.assignedByUserName} • Priority: {task.priority}
+                          </p>
+                          {task.status === "overdue" && (
+                            <p className="text-sm text-red-600 mt-2 font-semibold">
+                              OVERDUE
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Scheduler View */}
+          {activeView === "scheduler" && (
+            <>
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-text mb-2">Scheduler</h1>
+                <p className="text-secondary">View and manage shifts and schedules</p>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+                <div className="space-y-6">
+                  {myUpcomingShifts.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Clock className="w-16 h-16 text-border mx-auto mb-4" />
+                      <p className="text-secondary">Nothing scheduled at this time</p>
+                    </div>
+                  ) : (
+                    myUpcomingShifts.map((shift) => (
+                      <div
+                        key={shift.id}
+                        className="bg-primary/5 border border-primary/20 rounded-lg p-4 hover:bg-primary/10 transition-colors cursor-pointer"
+                      >
+                        <h3 className="font-semibold text-text">{shift.title}</h3>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Calendar className="w-4 h-4 text-secondary" />
+                          <p className="text-sm text-secondary">
+                            {formatDate(shift.date)} at {shift.startTime}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Placeholder views for other navigation items */}
+          {activeView === "users" && (
+            <>
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-text mb-2">Manage Users</h1>
+                <p className="text-secondary">View and manage system users</p>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+                <p className="text-secondary text-center py-12">User management interface</p>
+              </div>
+            </>
+          )}
+
+          {activeView === "tasks" && (
+            <>
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-text mb-2">Task Management</h1>
+                <p className="text-secondary">Manage and assign tasks</p>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+                <p className="text-secondary text-center py-12">Task management interface</p>
+              </div>
+            </>
+          )}
+
+          {activeView === "volunteers" && (
+            <>
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-text mb-2">Volunteers</h1>
+                <p className="text-secondary">View and manage volunteers</p>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+                <p className="text-secondary text-center py-12">Volunteer management interface</p>
+              </div>
+            </>
+          )}
+
+          {activeView === "reporting" && (
+            <>
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-text mb-2">Monthly Reporting</h1>
+                <p className="text-secondary">View reports and analytics</p>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+                <p className="text-secondary text-center py-12">Reporting dashboard</p>
+              </div>
+            </>
+          )}
+
+          {activeView === "resources" && (
+            <>
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-text mb-2">Resources</h1>
+                <p className="text-secondary">Access documents and resources</p>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+                <p className="text-secondary text-center py-12">Resource library</p>
+              </div>
+            </>
+          )}
+
+          {activeView === "add-participant" && (
+            <>
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-text mb-2">Add Participant</h1>
+                <p className="text-secondary">Add a new participant to the system</p>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+                <p className="text-secondary text-center py-12">Participant intake form</p>
+              </div>
+            </>
+          )}
+
+          {activeView === "assign-tasks" && (
+            <>
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-text mb-2">Assign Tasks</h1>
+                <p className="text-secondary">Assign tasks to team members</p>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+                <p className="text-secondary text-center py-12">Task assignment interface</p>
+              </div>
+            </>
+          )}
+
           {/* Dashboard/Overview View (default) */}
           {(activeView === "dashboard" || !activeView) && (
             <>
