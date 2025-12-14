@@ -88,6 +88,37 @@ export default function ViewReportingView({ onNavigate, monthlyReports, currentU
     return availableReports.find(r => r.month === prevMonth && r.year === prevYear);
   };
 
+  // Calculate comparison (up/down from previous period)
+  const getComparison = (currentValue: number, prevValue: number) => {
+    const diff = currentValue - prevValue;
+    const percentChange = prevValue !== 0 ? (diff / prevValue) * 100 : 0;
+
+    return {
+      diff,
+      percentChange,
+      isUp: diff > 0,
+      isDown: diff < 0,
+    };
+  };
+
+  const ComparisonIndicator = ({ currentValue, prevValue, isMissedCalls = false }: { currentValue: number; prevValue: number; isMissedCalls?: boolean }) => {
+    if (prevValue === null || prevValue === undefined) return null;
+
+    const comparison = getComparison(currentValue, prevValue);
+    if (comparison.diff === 0) return null;
+
+    const isGood = isMissedCalls ? comparison.isDown : comparison.isUp;
+
+    return (
+      <div className={`inline-flex items-center ml-2 px-2 py-1 rounded text-xs font-semibold ${
+        isGood ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+      }`}>
+        {comparison.isUp ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
+        <span className="ml-1">{formatNumber(Math.abs(comparison.diff))} ({formatNumber(Math.abs(comparison.percentChange), 1)}%)</span>
+      </div>
+    );
+  };
+
   // Calculate aggregated metrics
   const aggregatedMetrics = useMemo(() => {
     if (reportsInRange.length === 0) return null;
@@ -178,78 +209,14 @@ export default function ViewReportingView({ onNavigate, monthlyReports, currentU
     return `${formatNumber(num, 1)}%`;
   };
 
-  // Calculate comparison (up/down from previous period)
-  const getComparison = (currentValue: number, field: string, report: any) => {
-    const prevReport = getPreviousMonthReport(report.month, report.year);
-    if (!prevReport) return null;
-
-    let prevValue = 0;
-
-    // Navigate nested structure based on field
-    if (field.startsWith("releaseFacilityCounts.")) {
-      const facilityField = field.split(".")[1];
-      prevValue = prevReport.releaseFacilityCounts?.[facilityField] || 0;
-    } else if (field.startsWith("callMetrics.")) {
-      const callField = field.split(".")[1];
-      prevValue = prevReport.callMetrics?.[callField] || 0;
-    } else if (field.startsWith("bridgeTeamMetrics.")) {
-      const fieldParts = field.split(".");
-      if (fieldParts.length === 3 && fieldParts[1] === "participantsReceived") {
-        prevValue = prevReport.bridgeTeamMetrics?.participantsReceived?.manualOverride ??
-                    prevReport.bridgeTeamMetrics?.participantsReceived?.autoCalculated ?? 0;
-      } else if (fieldParts.length === 4 && fieldParts[1] === "statusCounts") {
-        const statusField = fieldParts[2];
-        prevValue = prevReport.bridgeTeamMetrics?.statusCounts?.[statusField]?.manualOverride ??
-                    prevReport.bridgeTeamMetrics?.statusCounts?.[statusField]?.autoCalculated ?? 0;
-      } else if (fieldParts.length === 3 && fieldParts[1] === "averageDaysToFirstOutreach") {
-        prevValue = prevReport.bridgeTeamMetrics?.averageDaysToFirstOutreach?.manualOverride ??
-                    prevReport.bridgeTeamMetrics?.averageDaysToFirstOutreach?.autoCalculated ?? 0;
-      }
-    } else if (field.startsWith("mentorshipMetrics.")) {
-      const mentorField = field.split(".")[1];
-      prevValue = prevReport.mentorshipMetrics?.[mentorField] || 0;
-    } else if (field.startsWith("donorData.")) {
-      const donorField = field.split(".")[1];
-      prevValue = prevReport.donorData?.[donorField] || 0;
-    } else if (field.startsWith("financialData.")) {
-      const finField = field.split(".")[1];
-      prevValue = prevReport.financialData?.[finField] || 0;
-    } else if (field.startsWith("socialMediaMetrics.")) {
-      const socialField = field.split(".")[1];
-      prevValue = prevReport.socialMediaMetrics?.[socialField] || 0;
-    }
-
-    const diff = currentValue - prevValue;
-    const percentChange = prevValue !== 0 ? (diff / prevValue) * 100 : 0;
-
-    return { diff, percentChange, isUp: diff > 0, isDown: diff < 0 };
-  };
-
-  const ComparisonIndicator = ({ value, field, report }: { value: number; field: string; report: any }) => {
-    const comparison = getComparison(value, field, report);
-    if (!comparison || (comparison.diff === 0)) return null;
-
-    const isMissedCallsMetric = field === "callMetrics.missedCallsPercent";
-    const isGood = isMissedCallsMetric ? comparison.isDown : comparison.isUp;
-
-    return (
-      <div className={`inline-flex items-center ml-2 px-2 py-1 rounded text-xs font-semibold ${
-        isGood ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-      }`}>
-        {comparison.isUp ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
-        <span className="ml-1">{formatNumber(Math.abs(comparison.diff))} ({formatNumber(Math.abs(comparison.percentChange), 1)}%)</span>
-      </div>
-    );
-  };
-
-  const renderMetricRow = (label: string, value: number, field: string, report: any, isCurrency = false, isPercentage = false) => (
+  const renderMetricRow = (label: string, value: number, prevValue: number, isCurrency = false, isPercentage = false, isMissedCalls = false) => (
     <div key={label} className="flex justify-between items-center py-2 border-b border-gray-100">
       <p className="text-gray-700">{label}</p>
       <div className="flex items-center">
         <p className="text-gray-900 font-semibold">
           {isCurrency ? formatCurrency(value) : isPercentage ? formatPercentage(value) : formatNumber(value)}
         </p>
-        {viewMode === "single" && <ComparisonIndicator value={value} field={field} report={report} />}
+        <ComparisonIndicator currentValue={value} prevValue={prevValue} isMissedCalls={isMissedCalls} />
       </div>
     </div>
   );
@@ -266,8 +233,14 @@ export default function ViewReportingView({ onNavigate, monthlyReports, currentU
       );
     }
 
+    const prevReport = getPreviousMonthReport(report.month, report.year);
+
     const totalReleasees = report.releaseFacilityCounts
       ? Object.values(report.releaseFacilityCounts).reduce((a: number, b: any) => a + (b || 0), 0)
+      : 0;
+
+    const prevTotalReleasees = prevReport?.releaseFacilityCounts
+      ? Object.values(prevReport.releaseFacilityCounts).reduce((a: number, b: any) => a + (b || 0), 0)
       : 0;
 
     return (
@@ -276,13 +249,13 @@ export default function ViewReportingView({ onNavigate, monthlyReports, currentU
         {canViewCategory("release_facilities") && (categoryFilter === "all" || categoryFilter === "releasees") && report.releaseFacilityCounts && (
           <div className="bg-white rounded-lg p-4 border border-gray-200">
             <h3 className="text-lg font-bold text-gray-900 mb-3">Releasees Met</h3>
-            {renderMetricRow("Total", totalReleasees, "releaseFacilityCounts.total", report)}
-            {renderMetricRow("Pam Lychner", report.releaseFacilityCounts.pamLychner ?? 0, "releaseFacilityCounts.pamLychner", report)}
-            {renderMetricRow("Huntsville", report.releaseFacilityCounts.huntsville ?? 0, "releaseFacilityCounts.huntsville", report)}
-            {renderMetricRow("Plane State Jail", report.releaseFacilityCounts.planeStateJail ?? 0, "releaseFacilityCounts.planeStateJail", report)}
-            {renderMetricRow("Havins Unit", report.releaseFacilityCounts.havinsUnit ?? 0, "releaseFacilityCounts.havinsUnit", report)}
-            {renderMetricRow("Clemens Unit", report.releaseFacilityCounts.clemensUnit ?? 0, "releaseFacilityCounts.clemensUnit", report)}
-            {renderMetricRow("Other", report.releaseFacilityCounts.other ?? 0, "releaseFacilityCounts.other", report)}
+            {renderMetricRow("Total", totalReleasees, prevTotalReleasees)}
+            {renderMetricRow("Pam Lychner", report.releaseFacilityCounts.pamLychner ?? 0, prevReport?.releaseFacilityCounts?.pamLychner ?? 0)}
+            {renderMetricRow("Huntsville", report.releaseFacilityCounts.huntsville ?? 0, prevReport?.releaseFacilityCounts?.huntsville ?? 0)}
+            {renderMetricRow("Plane State Jail", report.releaseFacilityCounts.planeStateJail ?? 0, prevReport?.releaseFacilityCounts?.planeStateJail ?? 0)}
+            {renderMetricRow("Havins Unit", report.releaseFacilityCounts.havinsUnit ?? 0, prevReport?.releaseFacilityCounts?.havinsUnit ?? 0)}
+            {renderMetricRow("Clemens Unit", report.releaseFacilityCounts.clemensUnit ?? 0, prevReport?.releaseFacilityCounts?.clemensUnit ?? 0)}
+            {renderMetricRow("Other", report.releaseFacilityCounts.other ?? 0, prevReport?.releaseFacilityCounts?.other ?? 0)}
           </div>
         )}
 
@@ -290,9 +263,9 @@ export default function ViewReportingView({ onNavigate, monthlyReports, currentU
         {canViewCategory("calls") && (categoryFilter === "all" || categoryFilter === "calls") && report.callMetrics && (
           <div className="bg-white rounded-lg p-4 border border-gray-200">
             <h3 className="text-lg font-bold text-gray-900 mb-3">Calls</h3>
-            {renderMetricRow("Inbound", report.callMetrics.inbound ?? 0, "callMetrics.inbound", report)}
-            {renderMetricRow("Outbound", report.callMetrics.outbound ?? 0, "callMetrics.outbound", report)}
-            {renderMetricRow("Missed Calls %", report.callMetrics.missedCallsPercent ?? 0, "callMetrics.missedCallsPercent", report, false, true)}
+            {renderMetricRow("Inbound", report.callMetrics.inbound ?? 0, prevReport?.callMetrics?.inbound ?? 0)}
+            {renderMetricRow("Outbound", report.callMetrics.outbound ?? 0, prevReport?.callMetrics?.outbound ?? 0)}
+            {renderMetricRow("Missed Calls %", report.callMetrics.missedCallsPercent ?? 0, prevReport?.callMetrics?.missedCallsPercent ?? 0, false, true, true)}
           </div>
         )}
 
@@ -300,14 +273,29 @@ export default function ViewReportingView({ onNavigate, monthlyReports, currentU
         {canViewCategory("bridge_team") && (categoryFilter === "all" || categoryFilter === "bridge_team") && report.bridgeTeamMetrics && (
           <div className="bg-white rounded-lg p-4 border border-gray-200">
             <h3 className="text-lg font-bold text-gray-900 mb-3">Bridge Team</h3>
-            {renderMetricRow("Participants Received", report.bridgeTeamMetrics.participantsReceived?.manualOverride ?? report.bridgeTeamMetrics.participantsReceived?.autoCalculated ?? 0, "bridgeTeamMetrics.participantsReceived.autoCalculated", report)}
+            {renderMetricRow("Participants Received",
+              report.bridgeTeamMetrics.participantsReceived?.manualOverride ?? report.bridgeTeamMetrics.participantsReceived?.autoCalculated ?? 0,
+              prevReport?.bridgeTeamMetrics?.participantsReceived?.manualOverride ?? prevReport?.bridgeTeamMetrics?.participantsReceived?.autoCalculated ?? 0
+            )}
 
             <p className="text-sm font-semibold text-gray-700 mt-3 mb-2">Status Activity:</p>
             <div className="pl-4">
-              {renderMetricRow("Pending Bridge", report.bridgeTeamMetrics.statusCounts?.pendingBridge?.manualOverride ?? report.bridgeTeamMetrics.statusCounts?.pendingBridge?.autoCalculated ?? 0, "bridgeTeamMetrics.statusCounts.pendingBridge.autoCalculated", report)}
-              {renderMetricRow("Attempted to Contact", report.bridgeTeamMetrics.statusCounts?.attemptedToContact?.manualOverride ?? report.bridgeTeamMetrics.statusCounts?.attemptedToContact?.autoCalculated ?? 0, "bridgeTeamMetrics.statusCounts.attemptedToContact.autoCalculated", report)}
-              {renderMetricRow("Contacted", report.bridgeTeamMetrics.statusCounts?.contacted?.manualOverride ?? report.bridgeTeamMetrics.statusCounts?.contacted?.autoCalculated ?? 0, "bridgeTeamMetrics.statusCounts.contacted.autoCalculated", report)}
-              {renderMetricRow("Unable to Contact", report.bridgeTeamMetrics.statusCounts?.unableToContact?.manualOverride ?? report.bridgeTeamMetrics.statusCounts?.unableToContact?.autoCalculated ?? 0, "bridgeTeamMetrics.statusCounts.unableToContact.autoCalculated", report)}
+              {renderMetricRow("Pending Bridge",
+                report.bridgeTeamMetrics.statusCounts?.pendingBridge?.manualOverride ?? report.bridgeTeamMetrics.statusCounts?.pendingBridge?.autoCalculated ?? 0,
+                prevReport?.bridgeTeamMetrics?.statusCounts?.pendingBridge?.manualOverride ?? prevReport?.bridgeTeamMetrics?.statusCounts?.pendingBridge?.autoCalculated ?? 0
+              )}
+              {renderMetricRow("Attempted to Contact",
+                report.bridgeTeamMetrics.statusCounts?.attemptedToContact?.manualOverride ?? report.bridgeTeamMetrics.statusCounts?.attemptedToContact?.autoCalculated ?? 0,
+                prevReport?.bridgeTeamMetrics?.statusCounts?.attemptedToContact?.manualOverride ?? prevReport?.bridgeTeamMetrics?.statusCounts?.attemptedToContact?.autoCalculated ?? 0
+              )}
+              {renderMetricRow("Contacted",
+                report.bridgeTeamMetrics.statusCounts?.contacted?.manualOverride ?? report.bridgeTeamMetrics.statusCounts?.contacted?.autoCalculated ?? 0,
+                prevReport?.bridgeTeamMetrics?.statusCounts?.contacted?.manualOverride ?? prevReport?.bridgeTeamMetrics?.statusCounts?.contacted?.autoCalculated ?? 0
+              )}
+              {renderMetricRow("Unable to Contact",
+                report.bridgeTeamMetrics.statusCounts?.unableToContact?.manualOverride ?? report.bridgeTeamMetrics.statusCounts?.unableToContact?.autoCalculated ?? 0,
+                prevReport?.bridgeTeamMetrics?.statusCounts?.unableToContact?.manualOverride ?? prevReport?.bridgeTeamMetrics?.statusCounts?.unableToContact?.autoCalculated ?? 0
+              )}
             </div>
 
             <div className="flex justify-between items-center py-2 border-b border-gray-100 mt-2">
@@ -316,7 +304,10 @@ export default function ViewReportingView({ onNavigate, monthlyReports, currentU
                 <p className="text-gray-900 font-semibold">
                   {formatNumber(report.bridgeTeamMetrics.averageDaysToFirstOutreach?.manualOverride ?? report.bridgeTeamMetrics.averageDaysToFirstOutreach?.autoCalculated ?? 0)} days
                 </p>
-                {viewMode === "single" && <ComparisonIndicator value={report.bridgeTeamMetrics.averageDaysToFirstOutreach?.manualOverride ?? report.bridgeTeamMetrics.averageDaysToFirstOutreach?.autoCalculated ?? 0} field="bridgeTeamMetrics.averageDaysToFirstOutreach.autoCalculated" report={report} />}
+                <ComparisonIndicator
+                  currentValue={report.bridgeTeamMetrics.averageDaysToFirstOutreach?.manualOverride ?? report.bridgeTeamMetrics.averageDaysToFirstOutreach?.autoCalculated ?? 0}
+                  prevValue={prevReport?.bridgeTeamMetrics?.averageDaysToFirstOutreach?.manualOverride ?? prevReport?.bridgeTeamMetrics?.averageDaysToFirstOutreach?.autoCalculated ?? 0}
+                />
               </div>
             </div>
           </div>
@@ -326,7 +317,10 @@ export default function ViewReportingView({ onNavigate, monthlyReports, currentU
         {canViewCategory("mentorship") && (categoryFilter === "all" || categoryFilter === "mentorship") && report.mentorshipMetrics && (
           <div className="bg-white rounded-lg p-4 border border-gray-200">
             <h3 className="text-lg font-bold text-gray-900 mb-3">Mentorship</h3>
-            {renderMetricRow("Participants Assigned", report.mentorshipMetrics.participantsAssignedToMentorship, "mentorshipMetrics.participantsAssignedToMentorship", report)}
+            {renderMetricRow("Participants Assigned",
+              report.mentorshipMetrics.participantsAssignedToMentorship,
+              prevReport?.mentorshipMetrics?.participantsAssignedToMentorship ?? 0
+            )}
           </div>
         )}
 
@@ -334,10 +328,10 @@ export default function ViewReportingView({ onNavigate, monthlyReports, currentU
         {canViewCategory("donors") && (categoryFilter === "all" || categoryFilter === "donors") && report.donorData && (
           <div className="bg-white rounded-lg p-4 border border-gray-200">
             <h3 className="text-lg font-bold text-gray-900 mb-3">Donors</h3>
-            {renderMetricRow("New Donors", report.donorData.newDonors ?? 0, "donorData.newDonors", report)}
-            {renderMetricRow("Amount from New Donors", report.donorData.amountFromNewDonors ?? 0, "donorData.amountFromNewDonors", report, true)}
-            {renderMetricRow("Checks", report.donorData.checks ?? 0, "donorData.checks", report)}
-            {renderMetricRow("Total from Checks", report.donorData.totalFromChecks ?? 0, "donorData.totalFromChecks", report, true)}
+            {renderMetricRow("New Donors", report.donorData.newDonors ?? 0, prevReport?.donorData?.newDonors ?? 0)}
+            {renderMetricRow("Amount from New Donors", report.donorData.amountFromNewDonors ?? 0, prevReport?.donorData?.amountFromNewDonors ?? 0, true)}
+            {renderMetricRow("Checks", report.donorData.checks ?? 0, prevReport?.donorData?.checks ?? 0)}
+            {renderMetricRow("Total from Checks", report.donorData.totalFromChecks ?? 0, prevReport?.donorData?.totalFromChecks ?? 0, true)}
           </div>
         )}
 
@@ -345,8 +339,8 @@ export default function ViewReportingView({ onNavigate, monthlyReports, currentU
         {canViewCategory("financials") && (categoryFilter === "all" || categoryFilter === "financials") && report.financialData && (
           <div className="bg-white rounded-lg p-4 border border-gray-200">
             <h3 className="text-lg font-bold text-gray-900 mb-3">Financials</h3>
-            {renderMetricRow("Beginning Balance", report.financialData.beginningBalance ?? 0, "financialData.beginningBalance", report, true)}
-            {renderMetricRow("Ending Balance", report.financialData.endingBalance ?? 0, "financialData.endingBalance", report, true)}
+            {renderMetricRow("Beginning Balance", report.financialData.beginningBalance ?? 0, prevReport?.financialData?.beginningBalance ?? 0, true)}
+            {renderMetricRow("Ending Balance", report.financialData.endingBalance ?? 0, prevReport?.financialData?.endingBalance ?? 0, true)}
             <div className="bg-indigo-50 p-3 rounded-lg border border-indigo-200 mt-2">
               <p className="text-gray-700 mb-1">Difference</p>
               <p className="text-2xl font-bold text-indigo-900">
@@ -360,16 +354,19 @@ export default function ViewReportingView({ onNavigate, monthlyReports, currentU
         {canViewCategory("social_media") && (categoryFilter === "all" || categoryFilter === "social_media") && report.socialMediaMetrics && (
           <div className="bg-white rounded-lg p-4 border border-gray-200">
             <h3 className="text-lg font-bold text-gray-900 mb-3">Social Media</h3>
-            {renderMetricRow("Reels/Post Views", report.socialMediaMetrics.reelsPostViews ?? 0, "socialMediaMetrics.reelsPostViews", report)}
-            {renderMetricRow("Views from Non-Followers", report.socialMediaMetrics.viewsFromNonFollowers ?? 0, "socialMediaMetrics.viewsFromNonFollowers", report, false, true)}
-            {renderMetricRow("Total Followers", report.socialMediaMetrics.followers ?? 0, "socialMediaMetrics.followers", report)}
+            {renderMetricRow("Reels/Post Views", report.socialMediaMetrics.reelsPostViews ?? 0, prevReport?.socialMediaMetrics?.reelsPostViews ?? 0)}
+            {renderMetricRow("Views from Non-Followers", report.socialMediaMetrics.viewsFromNonFollowers ?? 0, prevReport?.socialMediaMetrics?.viewsFromNonFollowers ?? 0, false, true)}
+            {renderMetricRow("Total Followers", report.socialMediaMetrics.followers ?? 0, prevReport?.socialMediaMetrics?.followers ?? 0)}
             <div className="flex justify-between items-center py-2 border-b border-gray-100">
               <p className="text-gray-700">Followers Gained</p>
               <div className="flex items-center">
                 <p className={`font-semibold ${(report.socialMediaMetrics.followersGained ?? 0) >= 0 ? "text-green-600" : "text-red-600"}`}>
                   {(report.socialMediaMetrics.followersGained ?? 0) >= 0 ? "+" : ""}{formatNumber(report.socialMediaMetrics.followersGained ?? 0)}
                 </p>
-                {viewMode === "single" && <ComparisonIndicator value={report.socialMediaMetrics.followersGained ?? 0} field="socialMediaMetrics.followersGained" report={report} />}
+                <ComparisonIndicator
+                  currentValue={report.socialMediaMetrics.followersGained ?? 0}
+                  prevValue={prevReport?.socialMediaMetrics?.followersGained ?? 0}
+                />
               </div>
             </div>
           </div>
