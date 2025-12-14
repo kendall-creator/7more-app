@@ -26,7 +26,7 @@ import AddParticipantForm from "./AddParticipantForm";
 import IntakeTypeSelection from "./IntakeTypeSelection";
 import MissedCallNoVoicemail from "./MissedCallNoVoicemail";
 import MissedCallVoicemail from "./MissedCallVoicemail";
-import AdminDashboardView from "./AdminDashboardView";
+import AdminHomepageView from "./AdminHomepageView";
 import BridgeTeamDashboardView from "./BridgeTeamDashboardView";
 import MentorDashboardView from "./MentorDashboardView";
 
@@ -1284,8 +1284,8 @@ export default function MainDashboard() {
           {/* Dashboard/Overview View (default) - Role-based */}
           {(activeView === "dashboard" || !activeView) && (
             <>
-              {/* Admin Dashboard */}
-              {isAdmin && <AdminDashboardView />}
+              {/* Admin Homepage */}
+              {isAdmin && <AdminHomepageView />}
 
               {/* Bridge Team Dashboard */}
               {isBridgeTeam && <BridgeTeamDashboardView />}
