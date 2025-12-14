@@ -1081,7 +1081,7 @@ export default function MainDashboard() {
                 <h3 className="text-lg font-semibold text-text mb-4">Report Options</h3>
                 <div className="space-y-3">
                   <button
-                    onClick={() => alert("Monthly reports view coming soon")}
+                    onClick={() => setActiveView("view-reporting")}
                     className="w-full bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg p-4 text-left transition-colors"
                   >
                     <div className="flex items-center justify-between">
@@ -1096,7 +1096,7 @@ export default function MainDashboard() {
                   </button>
                   {isAdmin && (
                     <button
-                      onClick={() => alert("Report management coming soon")}
+                      onClick={() => setActiveView("manage-reporting")}
                       className="w-full bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 rounded-lg p-4 text-left transition-colors"
                     >
                       <div className="flex items-center justify-between">
