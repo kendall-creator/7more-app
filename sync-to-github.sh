@@ -7,8 +7,10 @@ set -e
 
 echo "🔄 Syncing to GitHub..."
 
-# Check if GITHUB_TOKEN is set
-if [ -z "$GITHUB_TOKEN" ]; then
+# Check if GITHUB_TOKEN or EXPO_PUBLIC_GITHUB_TOKEN is set
+if [ -n "$EXPO_PUBLIC_GITHUB_TOKEN" ]; then
+    GITHUB_TOKEN="$EXPO_PUBLIC_GITHUB_TOKEN"
+elif [ -z "$GITHUB_TOKEN" ]; then
     echo "❌ Error: GITHUB_TOKEN environment variable not set"
     echo ""
     echo "To set up GitHub sync:"
@@ -18,15 +20,15 @@ if [ -z "$GITHUB_TOKEN" ]; then
     echo "   - Give it 'repo' scope"
     echo "   - Copy the token"
     echo ""
-    echo "2. Add GITHUB_TOKEN to your Vibecode environment"
+    echo "2. Add EXPO_PUBLIC_GITHUB_TOKEN to your Vibecode environment"
     echo "   - Use the ENV tab in Vibecode"
-    echo "   - Add: GITHUB_TOKEN=your_token_here"
+    echo "   - Add: EXPO_PUBLIC_GITHUB_TOKEN=your_token_here"
     echo ""
     exit 1
 fi
 
 # Update the GitHub remote URL with token
-git remote set-url github "https://${GITHUB_TOKEN}@github.com/kendall-creator/7more-app.git"
+git remote set-url github "https://x-access-token:${GITHUB_TOKEN}@github.com/kendall-creator/7more-app.git"
 
 # Fetch latest from GitHub
 echo "📥 Fetching from GitHub..."
