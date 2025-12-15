@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Calendar, Clock, Users, MapPin, X, Trash2, Plus, Copy } from "lucide-react";
+import { useState } from "react";
+import { Calendar, Clock, Users, MapPin, X, Trash2, Plus } from "lucide-react";
 import { useDataStore } from "../store/dataStore";
 import { useAuthStore } from "../store/authStore";
 
@@ -61,6 +61,10 @@ export default function ManageShiftsView({ onNavigate }: ManageShiftsViewProps) 
     try {
       // Call Firebase to create shift
       const { database } = await import("../../../src/config/firebase");
+      if (!database) {
+        alert("Database connection error");
+        return;
+      }
       const { ref, push, set } = await import("firebase/database");
 
       const shiftsRef = ref(database, "shifts");
@@ -126,6 +130,10 @@ export default function ManageShiftsView({ onNavigate }: ManageShiftsViewProps) 
 
     try {
       const { database } = await import("../../../src/config/firebase");
+      if (!database) {
+        alert("Database connection error");
+        return;
+      }
       const { ref, remove } = await import("firebase/database");
 
       const shiftRef = ref(database, `shifts/${shiftId}`);

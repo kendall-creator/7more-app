@@ -12,7 +12,6 @@ import {
   Calendar,
   ChevronRight,
   CheckCircle,
-  Clock,
   BarChart3,
   FileText,
   UserCircle,

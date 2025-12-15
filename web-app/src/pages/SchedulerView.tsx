@@ -11,7 +11,6 @@ import {
   Phone,
   CheckCircle,
   AlertCircle,
-  UserPlus,
   Edit,
 } from "lucide-react";
 import { useDataStore } from "../store/dataStore";
@@ -258,7 +257,7 @@ export default function SchedulerView({ onNavigate }: SchedulerViewProps) {
 
       {/* Week Calendar View */}
       <div className="space-y-6">
-        {weekDays.map((day, index) => {
+        {weekDays.map((day) => {
           const dayShifts = shiftsByDate[day.dateString] || [];
           const dayMeetings = meetingsByDate[day.dateString] || [];
           const hasContent = dayShifts.length > 0 || dayMeetings.length > 0;

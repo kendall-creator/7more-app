@@ -54,6 +54,10 @@ export default function CreateMeetingView({ onNavigate }: CreateMeetingViewProps
 
     try {
       const { database } = await import("../../../src/config/firebase");
+      if (!database) {
+        alert("Database connection error");
+        return;
+      }
       const { ref, push, set } = await import("firebase/database");
 
       const meetingsRef = ref(database, "meetings");
@@ -99,6 +103,10 @@ export default function CreateMeetingView({ onNavigate }: CreateMeetingViewProps
 
     try {
       const { database } = await import("../../../src/config/firebase");
+      if (!database) {
+        alert("Database connection error");
+        return;
+      }
       const { ref, remove } = await import("firebase/database");
 
       const meetingRef = ref(database, `meetings/${meetingId}`);
@@ -166,13 +174,13 @@ export default function CreateMeetingView({ onNavigate }: CreateMeetingViewProps
                       </div>
                       <div className="flex items-center gap-1">
                         <Users className="w-4 h-4" />
-                        {meeting.rsvps?.length || 0} RSVPs
+                        {(meeting as any).rsvps?.length || 0} RSVPs
                       </div>
-                      {meeting.videoLink && (
+                      {(meeting as any).videoLink && (
                         <div className="flex items-center gap-1">
                           <Video className="w-4 h-4" />
                           <a
-                            href={meeting.videoLink}
+                            href={(meeting as any).videoLink}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary hover:underline"
