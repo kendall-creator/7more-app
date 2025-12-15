@@ -1524,7 +1524,7 @@ export default function MainDashboard() {
             </>
           )}
 
-          {/* Scheduler Landing Page */}
+          {/* Scheduler Landing Page - Updated Dec 15 2025 */}
           {activeView === "scheduler" && (
             <>
               <div className="mb-6">
