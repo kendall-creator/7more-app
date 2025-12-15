@@ -7,6 +7,9 @@ module.exports = defineConfig([
   {
     ignores: [
       "dist/*",
+      "web-app/dist/*",
+      "web-app/dist/**/*",
+      "**/dist/*",
       "index.ts",
       "rootStore.example.ts",
       "nativewind-env.d.ts",
