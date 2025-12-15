@@ -90,7 +90,7 @@
     "expo-web-browser": "~14.1.6",
     "firebase": "^12.6.0",
     "lottie-react-native": "7.2.2",
-    "nativewind": "4.1.23",
+    "nativewind": "4.0.1",
     "openai": "^4.89.0",
     "patch-package": "^8.0.0",
     "react": "18.3.1",

@@ -51,7 +51,7 @@ const openai_api_key = Constants.expoConfig.extra.apikey;
 
 export default function App() {
   // Force cache bust - changes every time the code is updated
-  const BUILD_TIMESTAMP = "2025-12-15T02:20:00Z";
+  const BUILD_TIMESTAMP = "2025-12-15T02:30:00Z";
   console.log(`📱 App version: ${BUILD_TIMESTAMP}`);
 
   const initializeDefaultAdmin = useUsersStore((s) => s.initializeDefaultAdmin);

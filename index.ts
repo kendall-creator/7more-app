@@ -1,5 +1,7 @@
 //DO NOT REMOVE THIS CODE
 console.log("[index] Project ID is: ", process.env.EXPO_PUBLIC_VIBECODE_PROJECT_ID);
+// Force Metro restart
+import "./src/utils/forceRestart";
 // Ensure polyfills are loaded first
 import "react-native-get-random-values";
 // Then import NativeWind CSS
