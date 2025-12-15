@@ -2,6 +2,36 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
+## 🚨 CRITICAL: Metro Server Restart Required - December 15, 2025
+
+**Date:** December 15, 2025
+**Status:** ⚠️ PENDING SERVER RESTART
+
+### Issue:
+The mobile app is experiencing a Hermes runtime error: "Cannot read property 'S' of undefined". This error started after Metro configuration changes and requires a server restart to resolve.
+
+### Root Cause:
+This is a known Expo SDK 53 compatibility issue with Metro's ES Module resolution. The error occurs before the JavaScript runtime fully initializes.
+
+### Fix Applied:
+✅ Added `config.resolver.unstable_enablePackageExports = false` to metro.config.js
+✅ Fixed import order in index.ts (polyfills before CSS)
+✅ Cleared all Metro caches
+✅ Reinstalled all dependencies with clean state
+
+### To Resolve:
+**The development server needs to restart to apply these changes.** The server has detected the metro.config.js change but is waiting for a restart.
+
+**For Vibecode users:** Close and reopen your app preview, or refresh your session. The error should clear once the server restarts with the new configuration.
+
+### Reference:
+- [Expo SDK 53 ES Module Issues](https://github.com/expo/expo/discussions/36551)
+- Related errors: [[SDK 53] runtime not ready errors](https://github.com/expo/expo/issues/36589)
+
+**The web app is unaffected** - it uses a separate build system and works correctly.
+
+---
+
 ## 🚨 CRITICAL: Environment Variables Protection System - December 14, 2025
 
 **Date:** December 14, 2025
