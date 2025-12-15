@@ -1,0 +1,6 @@
+node_modules/
+dist/
+web-app/dist/
+web-app/node_modules/
+.expo/
+.expo-shared/

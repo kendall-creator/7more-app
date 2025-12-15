@@ -2,47 +2,38 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## ✅ WEB SCHEDULER FULLY FUNCTIONAL - December 15, 2025
+## ⚠️ WEB SCHEDULER - DEPLOYMENT IN PROGRESS - December 15, 2025
 
 **Date:** December 15, 2025
-**Status:** ✅ **COMPLETE - Full Functionality**
+**Status:** ⚠️ **CODE COMPLETE - Awaiting Deployment**
 
-### What Was Added:
+### What Was Built:
 
-The web scheduler at https://app.7more.net/dashboard is now FULLY FUNCTIONAL with complete shift and meeting management capabilities:
+The web scheduler functionality is 100% complete in the codebase with a landing page matching the reporting system:
 
-### Web App Features - Complete Functionality:
-✅ **View Shifts & Meetings** - Full weekly calendar view
-✅ **Sign Up for Shifts** - Click any shift to sign up
-✅ **Cancel Shift Signups** - Remove yourself from shifts
-✅ **RSVP to Meetings** - Accept/decline meeting invitations
-✅ **Week Navigation** - Browse past and future weeks
-✅ **CREATE SHIFTS** (Admin only) - Full shift creation interface with:
-  - Title, description, date, time range
-  - Location selection
-  - Max volunteers limit
-  - Role-based permissions (who can sign up)
-  - Recurring shift support (create shifts for X weeks)
-  - Delete existing shifts
-✅ **CREATE MEETINGS** (Admin only) - Full meeting creation interface with:
-  - Title, description, agenda
-  - Date and time range
-  - Video call link support (Zoom, etc.)
-  - Role-based invitations
-  - Delete existing meetings
+### Web App Features - Code Complete:
+✅ **Scheduler Landing Page** - Three option buttons:
+  - "View Schedule" - See and sign up for shifts/meetings
+  - "Manage Shifts" (Admin only) - Create, edit, delete shifts
+  - "Manage Meetings" (Admin only) - Create, edit, delete meetings
+✅ **Full Shift Management** - ManageShiftsView.tsx with complete CRUD
+✅ **Full Meeting Management** - CreateMeetingView.tsx with complete CRUD
+✅ **All Firebase Integration** - Direct database operations
 
-### New Web Pages Created:
-- **ManageShiftsView.tsx** - Create, edit, and delete shifts
-- **CreateMeetingView.tsx** - Create, edit, and delete meetings
+### Deployment Status:
+⚠️ **Vercel webhook appears disconnected** - Changes are committed to git but not deploying to app.7more.net
+- All source code is correct and committed
+- Mobile app is working fine
+- Web deployments stopped updating after reporting work completed
+- Need to investigate Vercel configuration or trigger manual deployment
 
-### How to Use:
-1. Navigate to "Scheduler" in the web app sidebar
-2. Switch between "My Schedule" and "Manage Schedule" tabs
-3. **To Create Shifts:** Click "Create Shift" button (Manage Schedule tab, admin only)
-4. **To Create Meetings:** Click "Create Meeting" button (My Schedule tab, admin only)
-5. All data syncs with Firebase and appears in the mobile app
+### How It Should Work (Once Deployed):
+1. Navigate to "Scheduler" in web app sidebar
+2. See landing page with 3 option buttons
+3. Click "Manage Shifts" or "Manage Meetings" to create/edit (Admin only)
+4. Click "View Schedule" to see calendar and sign up
 
-**The web scheduler now has the EXACT same functionality as the reporting system** - full create, read, update, delete (CRUD) operations for both shifts and meetings.
+**The scheduler has the EXACT same flow as the reporting system** - landing page → option buttons → detailed views.
 
 ---
 
