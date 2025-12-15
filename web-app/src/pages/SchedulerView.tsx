@@ -206,20 +206,22 @@ export default function SchedulerView({ onNavigate }: SchedulerViewProps) {
       {/* Action Buttons */}
       <div className="flex gap-3 mb-6">
         {activeTab === "manage" && isAdmin && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center gap-3">
-            <Calendar className="w-5 h-5 text-blue-600" />
-            <p className="text-sm text-blue-900">
-              <strong>Note:</strong> To create or manage shifts, please use the mobile app. You can view and sign up for shifts here.
-            </p>
-          </div>
+          <button
+            onClick={() => onNavigate("manage-shifts")}
+            className="bg-primary hover:bg-primary/90 text-white rounded-lg px-6 py-3 font-semibold flex items-center gap-2 transition-colors"
+          >
+            <Calendar className="w-5 h-5" />
+            Create Shift
+          </button>
         )}
         {activeTab === "my" && isAdmin && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3 flex items-center gap-3">
-            <Users className="w-5 h-5 text-yellow-600" />
-            <p className="text-sm text-yellow-900">
-              <strong>Note:</strong> To create meetings, please use the mobile app. You can view meetings and RSVP here.
-            </p>
-          </div>
+          <button
+            onClick={() => onNavigate("create-meeting")}
+            className="bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg px-6 py-3 font-semibold flex items-center gap-2 transition-colors"
+          >
+            <Users className="w-5 h-5" />
+            Create Meeting
+          </button>
         )}
       </div>
 

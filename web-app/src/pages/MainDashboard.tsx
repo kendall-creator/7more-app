@@ -32,6 +32,8 @@ import BridgeTeamDashboardView from "./BridgeTeamDashboardView";
 import MentorDashboardView from "./MentorDashboardView";
 import ViewReportingView from "./ViewReportingView";
 import SchedulerView from "./SchedulerView";
+import ManageShiftsView from "./ManageShiftsView";
+import CreateMeetingView from "./CreateMeetingView";
 
 // NavButton component
 function NavButton({
@@ -1526,6 +1528,16 @@ export default function MainDashboard() {
           {/* Scheduler View */}
           {activeView === "scheduler" && (
             <SchedulerView onNavigate={setActiveView} />
+          )}
+
+          {/* Manage Shifts View */}
+          {activeView === "manage-shifts" && (
+            <ManageShiftsView onNavigate={setActiveView} />
+          )}
+
+          {/* Create Meeting View */}
+          {activeView === "create-meeting" && (
+            <CreateMeetingView onNavigate={setActiveView} />
           )}
 
           {/* Assign Tasks View */}
