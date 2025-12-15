@@ -1524,8 +1524,70 @@ export default function MainDashboard() {
             </>
           )}
 
-          {/* Scheduler View */}
+          {/* Scheduler Landing Page */}
           {activeView === "scheduler" && (
+            <>
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold text-text mb-2">Scheduler</h1>
+                <p className="text-secondary">Manage shifts and meetings for your team</p>
+              </div>
+
+              <div className="mt-6 bg-white rounded-xl shadow-sm border border-border p-6">
+                <h3 className="text-lg font-semibold text-text mb-4">Scheduler Options</h3>
+                <div className="space-y-3">
+                  <button
+                    onClick={() => setActiveView("view-scheduler")}
+                    className="w-full bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg p-4 text-left transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-semibold text-text">View Schedule</h4>
+                        <p className="text-sm text-secondary mt-1">
+                          View shifts, sign up, and manage your schedule
+                        </p>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-secondary" />
+                    </div>
+                  </button>
+                  {isAdmin && (
+                    <>
+                      <button
+                        onClick={() => setActiveView("manage-shifts")}
+                        className="w-full bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 rounded-lg p-4 text-left transition-colors"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-semibold text-text">Manage Shifts</h4>
+                            <p className="text-sm text-secondary mt-1">
+                              Create, edit, and delete volunteer shifts (Admin only)
+                            </p>
+                          </div>
+                          <ChevronRight className="w-5 h-5 text-secondary" />
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => setActiveView("create-meeting")}
+                        className="w-full bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 rounded-lg p-4 text-left transition-colors"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-semibold text-text">Manage Meetings</h4>
+                            <p className="text-sm text-secondary mt-1">
+                              Create, edit, and manage team meetings (Admin only)
+                            </p>
+                          </div>
+                          <ChevronRight className="w-5 h-5 text-secondary" />
+                        </div>
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* View Scheduler View */}
+          {activeView === "view-scheduler" && (
             <SchedulerView onNavigate={setActiveView} />
           )}
 
