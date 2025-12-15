@@ -1,8 +1,8 @@
 {
-  "buildCommand": "cd web-app && npm install && npm run build",
+  "buildCommand": "cd web-app && bun run build",
   "outputDirectory": "web-app/dist",
-  "framework": null,
-  "installCommand": "echo 'Skipping root install'",
+  "framework": "vite",
+  "installCommand": "cd web-app && bun install",
   "rewrites": [
     {
       "source": "/(.*)",
