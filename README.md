@@ -8,6 +8,7 @@ A comprehensive mobile application built with Expo and React Native to help nonp
 **Status:** ✅ **COMPLETE**
 
 ### What Was Added:
+### Mobile App - Full Scheduler Functionality:
 ✅ **Scheduler tab now visible for ALL user roles:**
 - Admin
 - Bridge Team Leader
@@ -18,7 +19,7 @@ A comprehensive mobile application built with Expo and React Native to help nonp
 - Mentorship Leaders
 - Supporters
 
-### Features Available in Scheduler Tab:
+### Features Available in Mobile App Scheduler Tab:
 - **My Schedule Tab**: View shifts you're signed up for
 - **Manage Schedule Tab**: View all available shifts (role-based permissions)
 - **Weekly Calendar View**: Monday-Sunday with dates
@@ -28,8 +29,19 @@ A comprehensive mobile application built with Expo and React Native to help nonp
 - **Week Navigation**: Browse previous and future weeks
 - **Create Shifts** (Admin only): Add new shifts with recurring options
 - **Add Meetings** (Admin only): Schedule meetings and invite users
+- **Edit/Delete Shifts** (Admin only): Full shift management
+- **Assign Users to Shifts** (Admin only): Manually assign volunteers
 
-The Scheduler works just like Monthly Reporting - it's now a dedicated tab in the bottom navigation for all users.
+### Web App - View and Sign Up for Shifts:
+The web scheduler at https://app.7more.net/dashboard allows you to:
+- ✅ View your personal schedule (My Schedule tab)
+- ✅ View all available shifts (Manage Schedule tab)
+- ✅ Sign up for shifts
+- ✅ Cancel shift signups
+- ✅ View meetings and RSVP
+- ✅ Navigate between weeks
+
+**Note:** Creating shifts and meetings must be done through the mobile app. The web app displays a notice directing admins to use the mobile app for creation/management tasks.
 
 ---
 
