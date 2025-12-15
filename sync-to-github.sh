@@ -7,6 +7,11 @@ set -e
 
 echo "🔄 Syncing to GitHub..."
 
+# Load environment variables from .env if it exists
+if [ -f "/home/user/workspace/.env" ]; then
+    source /home/user/workspace/.env
+fi
+
 # Check if GITHUB_TOKEN or EXPO_PUBLIC_GITHUB_TOKEN is set
 if [ -n "$EXPO_PUBLIC_GITHUB_TOKEN" ]; then
     GITHUB_TOKEN="$EXPO_PUBLIC_GITHUB_TOKEN"
