@@ -3,27 +3,23 @@ const { defineConfig } = require("eslint/config");
 const expoConfig = require("eslint-config-expo/flat");
 
 module.exports = defineConfig([
-  expoConfig,
   {
     ignores: [
-      "dist",
-      "dist/*",
-      "dist/**/*",
-      "web-app/dist",
-      "web-app/dist/*",
-      "web-app/dist/**/*",
-      "**/dist",
-      "**/dist/*",
-      "**/dist/**/*",
-      "node_modules",
-      "node_modules/**/*",
+      "**/dist/**",
+      "**/node_modules/**",
+      "web-app/**",
+      "backend/**",
+      "vercel-project/**",
+      "patches/**",
+      "bun.lock",
+      "*.log",
       "index.ts",
       "rootStore.example.ts",
       "nativewind-env.d.ts",
-      "patches/*",
-      "bun.lock",
-      "eslint.config.js",
     ],
+  },
+  expoConfig,
+  {
     settings: {
       "import/resolver": {
         typescript: {
