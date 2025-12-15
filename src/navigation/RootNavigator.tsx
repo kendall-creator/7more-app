@@ -339,6 +339,14 @@ function MainTabs() {
             }}
           />
           <Tab.Screen
+            name="Scheduler"
+            component={SchedulerScreen}
+            options={{
+              tabBarLabel: "Scheduler",
+              tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />,
+            }}
+          />
+          <Tab.Screen
             name="TaskList"
             component={TaskListScreen}
             options={{
@@ -385,6 +393,14 @@ function MainTabs() {
             }}
           />
           <Tab.Screen
+            name="Scheduler"
+            component={SchedulerScreen}
+            options={{
+              tabBarLabel: "Scheduler",
+              tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />,
+            }}
+          />
+          <Tab.Screen
             name="TaskList"
             component={TaskListScreen}
             options={{
@@ -428,6 +444,14 @@ function MainTabs() {
             options={{
               tabBarLabel: "My Mentees",
               tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />,
+            }}
+          />
+          <Tab.Screen
+            name="Scheduler"
+            component={SchedulerScreen}
+            options={{
+              tabBarLabel: "Scheduler",
+              tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />,
             }}
           />
           <Tab.Screen

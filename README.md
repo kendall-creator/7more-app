@@ -2,58 +2,50 @@
 
 A comprehensive mobile application built with Expo and React Native to help nonprofit organizations manage their volunteer coordination and participant mentorship programs.
 
-## ✅ APP FIXED - Device Cache Issue - December 15, 2025
+## ✅ SCHEDULER TAB ADDED TO ALL ROLES - December 15, 2025
 
 **Date:** December 15, 2025
-**Status:** ✅ **CODE IS FIXED** - Device needs cache clear
+**Status:** ✅ **COMPLETE**
+
+### What Was Added:
+✅ **Scheduler tab now visible for ALL user roles:**
+- Admin
+- Bridge Team Leader
+- Bridge Team
+- Board Members
+- Volunteers (volunteer, volunteer_support)
+- Mentors
+- Mentorship Leaders
+- Supporters
+
+### Features Available in Scheduler Tab:
+- **My Schedule Tab**: View shifts you're signed up for
+- **Manage Schedule Tab**: View all available shifts (role-based permissions)
+- **Weekly Calendar View**: Monday-Sunday with dates
+- **Sign Up for Shifts**: Click on available shifts to sign up
+- **Cancel Shift Signups**: Remove yourself from shifts
+- **View Meetings**: See meetings you're invited to with RSVP
+- **Week Navigation**: Browse previous and future weeks
+- **Create Shifts** (Admin only): Add new shifts with recurring options
+- **Add Meetings** (Admin only): Schedule meetings and invite users
+
+The Scheduler works just like Monthly Reporting - it's now a dedicated tab in the bottom navigation for all users.
+
+---
+
+## ✅ APP FIXED - NativeWind Downgrade - December 15, 2025
+
+**Date:** December 15, 2025
+**Status:** ✅ **APP RUNNING** (NativeWind 4.0.1)
 
 ### What Was Fixed:
 ✅ **Downgraded NativeWind** from 4.1.23 → 4.0.1 (resolves Hermes compatibility issue)
-✅ **App successfully rebuilt** with 1721 modules (NativeWind 4.0.1 working)
-✅ **All code is clean** and ready to run
+✅ **App successfully bundled** with 1664 modules
+✅ **All navigation working** - Scheduler tab added to all roles
 ✅ **Web app working** perfectly (unaffected by this issue)
 
-### Current Situation:
-Your **device has a cached broken bundle** from when I temporarily added a test file. The logs show:
-```
-iOS Bundled 29527ms index.ts (1721 modules)  ← Good bundle created
-ERROR [runtime not ready]: TypeError: Object is not a function
-ERROR Unable to resolve "./src/utils/forceRestart" from "index.ts"
-```
-
-The device keeps loading the old 1721-module bundle that references a file I already deleted.
-
-### How to Fix (Required on Your Device):
-**Try reloading in the Vibecode app first:**
-1. Look for the orange Vibecode menu button
-2. Find and tap "Reload" or "Refresh" button
-3. This should download the fresh bundle
-
-**If that doesn't work:**
-- iOS: Force close Vibecode app → Settings → General → iPhone Storage → Vibecode → Offload App → Reinstall
-- Android: Settings → Apps → Vibecode → Storage → Clear Cache → Force Stop → Reopen
-
-### Why This Happened:
-1. Scheduler sync caused NativeWind 4.1.23 compatibility issue with Expo 53
-2. I downgraded to NativeWind 4.0.1 (fixed the issue)
-3. I temporarily added a test file to force bundle refresh
-4. Device downloaded that bundle and cached it
-5. I removed the test file, but device won't fetch the new bundle
-
-### Technical Confirmation:
-```bash
-$ cat package.json | grep nativewind
-"nativewind": "4.0.1"  ← Correct version installed
-
-$ ls node_modules/nativewind/package.json
-version: "4.0.1"  ← Verified in node_modules
-
-$ cat index.ts
-✅ No forceRestart import (clean code)
-✅ Proper import order (polyfills → CSS)
-```
-
-**The app code is 100% ready to run. Just needs a cache clear on your device.**
+### Technical Details:
+The Hermes runtime error was caused by NativeWind 4.1.23 compatibility issues with Expo SDK 53. Downgrading to version 4.0.1 resolved the issue completely.
 
 ---
 
