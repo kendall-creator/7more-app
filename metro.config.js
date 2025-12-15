@@ -10,8 +10,12 @@ const config = getDefaultConfig(__dirname);
 // Disable Watchman for file watching.
 config.resolver.useWatchman = false;
 
+// Disable package exports to fix Expo 53 compatibility issues
+// See: https://github.com/expo/expo/discussions/36551
+config.resolver.unstable_enablePackageExports = false;
+
 // Get environment variables for Metro cache configuration.
-const metroCacheVersion = process.env.METRO_CACHE_VERSION || "1";
+const metroCacheVersion = process.env.METRO_CACHE_VERSION || "2";
 const metroCacheHttpEndpoint = process.env.METRO_CACHE_HTTP_ENDPOINT;
 const metroCacheDir = process.env.METRO_CACHE_DIR || path.join(os.homedir(), ".metro-cache");
 

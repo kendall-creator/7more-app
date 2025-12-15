@@ -1,7 +1,9 @@
 //DO NOT REMOVE THIS CODE
 console.log("[index] Project ID is: ", process.env.EXPO_PUBLIC_VIBECODE_PROJECT_ID);
-import "./global.css";
+// Ensure polyfills are loaded first
 import "react-native-get-random-values";
+// Then import NativeWind CSS
+import "./global.css";
 import { LogBox } from "react-native";
 LogBox.ignoreLogs(["Expo AV has been deprecated", "Disconnected from Metro"]);
 
