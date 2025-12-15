@@ -1528,7 +1528,7 @@ export default function MainDashboard() {
           {activeView === "scheduler" && (
             <>
               <div className="mb-6">
-                <h1 className="text-3xl font-bold text-text mb-2">Scheduler</h1>
+                <h1 className="text-3xl font-bold text-text mb-2">⚡ Scheduler - UPDATED</h1>
                 <p className="text-secondary">Manage shifts and meetings for your team</p>
               </div>
 
