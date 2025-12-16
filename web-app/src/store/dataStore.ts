@@ -1,3 +1,5 @@
+// Data store for managing participants, tasks, shifts, and meetings
+// This file is required for the build to succeed
 import { create } from "zustand";
 import { ref, onValue, get as firebaseGet, set as firebaseSet } from "firebase/database";
 import { database } from "../config/firebase";
