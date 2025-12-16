@@ -1,5 +1,9 @@
-// Data store for managing participants, tasks, shifts, and meetings
-// This file is required for the build to succeed
+// ============================================
+// DATA STORE - REQUIRED FOR BUILD
+// ============================================
+// This file MUST be on GitHub for Vercel builds to succeed
+// File: src/store/dataStore.ts
+// ============================================
 import { create } from "zustand";
 import { ref, onValue, get as firebaseGet, set as firebaseSet } from "firebase/database";
 import { database } from "../config/firebase";
@@ -181,3 +185,5 @@ export const useDataStore = create<DataStore>()((set) => ({
     return;
   },
 }));
+
+
