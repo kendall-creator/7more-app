@@ -21,7 +21,11 @@ export default function ManageShiftsView({ onNavigate }: ManageShiftsViewProps) 
   const [maxVolunteers, setMaxVolunteers] = useState("");
   const [isRecurring, setIsRecurring] = useState(false);
   const [weeksToCreate, setWeeksToCreate] = useState("12");
-  const [selectedRoles, setSelectedRoles] = useState<string[]>(["admin", "mentorship_leader", "mentor"]);
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([
+    "admin",
+    "mentorship_leader",
+    "mentor",
+  ]);
 
   const locationOptions = [
     { value: "pam_lychner", label: "Pam Lychner" },
@@ -60,7 +64,7 @@ export default function ManageShiftsView({ onNavigate }: ManageShiftsViewProps) 
 
     try {
       // Call Firebase to create shift
-      const { database } = await import("../../../src/config/firebase");
+      const { database } = await import("../config/firebase");
       if (!database) {
         alert("Database connection error");
         return;
@@ -129,7 +133,7 @@ export default function ManageShiftsView({ onNavigate }: ManageShiftsViewProps) 
     if (!confirm("Are you sure you want to delete this shift?")) return;
 
     try {
-      const { database } = await import("../../../src/config/firebase");
+      const { database } = await import("../config/firebase");
       if (!database) {
         alert("Database connection error");
         return;
@@ -180,7 +184,10 @@ export default function ManageShiftsView({ onNavigate }: ManageShiftsViewProps) 
             .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
             .slice(0, 20)
             .map((shift) => (
-              <div key={shift.id} className="border border-border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+              <div
+                key={shift.id}
+                className="border border-border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+              >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <h3 className="font-semibold text-text">{shift.title}</h3>
@@ -196,7 +203,8 @@ export default function ManageShiftsView({ onNavigate }: ManageShiftsViewProps) 
                       {shift.location && (
                         <div className="flex items-center gap-1">
                           <MapPin className="w-4 h-4" />
-                          {locationOptions.find((l) => l.value === shift.location)?.label || shift.location}
+                          {locationOptions.find((l) => l.value === shift.location)?.label ||
+                            shift.location}
                         </div>
                       )}
                       <div className="flex items-center gap-1">
@@ -224,7 +232,10 @@ export default function ManageShiftsView({ onNavigate }: ManageShiftsViewProps) 
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-border px-6 py-4 flex items-center justify-between">
               <h2 className="text-2xl font-bold text-text">Create Shift</h2>
-              <button onClick={() => setShowCreateModal(false)} className="text-gray-500 hover:text-gray-700">
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
                 <X className="w-6 h-6" />
               </button>
             </div>
@@ -232,7 +243,9 @@ export default function ManageShiftsView({ onNavigate }: ManageShiftsViewProps) 
             <div className="p-6 space-y-4">
               {/* Title */}
               <div>
-                <label className="block text-sm font-semibold text-text mb-2">Shift Title *</label>
+                <label className="block text-sm font-semibold text-text mb-2">
+                  Shift Title *
+                </label>
                 <input
                   type="text"
                   value={title}
@@ -244,7 +257,9 @@ export default function ManageShiftsView({ onNavigate }: ManageShiftsViewProps) 
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-semibold text-text mb-2">Description</label>
+                <label className="block text-sm font-semibold text-text mb-2">
+                  Description
+                </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -256,7 +271,9 @@ export default function ManageShiftsView({ onNavigate }: ManageShiftsViewProps) 
 
               {/* Date */}
               <div>
-                <label className="block text-sm font-semibold text-text mb-2">Date *</label>
+                <label className="block text-sm font-semibold text-text mb-2">
+                  Date *
+                </label>
                 <input
                   type="date"
                   value={date}
@@ -268,7 +285,9 @@ export default function ManageShiftsView({ onNavigate }: ManageShiftsViewProps) 
               {/* Time */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-text mb-2">Start Time *</label>
+                  <label className="block text-sm font-semibold text-text mb-2">
+                    Start Time *
+                  </label>
                   <input
                     type="time"
                     value={startTime}
@@ -277,7 +296,9 @@ export default function ManageShiftsView({ onNavigate }: ManageShiftsViewProps) 
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-text mb-2">End Time *</label>
+                  <label className="block text-sm font-semibold text-text mb-2">
+                    End Time *
+                  </label>
                   <input
                     type="time"
                     value={endTime}
@@ -289,7 +310,9 @@ export default function ManageShiftsView({ onNavigate }: ManageShiftsViewProps) 
 
               {/* Location */}
               <div>
-                <label className="block text-sm font-semibold text-text mb-2">Location</label>
+                <label className="block text-sm font-semibold text-text mb-2">
+                  Location
+                </label>
                 <select
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
@@ -306,7 +329,9 @@ export default function ManageShiftsView({ onNavigate }: ManageShiftsViewProps) 
 
               {/* Max Volunteers */}
               <div>
-                <label className="block text-sm font-semibold text-text mb-2">Max Volunteers (optional)</label>
+                <label className="block text-sm font-semibold text-text mb-2">
+                  Max Volunteers (optional)
+                </label>
                 <input
                   type="number"
                   value={maxVolunteers}
@@ -326,11 +351,15 @@ export default function ManageShiftsView({ onNavigate }: ManageShiftsViewProps) 
                     onChange={(e) => setIsRecurring(e.target.checked)}
                     className="w-5 h-5 text-primary"
                   />
-                  <span className="text-sm font-semibold text-text">Recurring Shift</span>
+                  <span className="text-sm font-semibold text-text">
+                    Recurring Shift
+                  </span>
                 </label>
                 {isRecurring && (
                   <div className="mt-3">
-                    <label className="block text-sm font-semibold text-text mb-2">Number of Weeks</label>
+                    <label className="block text-sm font-semibold text-text mb-2">
+                      Number of Weeks
+                    </label>
                     <input
                       type="number"
                       value={weeksToCreate}
@@ -345,10 +374,15 @@ export default function ManageShiftsView({ onNavigate }: ManageShiftsViewProps) 
 
               {/* Roles */}
               <div>
-                <label className="block text-sm font-semibold text-text mb-3">Who can sign up? *</label>
+                <label className="block text-sm font-semibold text-text mb-3">
+                  Who can sign up? *
+                </label>
                 <div className="grid grid-cols-2 gap-2">
                   {roleOptions.map((role) => (
-                    <label key={role.value} className="flex items-center gap-2 cursor-pointer border border-border rounded-lg px-3 py-2 hover:bg-gray-50">
+                    <label
+                      key={role.value}
+                      className="flex items-center gap-2 cursor-pointer border border-border rounded-lg px-3 py-2 hover:bg-gray-50"
+                    >
                       <input
                         type="checkbox"
                         checked={selectedRoles.includes(role.value)}
