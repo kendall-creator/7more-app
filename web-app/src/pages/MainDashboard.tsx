@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import { useDataStore } from "../store/dataStore";
 import { useReportingStore } from "../store/reportingStore";
@@ -511,8 +511,8 @@ export default function MainDashboard() {
               <NavButton
                 icon={<Users className="w-5 h-5" />}
                 label="All Participants"
-                active={activeView === "participants"}
-                onClick={() => setActiveView("participants")}
+                active={false}
+                onClick={() => navigate("/participants")}
               />
               <NavButton
                 icon={<UserPlus className="w-5 h-5" />}
@@ -523,8 +523,8 @@ export default function MainDashboard() {
               <NavButton
                 icon={<Users className="w-5 h-5" />}
                 label="Manage Users"
-                active={activeView === "users"}
-                onClick={() => setActiveView("users")}
+                active={false}
+                onClick={() => navigate("/users")}
               />
               <NavButton
                 icon={<CheckSquare className="w-5 h-5" />}
